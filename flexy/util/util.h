@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <vector>
 
 namespace flexy {
 
@@ -10,7 +11,7 @@ int GetThreadId();
 // 获取线程启动到现在的毫秒
 uint32_t GetThreadElapse();
 // 获得线程名称
-std::string GetThreadName();
+const std::string& GetThreadName();
 // 获得协程id
 uint32_t GetFiberId();
 // 获得当前系统时间微秒数
@@ -43,5 +44,9 @@ Iter find(Iter&& begin, Iter&& end, T&& val, bool find_first = true) {
 }
 // 将[begin, end)范围中的字符转换为整数
 int64_t atoi(const char* begin, const char* end);
+//获得函数调用堆栈信息
+void Backtrace(std::vector<std::string>& bt, int size = 64, int skip = 1);
+//获得函数调用堆栈信息字符串
+std::string BacktraceToString(int size = 64, int skip = 2, const std::string& prefix = "");
 
 }

@@ -148,7 +148,7 @@ public:
     virtual std::string toYamlString() = 0;
     virtual std::string toJsonString() = 0;
     void setFormatter(const LogFormatter::ptr& val);
-    auto getFormatter() const { LOCK_GUARD(mutex_); return formatter_; }
+    auto& getFormatter() const { LOCK_GUARD(mutex_); return formatter_; }
     auto getLevel() const { return level_; }
     void setLevel(LogLevel::Level level) { level_ = level; }
 protected:
@@ -201,7 +201,7 @@ class LoggerManager {
 friend class Singleton<LoggerManager>;
 public:
     Logger::ptr getLogger(const std::string& name);
-    auto& getRoot() const { return root_; }
+    auto& getRoot() { return root_; }
     std::string toYamlString();
 private:
     LoggerManager();                                                // 只能由单例类调用 

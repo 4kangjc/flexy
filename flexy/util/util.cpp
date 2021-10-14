@@ -1,5 +1,6 @@
 #include "util.h"
 #include "flexy/thread/thread.h"
+#include "log.h"
 
 #include <sys/syscall.h>
 #include <unistd.h>
@@ -7,6 +8,10 @@
 #include <memory>
 #include <stdarg.h>
 #include <charconv>
+#include <sstream>
+#include <execinfo.h>
+
+static auto g_logger = FLEXY_LOG_NAME("system");
 
 namespace flexy {
 
@@ -14,7 +19,7 @@ int GetThreadId() {
     return syscall(SYS_gettid);
 }
 
-std::string GetThreadName() {
+const std::string& GetThreadName() {
     return Thread::GetName();
 }
 
@@ -80,6 +85,31 @@ int64_t atoi(const char* begin, const char* end) {
     int64_t ans;
     std::from_chars(begin, end, ans);
     return ans;
+}
+
+void Backtrace(std::vector<std::string>& bt, int size, int skip) {
+    auto array = (void**)malloc(size * sizeof(void*));
+    size_t s = ::backtrace(array, size);
+    char** strings = backtrace_symbols(array, s);
+    if (strings == NULL) {
+        FLEXY_LOG_ERROR(g_logger) << "backtrace_symbols eroor";
+        return;
+    }
+    for (size_t i = skip; i < s; ++i) {
+        bt.push_back(strings[i]);
+    }
+    free(strings);
+    free(array);
+}
+
+std::string BacktraceToString(int size, int skip, const std::string& prefix) {
+    std::vector<std::string> bt;
+    Backtrace(bt, size, skip);
+    std::stringstream ss;
+    for (size_t i = 0; i < bt.size(); ++i) {
+        ss << prefix << bt[i] << std::endl;
+    }
+    return ss.str();
 }
 
 }
