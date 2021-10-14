@@ -1,0 +1,22 @@
+#忽略build目录下的文件
+/build/*
+#忽略.vscode目录下的文件
+/.vscode/*
+#忽略include目录下的文件
+/include/*
+#忽略.idea目录下的文件
+/.idea/*
+#忽略.yaml文件
+*.yaml
+*.yml
+#忽略ragel编译出来的文件
+*.rl.cpp
+#忽略二进制文件
+/bin/*
+
+#忽略txt目录下文件 存放log日志和yaml配置文件
+/txt/*
+
+#忽略动态库和静态库
+*.so
+*.a
