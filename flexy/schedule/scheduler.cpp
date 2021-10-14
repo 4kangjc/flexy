@@ -109,6 +109,7 @@ void Scheduler::run() {
     while (true) {
         // tk.reset();
         bool tickle_me = false;
+        // get task from deque
         {
             LOCK_GUARD(mutex_);
             if (!tasks_.empty()) {

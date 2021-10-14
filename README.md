@@ -9,17 +9,33 @@
 `ragel version 6.10`  
 
 * 编译依赖
-1. boost
-**ArchLinux** : `sudo pacman -S boost`
-2. yaml-cpp
+1. boost  
+**ArchLinux** : `sudo pacman -S boost`  
+**Ubuntu**    : `sudo apt install libboost-all-dev`  
+**Centos**    :  `sudo yum install boost-devel`
+2. yaml-cpp  
 **ArchLinux** : `sudo pacman -S yaml-cpp`
-3. jsoncpp
+```
+git clone https://github.com/jbeder/yaml-cpp.git
+cd yaml-cpp
+mkdir build && cd build
+cmake -DBUILD_SHARED_LIBS=ON .. //动态库, 默认为静态库(cmake ..)
+make && make install
+```
+3. jsoncpp  
 **ArchLinux** : `sudo pacman -S jsoncpp`
-4. fmt
+4. fmt  
 **ArchLinux** : `sudo pacman -S fmt`
-5. ragel
-**ArchLinux** : `sudo pacman -S ragel`
-
+```
+git clone  https://github.com/fmtlib/fmt.git
+cd fmt
+mkdir build && cd build && cmake ..
+make && make install
+```
+5. ragel  
+**ArchLinux** : `sudo pacman -S ragel`  
+**Ubuntu**    : `sudo apt install ragel`  
+**Centos**    : `sudo yum install ragel`
 * 编译安装
 ```shell
 git clone https://github.com/4kangjc/flexy.git
