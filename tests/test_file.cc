@@ -1,7 +1,7 @@
 #include <flexy/util/file.h>
 #include <flexy/util/log.h>
 
-static auto g_logger = FLEXY_LOG_ROOT();
+static auto&& g_logger = FLEXY_LOG_ROOT();
 
 int main(int argc, char** argv) {
     FLEXY_LOG_INFO(g_logger) << flexy::FS::AbsolutePath("../bin/log.txt");

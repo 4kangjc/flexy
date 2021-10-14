@@ -32,15 +32,18 @@ public:
 private:
     Fiber();                            // 主协程构造函数
 public:
-    Fiber(std::function<void()> cb, size_t stacksize = 0, bool use_caller = true);
+    Fiber(std::function<void()>&& cb, size_t stacksize = 0, bool use_caller = true);
+    Fiber(const std::function<void()>& cb, size_t stacksize = 0, bool use_caller = true) 
+        : Fiber(std::function<void()>(cb), stacksize, use_caller) { }
     ~Fiber();
 
-    void reset(std::function<void()> cb);                       // 重置协程函数 并重置协程状态
+    void reset(std::function<void()>&& cb);                      // 重置协程函数 并重置协程状态
+    void reset(const std::function<void()>& cb) { return reset(std::function<void()>(cb)); }
     void yield();                                               // 让出执行权
     void resume();                                              // 进入协程
 
-    uint64_t getId() const { return id_; }                     // 返回协程id
-    State getState() const { return state_; }                  // 返回协程状态
+    uint64_t getId() const { return id_; }                      // 返回协程id
+    State getState() const { return state_; }                   // 返回协程状态
 
     static void SetThis(Fiber*);                                // 设置当前协程
     static Fiber::ptr GetThis();                                // 返回当前协程

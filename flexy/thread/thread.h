@@ -7,6 +7,7 @@ namespace flexy {
 
 class Thread : noncopyable {
 public:
+    using ptr = std::shared_ptr<Thread>;
     template <typename... Args>
     Thread(std::string_view name, Args&&... args) : name_(name), 
             cb_(std::forward<Args>(args)...) {

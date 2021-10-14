@@ -1,6 +1,6 @@
 #include <flexy/util/log.h>
 
-static auto g_logger = FLEXY_LOG_ROOT();
+static auto&& g_logger = FLEXY_LOG_ROOT();
 
 int main() {
     FLEXY_LOG_INFO(g_logger) << "Hello flexy log!";

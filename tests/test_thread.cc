@@ -1,7 +1,7 @@
 #include <flexy/thread/thread.h>
 #include <flexy/util/log.h>
 
-static auto g_logger = FLEXY_LOG_ROOT();
+static auto&& g_logger = FLEXY_LOG_ROOT();
 
 void test_thread(int argc, char** argv) {
     for (int i = 1; i < argc; ++i) {
@@ -26,7 +26,9 @@ int main(int argc, char** argv) {
     flexy::Thread t2("print", print);
     Add a;
     flexy::Thread t3("add", &Add::operator(), a, 1, 2);
+    flexy::Thread::SetName("main thread");
     t.join();
     t2.join();
     t3.join();
+    FLEXY_LOG_INFO(g_logger) << "this is a log";
 }

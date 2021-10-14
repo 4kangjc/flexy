@@ -13,6 +13,7 @@ set(LIB_SRC
     flexy/util/log.cpp
     flexy/util/file.cpp
     flexy/schedule/fiber.cpp
+    flexy/schedule/scheduler.cpp
 )
 
 set(LIBS
@@ -29,6 +30,8 @@ flexy_add_executable(test_thread "tests/test_thread.cc" "${LIBS}")
 flexy_add_executable(test_log "tests/test_logger.cc" "${LIBS}")
 flexy_add_executable(test_file "tests/test_file.cc" "${LIBS}")
 flexy_add_executable(test_fiber "tests/test_fiber.cc" "${LIBS}")
+flexy_add_executable(test_scheduler "tests/test_scheduler.cc" "${LIBS}")
+flexy_add_executable(test_task "tests/test_task.cc" "${LIBS}")
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)

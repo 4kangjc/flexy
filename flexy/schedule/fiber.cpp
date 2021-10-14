@@ -1,6 +1,7 @@
 #include "fiber.h"
 #include "allocator.h"
 #include "flexy/util/macro.h"
+#include "scheduler.h"
 #include <atomic>
 
 namespace flexy {
@@ -25,8 +26,8 @@ Fiber::Fiber() {
     FLEXY_LOG_DEBUG(g_logger) << "Fiber::Fiber main";
 }
 
-Fiber::Fiber(std::function<void()> cb, size_t stacksize, bool use_scheduler)
-        : id_(++s_fiber_id), cb_(cb), use_scheduler_(use_scheduler) {
+Fiber::Fiber(std::function<void()>&& cb, size_t stacksize, bool use_scheduler)
+        : id_(++s_fiber_id), cb_(std::move(cb)), use_scheduler_(use_scheduler) {
     ++s_fiber_count;
     stacksize_ = stacksize ? stacksize : g_fiber_stack_size;
 
@@ -52,7 +53,7 @@ Fiber::~Fiber() {
 }
 
 
-void Fiber::reset(std::function<void()> cb) {
+void Fiber::reset(std::function<void()>&& cb) {
     FLEXY_ASSERT(stack_);                            // 子协程才能重置
     FLEXY_ASSERT(state_ != EXEC);                    // 没有在运行
     cb_ = std::move(cb);
@@ -66,7 +67,7 @@ void Fiber::resume() {
     SetThis(this);                         
     state_ = EXEC;
     if (use_scheduler_) {
-        // Scheduler::GetMainFiber()->state_ = READY;
+        Scheduler::GetMainFiber()->state_ = READY;
     } else {
         t_threadFiber->state_ = READY;
     }
@@ -80,10 +81,10 @@ void Fiber::yield() {
         state_ = READY;
     }
     if (use_scheduler_) {
-        // SetThis(Scheduler::GetMainFiber());
-        // Scheduler::GetMainFiber()->state_ = EXEC;
-        // auto p = jump_fcontext(Scheduler::GetMainFiber()->ctx_, nullptr);
-        // Scheduler::GetMainFiber()->ctx_ = p.fctx;
+        SetThis(Scheduler::GetMainFiber());
+        Scheduler::GetMainFiber()->state_ = EXEC;
+        auto p = jump_fcontext(Scheduler::GetMainFiber()->ctx_, nullptr);
+        Scheduler::GetMainFiber()->ctx_ = p.fctx;
     } else {
         SetThis(t_threadFiber.get());
         t_threadFiber->state_ = EXEC;
@@ -116,7 +117,7 @@ void Fiber::MainFunc(transfer_t t) {
     FLEXY_ASSERT(cur);
 
     if (cur->use_scheduler_) {
-        // Scheduler::GetMainFiber()->ctx_ = t.fctx;
+        Scheduler::GetMainFiber()->ctx_ = t.fctx;
     } else {
         t_threadFiber->ctx_ = t.fctx;
     }
