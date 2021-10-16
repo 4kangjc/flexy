@@ -18,6 +18,7 @@ public:
     void operator()() { return cb_(); }
     operator bool() { return cb_ != nullptr; }
     operator std::function<void()>() const { return cb_; }
+    auto& get() { return cb_; }
     void swap(__task& cb) noexcept { cb_.swap(cb.cb_); }
 private:
     std::function<void()> cb_;

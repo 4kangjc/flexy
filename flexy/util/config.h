@@ -118,7 +118,11 @@ class Config {
 public:
     using ConfigVarMap = std::unordered_map<std::string, ConfigVarBase::ptr>;
 
+#ifdef FLEXY_YAML
     template<typename T, typename FromStr = YamlFromStr<T>, typename ToStr = YamlToStr<T>>
+#elif FLEXY_JSON
+    template<typename T, typename FromStr = JsonFromStr<T>, typename ToStr = JsonToStr<T>>
+#endif
     static std::shared_ptr<ConfigVar<T, FromStr, ToStr>> Lookup(const std::string& name, 
             const T& default_val, std::string_view description = "") {
         WRITELOCK(GetMutex());

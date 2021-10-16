@@ -26,7 +26,23 @@ set(LIBS
     jsoncpp
 )
 
+option(YAML "Config by Json" ON)
+option(JSON "Config by Json" OFF)
+option(BUILD_SHARED_LIBS "Build flexy as a shared lib" ON)
+option(BUILD_STATIC_LIBS "Build flext as a static lib" OFF)
+
+if(JSON)
+    add_definitions(-DFLEXY_JSON)
+elseif(YAML)
+    add_definitions(-DFLEXY_YAML)
+endif(JSON)
+
+if (BUILD_STATIC_LIBS)
 add_library(flexy STATIC ${LIB_SRC})
+elseif (BUILD_SHARED_LIBS)
+add_library(flexy SHARED ${LIB_SRC})
+endif(BUILD_STATIC_LIBS)
+
 redefine_file_macro(flexy)
 
 flexy_add_executable(test_thread "tests/test_thread.cc" "${LIBS}")

@@ -296,6 +296,8 @@ void LogFormatter::init() {
         }
         if (i + 1 < size && pattern_[i + 1] == '%') {
             nstr.push_back('%');
+            i++;
+            continue;
         }
         size_t j = i + 1;
         size_t fmt_status = 0, fmt_begin = 0;

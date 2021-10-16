@@ -134,10 +134,10 @@ void Scheduler::run() {
             tk.reset();
         } else if (tk.cb) {
             if (cb_fiber) {
-                cb_fiber->reset(std::move(tk.cb));
+                cb_fiber->reset(std::move(tk.cb.get()));
                 // cb_fiber->reset(tk.cb);
             } else {
-                cb_fiber.reset(new Fiber(std::move(tk.cb)));
+                cb_fiber.reset(new Fiber(std::move(tk.cb.get())));
                 // cb_fiber.reset(new Fiber(tk.cb));
             }
             cb_fiber->resume();
