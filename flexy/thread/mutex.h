@@ -22,6 +22,10 @@ using ReadLock = std::shared_lock<rw_mutex>;
 using WriteLock = std::lock_guard<rw_mutex>;            // 不支持手动 unlock
 using WriteLock2 = std::unique_lock<rw_mutex>;          // 可手动 unlock
 
+#define READLOCK(x)   ReadLock lk(x)
+#define WRITELOCK(x)  WriteLock lk(x)
+#define WRITELOCK2(x) WriteLock2 lk(x)
+
 // TODO: boost::upgrade_lock 可从读锁直接升级为写锁
 
 using mutex = std::mutex;

@@ -3,7 +3,7 @@ project(flexy)
 
 include (cmake/utils.cmake)
 
-set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O0 -ggdb -std=c++17 -Wall -Wno-deprecated -Werror -Wno-unused-function -Wno-builtin-macro-redefined")
+set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O0 -ggdb -std=c++17 -Wall -Wno-deprecated -Werror -Wno-unused-function -Wno-builtin-macro-redefined -Wno-deprecated-declarations")
 
 include_directories(./)
 
@@ -14,6 +14,7 @@ set(LIB_SRC
     flexy/util/file.cpp
     flexy/schedule/fiber.cpp
     flexy/schedule/scheduler.cpp
+    flexy/util/config.cpp
 )
 
 set(LIBS
@@ -21,6 +22,8 @@ set(LIBS
     pthread
     fmt
     boost_context
+    yaml-cpp
+    jsoncpp
 )
 
 add_library(flexy STATIC ${LIB_SRC})
@@ -32,6 +35,7 @@ flexy_add_executable(test_file "tests/test_file.cc" "${LIBS}")
 flexy_add_executable(test_fiber "tests/test_fiber.cc" "${LIBS}")
 flexy_add_executable(test_scheduler "tests/test_scheduler.cc" "${LIBS}")
 flexy_add_executable(test_task "tests/test_task.cc" "${LIBS}")
+flexy_add_executable(test_config "tests/test_config.cc" "${LIBS}")
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)

@@ -2,6 +2,7 @@
 /build/*
 #忽略.vscode目录下的文件
 /.vscode/*
+/.cache/*
 #忽略include目录下的文件
 /include/*
 #忽略.idea目录下的文件

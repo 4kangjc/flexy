@@ -1,6 +1,7 @@
 #include "fiber.h"
 #include "allocator.h"
 #include "flexy/util/macro.h"
+#include "flexy/util/config.h"
 #include "scheduler.h"
 #include <atomic>
 
@@ -14,7 +15,7 @@ static std::atomic<uint64_t> s_fiber_count {0};         // 记录正在运行的
 static thread_local Fiber* t_fiber = nullptr;               // run fiber
 static thread_local Fiber::ptr t_threadFiber = nullptr;     // main fiber
 
-static const uint32_t g_fiber_stack_size = 128 * 1024;
+static auto g_fiber_stack_size = Config::Lookup<uint32_t>("fiber.stack_size", 128 * 1024, "fiber stack size");
 
 using StackAllocator = MallocStackAllocator;
 
@@ -29,7 +30,7 @@ Fiber::Fiber() {
 Fiber::Fiber(std::function<void()>&& cb, size_t stacksize, bool use_scheduler)
         : id_(++s_fiber_id), cb_(std::move(cb)), use_scheduler_(use_scheduler) {
     ++s_fiber_count;
-    stacksize_ = stacksize ? stacksize : g_fiber_stack_size;
+    stacksize_ = stacksize ? stacksize : g_fiber_stack_size->getValue();
 
     stack_ = StackAllocator::Alloc(stacksize_);
 
