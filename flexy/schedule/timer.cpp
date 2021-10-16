@@ -115,7 +115,7 @@ bool TimerManager::hasTimer() const {
 
 uint64_t TimerManager::getNextTimer() {
     LOCK_GUARD(mutex_);
-    tickled_ = true;
+    tickled_ = false;
     if (timers_.empty()) {
         return ~0ull;
     }
