@@ -15,6 +15,7 @@ set(LIB_SRC
     flexy/schedule/fiber.cpp
     flexy/schedule/scheduler.cpp
     flexy/util/config.cpp
+    flexy/schedule/timer.cpp
 )
 
 set(LIBS
