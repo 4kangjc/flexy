@@ -19,13 +19,17 @@ public:
      */
     Scheduler(size_t threads = 1, bool use_caller = true, std::string_view name = "");
     virtual ~Scheduler();
+    // 放回协程调第器的名称
     auto& getName() const { return name_; }
+    // 返回当前协程调度器
     static Scheduler* GetThis();
+    // 返回当前协程调度器的调度协程
     static Fiber* GetMainFiber();
-
+    // 开始协程调度器
     void start();
+    // 停止协程调度器
     void stop();
-
+    // 将任务加入到协程调度器中运行
     template <typename... FiberOrcb>
     void async(FiberOrcb&&... fc) {
         bool need_tickle = false;
@@ -38,7 +42,7 @@ public:
             tickle();
         }
     }
-
+    // 将任务加入到协程调度器中优先运行
     template <typename... FiberOrcb>
     void async_first(FiberOrcb&&... fc) {
                 bool need_tickle = false;
@@ -51,7 +55,7 @@ public:
             tickle();
         }
     }
-
+    // 将 [begin, end)里的任务加入到协程调度器中运行
     template <typename Iterator>
     void async(Iterator&& begin, Iterator&& end) {
         bool need_tikle = false;
@@ -87,11 +91,17 @@ private:
     };
 
 protected:
+    // 通知调度器有任务了
     virtual void tickle();
+    // 协程调度实体函数
     void run();
+    // 返回是否可以停止
     virtual bool stopping();
+    // 协程无任务调度时执行idle协程
     virtual void idle();
+    // 设置当前协程调度器
     void setThis();
+    // 是否有空闲线程
     bool hasIdleThreads() const { return idleThreadCount_ > 0; }
 private:    
     mutable mutex mutex_;                                                      // Mutex       

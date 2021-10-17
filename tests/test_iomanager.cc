@@ -29,26 +29,17 @@ void test_fiber() {
 
     } else if (errno == EINPROGRESS) {
         FLEXY_LOG_INFO(g_logger) << "add event error = " << errno << " " << strerror(errno);
-        flexy::IOManager::GetThis()->addEvent(sock, flexy::READ, [](){
+        flexy::IOManager::GetThis()->onRead(sock, [](){
             FLEXY_LOG_INFO(g_logger) << "read call back";
         }); 
-        flexy::IOManager::GetThis()->addEvent(sock, flexy::WRITE, [](){
+        flexy::IOManager::GetThis()->onWrite(sock, [](){
             FLEXY_LOG_INFO(g_logger) << "write call back";
-            //FLEXY::IOManager::GetThis()->addEvent(sock, FLEXY::IOManager::READ, [](){ FLEXY_LOG_DEBUG(g_logger) << "read"; } );
-            bool res = flexy::IOManager::GetThis()->cancelEvent(sock, flexy::READ);
+            bool res = flexy::IOManager::GetThis()->cancelRead(sock);
             if (!res) {
                 FLEXY_LOG_INFO(g_logger) << "cacel event failed";
             }
             close(sock);
         });
-        //FLEXY::IOManager::GetThis()->addEvent(sock, FLEXY::IOManager::WRITE, [](){ FLEXY_LOG_DEBUG(g_logger) << "1"; } );
-        //FLEXY::IOManager::GetThis()->addEvent(sock, FLEXY::IOManager::READ, [](){ FLEXY_LOG_DEBUG(g_logger) << "read"; } );
-        //FLEXY::IOManager::GetThis()->cancelEvent(sock, FLEXY::IOManager::READ);
-        //FLEXY::IOManager::GetThis()->delEvent(sock, FLEXY::IOManager::WRITE);
-        //FLEXY::IOManager::GetThis()->addEvent(sock, FLEXY::IOManager::WRITE, [](){ FLEXY_LOG_DEBUG(g_logger) << "2"; } );
-        //FLEXY::IOManager::GetThis()->delEvent(sock, FLEXY::IOManager::WRITE);
-        //FLEXY::IOManager::GetThis()->addEvent(sock, FLEXY::IOManager::WRITE, [](){ FLEXY_LOG_DEBUG(g_logger) << "3"; } );
-    } else {
         FLEXY_LOG_INFO(g_logger) << "else " << errno << " " << strerror(errno);
     }
 }
