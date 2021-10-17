@@ -36,8 +36,7 @@ public:
 
     template <typename... Args>
     Timer::ptr addTimer(uint64_t ms, Args&&... args) {
-        __task t(std::forward<Args>(args)...);
-        Timer::ptr timer(new Timer(ms, std::move(t), false, this));
+        Timer::ptr timer(new Timer(ms, __task(std::forward<Args>(args)...), false, this));
         unique_lock<decltype(mutex_)> lock(mutex_);
         addTimer(timer, lock);
         return timer;
@@ -45,8 +44,7 @@ public:
 
     template <typename... Args>
     Timer::ptr addRecTimer(uint64_t ms, Args&&... args) {
-        __task t(std::forward<Args>(args)...);
-        Timer::ptr timer(new Timer(ms, std::move(t), true, this));
+        Timer::ptr timer(new Timer(ms, __task(std::forward<Args>(args)...), true, this));
         unique_lock<decltype(mutex_)> lock(mutex_);
         addTimer(timer, lock);
         return timer;
@@ -54,12 +52,12 @@ public:
 
     template <typename... Args>
     Timer::ptr addCondtionTimer(uint64_t ms, std::weak_ptr<void()> weak_cond, Args&&... args) {
-        return addTimer(ms, OnTimer, weak_cond, std::forward<Args>(args)...);
+        return addTimer(ms, OnTimer, weak_cond, __task(std::forward<Args>(args)...));
     }
 
     template <typename... Args>
     Timer::ptr addRecCondtionTimer(uint64_t ms, std::weak_ptr<void()> weak_cond, Args&&... args) {
-        return addRecTimer(ms, OnTimer, weak_cond, std::forward<Args>(args)...);
+        return addRecTimer(ms, OnTimer, weak_cond, __task(std::forward<Args>(args)...));
     }
 
     uint64_t getNextTimer();                                    // 获取下一个要执行的定时器任务的时间
@@ -67,8 +65,8 @@ public:
     bool hasTimer() const;                                      // 是否有定时器
 protected:
     virtual void onTimerInsertedAtFront() = 0;                  // 当有新的定时器插入到定时器的首部,执行该函数
-    void addTimer(Timer::ptr& val, unique_lock<mutex>& lock);     // 将定时器添加到timers_中
-    void addTimer(Timer::ptr&& val, unique_lock<mutex>& lock);    // 将定时器添加到timers_中
+    void addTimer(Timer::ptr& val, unique_lock<mutex>& lock);   // 将定时器添加到timers_中
+    void addTimer(Timer::ptr&& val, unique_lock<mutex>& lock);  // 将定时器添加到timers_中
     bool detectClockRollover(uint64_t now_ms);                  // 检测服务器时间是否被调后了
 private:
     mutable mutex mutex_;                                       // 锁

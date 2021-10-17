@@ -51,7 +51,7 @@ void Scheduler::start() {
     FLEXY_ASSERT(threads_.empty());
     threads_.reserve(threadCount_);
     for (size_t i = 0; i < threadCount_; ++i) {
-        threads_.emplace_back(std::make_shared<Thread>(name_ + "-" + std::to_string(i), 
+        threads_.emplace_back(std::make_shared<Thread>(name_ + "_" + std::to_string(i), 
             &Scheduler::run, this));
         threadIds_.push_back(threads_[i]->getId());
     }

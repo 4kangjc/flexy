@@ -14,6 +14,18 @@ struct Add {
     }
 };
 
+void test2(__task&& cb) {
+    cb();
+}
+
+template <typename... Args>
+void test1(Args&&... args) {
+    // __task cb(std::forward<Args>(args)...);
+    return test2(__task(std::forward<Args>(args)...));
+    // return test2(std::move(cb));
+}
+
+
 int main() {
     __task t1(print, "hello __task");
     __task t2(print, "hello __task again");
@@ -29,4 +41,6 @@ int main() {
     __task t5(&Add::operator(), a, 1, 2);
     __task t6(a, 2, 3);
     t5(); t6();
+
+    test1(print, "Hello std::forward");
 }

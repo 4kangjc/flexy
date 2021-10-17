@@ -82,7 +82,7 @@ void TimerManager::addTimer(Timer::ptr& val, unique_lock<mutex>& lock) {
 
 void TimerManager::addTimer(Timer::ptr&& val, unique_lock<mutex>& lock) {
     auto it = timers_.insert(val).first;
-    bool at_front = (it == timers_.begin() && !tickled_);
+    bool at_front = (it == timers_.begin() && !tickled_);           // 防止调用getNextTimer前多次调用onTimerInsetedAtFront
     if (at_front) {
         tickled_ = true;
     }

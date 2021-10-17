@@ -1,5 +1,6 @@
 #include "util.h"
 #include "flexy/thread/thread.h"
+#include "flexy/schedule/fiber.h"
 #include "log.h"
 
 #include <sys/syscall.h>
@@ -10,6 +11,7 @@
 #include <charconv>
 #include <sstream>
 #include <execinfo.h>
+#include <cxxabi.h>
 
 static auto g_logger = FLEXY_LOG_NAME("system");
 
@@ -28,7 +30,7 @@ uint32_t GetThreadElapse() {
 }
 
 uint32_t GetFiberId() {
-    return 0;
+    return Fiber::GetFiberId();
 }
 
 uint64_t GetTimeUs() {
@@ -87,6 +89,25 @@ int64_t atoi(const char* begin, const char* end) {
     return ans;
 }
 
+static std::string damangle(const char* str) {
+    size_t size = 0;
+    int status = 0;
+    std::string rt;
+    rt.resize(256);
+    if (1 == sscanf(str, "%*[^(]%*[^_]%255[^)+]", rt.data())) {
+        char* v = abi::__cxa_demangle(rt.data(), nullptr, &size, &status);
+        if (v) {
+            std::string result(v);
+            free(v);
+            return result;
+        } 
+    }
+    if (1 == sscanf(str, "%255s", rt.data())) {
+        return rt;
+    }
+    return str;
+}
+
 void Backtrace(std::vector<std::string>& bt, int size, int skip) {
     auto array = (void**)malloc(size * sizeof(void*));
     size_t s = ::backtrace(array, size);
@@ -96,7 +117,8 @@ void Backtrace(std::vector<std::string>& bt, int size, int skip) {
         return;
     }
     for (size_t i = skip; i < s; ++i) {
-        bt.push_back(strings[i]);
+        // bt.push_back(strings[i]);
+        bt.push_back(damangle(strings[i]));
     }
     free(strings);
     free(array);
