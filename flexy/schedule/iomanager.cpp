@@ -8,6 +8,7 @@
 namespace flexy {
 
 static auto g_logger = FLEXY_LOG_NAME("system");
+static auto g_channel_init_size = Config::Lookup("channel.init.size", 64, "channel vector init size");
 static auto g_channel_resize_times = Config::Lookup("channel.resize.times", 2.0f, "channel vector resize times");
 
 IOManager::IOManager(size_t threads, bool use_caller, std::string_view name) 
@@ -29,7 +30,7 @@ IOManager::IOManager(size_t threads, bool use_caller, std::string_view name)
     // rt = epoll_ctl(epfd_, EPOLL_CTL_ADD, tickleFds_[0], &ev);
     // FLEXY_ASSERT(!rt);
 
-    channelResize(64);
+    channelResize(g_channel_init_size->getValue() * 1);
 
     channels_[tickleFds_[0]]->enableRead();
 

@@ -26,5 +26,10 @@ int main(int argc, char** argv) {
     // sleep(1);
     sc.async_first(nullptr);
     sc.async_first(test);
+    
+    sc.async([](auto&& first, auto&&... other){
+        FLEXY_LOG_INFO(g_logger) << "sum = " << (first + ... + other);
+    }, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+
     sc.stop();
 }

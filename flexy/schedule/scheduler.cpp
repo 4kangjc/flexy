@@ -1,5 +1,6 @@
 #include "scheduler.h"
 #include "flexy/util/macro.h"
+#include "flexy/net/hook.h"
 
 namespace flexy {
 
@@ -96,7 +97,7 @@ void Scheduler::stop() {
 
 void Scheduler::run() {
     FLEXY_LOG_DEBUG(g_logger) << name_ << " run";
-    // sethookenable(true)                          // 启用hook
+    set_hook_enable(true);                          // 启用hook
     setThis();
     if (GetThreadId() != rootThreadId_) {                   // 非主线程
         t_scheduler_fiber = Fiber::GetThis().get();         // 调度协程为主协程

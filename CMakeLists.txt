@@ -18,6 +18,8 @@ set(LIB_SRC
     flexy/schedule/timer.cpp
     flexy/schedule/channel.cpp
     flexy/schedule/iomanager.cpp
+    flexy/net/fd_manager.cpp
+    flexy/net/hook.cpp
 )
 
 set(LIBS
@@ -27,6 +29,7 @@ set(LIBS
     boost_context
     yaml-cpp
     jsoncpp
+    dl
 )
 
 option(YAML "Config by Json" ON)
@@ -57,6 +60,7 @@ flexy_add_executable(test_task "tests/test_task.cc" "${LIBS}")
 flexy_add_executable(test_config "tests/test_config.cc" "${LIBS}")
 flexy_add_executable(test_timer "tests/test_timer.cc" "${LIBS}")
 flexy_add_executable(test_iomanager "tests/test_iomanager.cc" "${LIBS}")
+flexy_add_executable(test_hook "tests/test_hook.cc" "${LIBS}")
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
