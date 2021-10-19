@@ -215,8 +215,9 @@ int socket(int domain, int type, int protocol) {
 int connect_with_timeout(int sockfd, const struct sockaddr* addr, socklen_t addrlen, uint64_t timeout_ms) {
     if (!flexy::t_hook_enable) {
         if (!connect_f) {
-            return connect_f(sockfd, addr, addrlen);
+            flexy::hook_init();
         }
+        return connect_f(sockfd, addr, addrlen);
     }
     auto ctx = flexy::FdMsg::GetInstance().get(sockfd);
     if (!ctx || ctx->isClose()) {
@@ -253,7 +254,7 @@ int connect_with_timeout(int sockfd, const struct sockaddr* addr, socklen_t addr
     }
 
     int rt = iom->onWrite(sockfd);
-    if (rt == 0) {
+    if (rt) {
         flexy::Fiber::Yield();
         if (timer) {
             timer->cancel();
