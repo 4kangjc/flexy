@@ -26,7 +26,7 @@ Timer::Timer(uint64_t ms, __task&& cb, bool recurring, TimerManager* manager)
 
 Timer::Timer(uint64_t next) : next_(next) { }
 
-bool Timer::cacel() {
+bool Timer::cancel() {
     LOCK_GUARD(manager_->mutex_);
     if (cb_) {
         cb_ = nullptr;

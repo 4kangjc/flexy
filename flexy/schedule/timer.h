@@ -11,7 +11,7 @@ friend class TimerManager;
 public:
     using ptr = std::shared_ptr<Timer>;
     // 取消定时器
-    bool cacel();
+    bool cancel();
     // 刷新设置定时器的执行时间
     bool refresh();
     // 重置定时器时间 from_now 是否从当前时间开始计算

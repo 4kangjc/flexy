@@ -9,7 +9,7 @@ void test_timer() {
         static int i = 0;
         FLEXY_LOG_INFO(g_logger) << "hello timer";
         if (++i == 5) {
-            t->cacel();
+            t->cancel();
         }
     }, std::ref(timer));
 }

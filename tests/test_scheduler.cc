@@ -1,5 +1,5 @@
-#include "flexy/schedule/scheduler.h"
-#include "flexy/util/log.h"
+#include <flexy/schedule/scheduler.h>
+#include <flexy/util/log.h>
 #include <unistd.h>
 
 static auto&& g_logger = FLEXY_LOG_ROOT();

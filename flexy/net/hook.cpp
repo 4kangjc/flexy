@@ -124,13 +124,13 @@ retry:
             FLEXY_LOG_ERROR(g_logger) << hook_fun_name << " addEvent(" 
                 << fd << ", " << (flexy::Event)event << ")";
             if (timer) {
-                timer->cacel();
+                timer->cancel();
             }
             return -1;
         } else {
             flexy::Fiber::Yield();
             if (timer) {
-                timer->cacel();
+                timer->cancel();
             }
             if (tinfo->cacelled) {
                 errno = tinfo->cacelled;
@@ -213,7 +213,72 @@ int socket(int domain, int type, int protocol) {
 }
 
 int connect_with_timeout(int sockfd, const struct sockaddr* addr, socklen_t addrlen, uint64_t timeout_ms) {
-    return connect_f(sockfd, addr, addrlen);        // TODO
+    if (!flexy::t_hook_enable) {
+        if (!connect_f) {
+            return connect_f(sockfd, addr, addrlen);
+        }
+    }
+    auto ctx = flexy::FdMsg::GetInstance().get(sockfd);
+    if (!ctx || ctx->isClose()) {
+        errno = EBADF;
+        return -1;
+    }
+    if (!ctx->isSocket()) {
+        return connect_f(sockfd, addr, addrlen);
+    }
+    if (ctx->getUserNonblock()) {
+        return connect_f(sockfd, addr, addrlen);
+    }
+    int n = connect_f(sockfd, addr, addrlen);
+    if (n == 0) {
+        return 0;
+    } else if (n != -1 || errno != EINPROGRESS) {
+        return n;
+    }
+
+    auto iom = flexy::IOManager::GetThis();
+    flexy::Timer::ptr timer;    
+    auto tinfo = std::make_shared<timer_info>();
+    std::weak_ptr<timer_info> winfo(tinfo);
+
+    if (timeout_ms != ~0ull) {
+        timer = iom->addTimer(timeout_ms, [winfo, sockfd, iom] {
+            auto t = winfo.lock();
+            if (!t || t->cacelled) {
+                return;
+            }
+            t->cacelled = ETIMEDOUT;
+            iom->cancelWrite(sockfd);
+        });
+    }
+
+    int rt = iom->onWrite(sockfd);
+    if (rt == 0) {
+        flexy::Fiber::Yield();
+        if (timer) {
+            timer->cancel();
+        }
+        if (tinfo->cacelled) {
+            errno = tinfo->cacelled;
+            return -1;
+        }
+    } else {
+        if (timer) {
+            timer->cancel();
+        }
+        FLEXY_LOG_ERROR(g_logger) << "connect addEvent(" << sockfd << ", WRITE) error";
+    }
+    int error = 0;
+    socklen_t len = sizeof(error);
+    if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, &error, &len) == -1) {
+        return -1;
+    }
+    if (!error) {
+        return 0;
+    } else {
+        errno = error;
+        return -1;
+    }
 }
 
 int connect(int sockfd, const struct sockaddr* addr, socklen_t addrlen) {
