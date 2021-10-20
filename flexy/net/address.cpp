@@ -200,7 +200,7 @@ Address::GetInterfaceAddress(const std::string& iface, int family) {
     return result;
 }
 
-inline int Address::getFamily() const {
+int Address::getFamily() const {
     return getAddr()->sa_family;
 }
 

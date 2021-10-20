@@ -21,6 +21,7 @@ set(LIB_SRC
     flexy/net/fd_manager.cpp
     flexy/net/hook.cpp
     flexy/net/address.cpp
+    flexy/net/socket.cpp
 )
 
 set(LIBS
@@ -63,6 +64,7 @@ flexy_add_executable(test_timer "tests/test_timer.cc" "${LIBS}")
 flexy_add_executable(test_iomanager "tests/test_iomanager.cc" "${LIBS}")
 flexy_add_executable(test_hook "tests/test_hook.cc" "${LIBS}")
 flexy_add_executable(test_address "tests/test_address.cc" "${LIBS}")
+flexy_add_executable(test_socket "tests/test_socket.cc" "${LIBS}")
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
