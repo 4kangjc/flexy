@@ -297,13 +297,71 @@ int Socket::recvFrom(iovec* buffer, size_t length, Address::ptr& from, int flags
 
 
 Address::ptr Socket::getRemoteAddress() {
-    // TODO
-    return nullptr;
+    if (remoteAddress_) {
+        return remoteAddress_;
+    }
+    Address::ptr result;
+    switch (family_) {
+        case AF_INET:
+            result.reset(new IPv4Address());
+            break;
+        case AF_INET6:
+            result.reset(new IPv6Address());
+            break;
+        case AF_UNIX:
+            result.reset(new UnixAddress());
+            break;
+        default:
+            result.reset(new UnkownAddress(family_));
+            break;
+    }
+    socklen_t addrlen = result->getAddrLen();
+    if (getpeername(sock_, result->getAddr(), &addrlen)) {
+        FLEXY_LOG_ERROR(g_logger) << "getpeername error sock = " << sock_
+        << " errno = " << errno << " errstr = " << strerror(errno);
+        return std::make_shared<UnkownAddress>(family_);
+    }
+    if (family_ == AF_UNIX) {
+        auto addr = std::dynamic_pointer_cast<UnixAddress>(result);
+        addr->setAddrLen(addrlen);
+    }
+    remoteAddress_ = result;
+    
+    return result;
 }
 
 Address::ptr Socket::getLocalAddress() {
-    // TODO
-    return nullptr;
+    if (localAddress_) {
+        return localAddress_;
+    }
+    Address::ptr result;
+    switch (family_) {
+        case AF_INET:
+            result.reset(new IPv4Address());
+            break;
+        case AF_INET6:
+            result.reset(new IPv6Address());
+            break;
+        case AF_UNIX:
+            result.reset(new UnixAddress());
+            break;
+        default:
+            result.reset(new UnkownAddress(family_));
+            break;
+    }
+    socklen_t addrlen = result->getAddrLen();
+    if (getsockname(sock_, result->getAddr(), &addrlen)) {
+        FLEXY_LOG_ERROR(g_logger) << "getpeername error sock = " << sock_
+        << " errno = " << errno << " errstr = " << strerror(errno);
+        return std::make_shared<UnkownAddress>(family_);
+    }
+    if (family_ == AF_UNIX) {
+        auto addr = std::dynamic_pointer_cast<UnixAddress>(result);
+        addr->setAddrLen(addrlen);
+    }
+    localAddress_ = result;
+    
+    return result;
 }
 
 int Socket::getError() {

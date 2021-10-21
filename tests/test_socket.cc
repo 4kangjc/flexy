@@ -20,6 +20,7 @@ void test_socket() {
         return;
     } else {
         FLEXY_LOG_INFO(g_logger) << "connect " << addr->toString() << " connected";
+        // FLEXY_LOG_DEBUG(g_logger) << *sock;
     }
     const char buff[] = "GET / HTTP/1.0\r\n\r\n";
     int rt = sock->send(buff);
