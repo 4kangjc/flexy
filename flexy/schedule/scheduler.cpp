@@ -118,13 +118,13 @@ void Scheduler::run() {
                 tasks_.pop_front();
                 if (!tk)   continue;            // nullptr task continue
                 ++activeThreadCount_;
-            } else {
                 tickle_me = true;
             }
         }
         if (tk.fiber) {
             FLEXY_ASSERT(tk.fiber->getState() == Fiber::READY);
         }
+
         if (tickle_me) {
             tickle();
         }

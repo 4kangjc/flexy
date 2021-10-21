@@ -23,6 +23,7 @@ set(LIB_SRC
     flexy/net/address.cpp
     flexy/net/socket.cpp
     flexy/net/tcp_server.cpp
+    flexy/env/signal.cpp
 )
 
 set(LIBS
@@ -67,6 +68,7 @@ flexy_add_executable(test_hook "tests/test_hook.cc" "${LIBS}")
 flexy_add_executable(test_address "tests/test_address.cc" "${LIBS}")
 flexy_add_executable(test_socket "tests/test_socket.cc" "${LIBS}")
 flexy_add_executable(test_tcp_server "tests/test_tcp_server.cc" "${LIBS}")
+flexy_add_executable(test_signal "tests/test_signal.cc" "${LIBS}")
 
 
 flexy_add_executable(echo_server "examples/echo_server.cc" "${LIBS}")
