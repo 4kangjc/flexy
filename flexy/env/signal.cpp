@@ -5,6 +5,7 @@
 
 namespace flexy {
 
+namespace {
 // std::function<void()> handlers[65];
 __task handlers[65];
 
@@ -15,6 +16,8 @@ static void signal_handler(int sig) {
     } else {
         handlers[sig]();
     }
+}
+
 }
 
 void Signal::signal(int sig, __task&& handler) {
