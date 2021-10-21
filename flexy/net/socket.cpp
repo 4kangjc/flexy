@@ -210,7 +210,12 @@ int Socket::send(const void* buffer, size_t length, int flags) {
 }
 
 int Socket::send(std::string_view s, int flags) {
-    return send(s.data(), s.size(), flags);
+    int rt = send(s.data(), s.size(), flags);
+    if (rt < 0) {
+        FLEXY_LOG_INFO(g_logger) << "sock = " << sock_ << " send error,"
+        " errrno = " << errno << ", errstr = " << strerror(errno);
+    }
+    return rt;
 }
 
 int Socket::send(const iovec* buffer, size_t length, int flags) {
@@ -256,7 +261,14 @@ int Socket::recv(void* buffer, size_t length, int flags) {
 }
 
 int Socket::recv(std::string& s, int flags) {
-    return recv(s.data(), s.size(), flags);
+    int rt = recv(s.data(), s.size(), flags);
+    if (rt < 0) {
+        FLEXY_LOG_INFO(g_logger) << "sock = " << sock_ << " recv error,"
+        " errrno = " << errno << ", errstr = " << strerror(errno);
+    } else if (rt == 0) {
+        FLEXY_LOG_DEBUG(g_logger) << "sock = " << sock_ << " close";
+    }
+    return rt;
 }
 
 int Socket::recv(iovec* buffer, size_t length, int flags) {
@@ -360,7 +372,7 @@ Address::ptr Socket::getLocalAddress() {
         addr->setAddrLen(addrlen);
     }
     localAddress_ = result;
-    
+
     return result;
 }
 
@@ -383,7 +395,7 @@ std::ostream& Socket::dump(std::ostream& os) const {
     if (remoteAddress_) {
         os << " remote_address = " << remoteAddress_->toString();
     }
-    return os;
+    return os << "]";
 }
 
 std::string Socket::toString() const {
