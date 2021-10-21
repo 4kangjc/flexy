@@ -84,7 +84,7 @@ std::string format(const char* fmt, ...) {
 }
 
 int64_t atoi(const char* begin, const char* end) {
-    int64_t ans;
+    int64_t ans = 0;
     std::from_chars(begin, end, ans);
     return ans;
 }
