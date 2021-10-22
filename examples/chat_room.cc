@@ -15,7 +15,7 @@ void run() {
             WRITELOCK(thi->mutex_);
             thi->clients_.insert(client);
         }
-        while (true) {
+        while (!self->isStop()) {
             std::string s;
             s.resize(1024);
             if (client->recv(s) <= 0) {
@@ -36,6 +36,7 @@ void run() {
     auto addr = Address::LookupAny("0.0.0.0:8021");
     cr->bind(addr);
     cr->start();
+    Signal::signal(SIGINT, [cr](){ cr->stop(); });
 }
 
 int main() {

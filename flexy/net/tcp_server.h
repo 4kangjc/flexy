@@ -5,6 +5,7 @@
 #include "address.h"
 #include "socket.h"
 #include <memory>
+#include <atomic>
 
 namespace flexy {
 
@@ -42,7 +43,7 @@ protected:
     IOManager* acceptWorker_;
     uint64_t recvTimeout_;
     std::string name_;
-    bool isStop_;
+    std::atomic<bool> isStop_;
     TcpCallBack handleClient_;
 
 };

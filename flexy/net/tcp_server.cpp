@@ -70,7 +70,7 @@ void TcpServer::startAccept(const Socket::ptr& sock) {
             client->setRecvTimeout(recvTimeout_);
             worker_->async(handleClient_, shared_from_this(), client);
         } else {
-            FLEXY_LOG_ERROR(g_logger) << "accept errno = " << errno << "errstr" 
+            FLEXY_LOG_ERROR(g_logger) << "accept errno = " << errno << "," 
             << " errstr = " << strerror(errno);
         }
     }
