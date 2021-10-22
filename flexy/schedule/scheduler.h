@@ -71,6 +71,11 @@ public:
             tickle();
         }
     }
+
+    template <typename T>
+    void operator-(T&& args) {
+        return async(std::forward<T>(args));
+    }
 private:
     // 可执行对象
     struct Task {
@@ -121,3 +126,6 @@ protected:
 
 
 } // namespace flexy
+
+#define go *flexy::Scheduler::GetThis() - 
+#define go_args(func, args...) flexy::Scheduler::GetThis()->async(func, ##args)
