@@ -1,5 +1,5 @@
 #include "config.h"
-
+#include "file.h"
 namespace flexy {
 
 static auto g_logger = FLEXY_LOG_NAME("system");
@@ -83,6 +83,49 @@ void Config::LoadFromJson(const Json::Value& root) {
     }
 }
 
+static std::map<std::string, uint64_t> s_filelastmodtime;
+static mutex s_mutex;
 
+template <bool json>
+void Config::LoadFromConDir(std::string_view path) {
+    auto absolute_path = FS::AbsolutePath(path);     // TODO env 
+    std::vector<std::string> files;
+    if constexpr (!json) {
+        FS::ListAllFile(files, absolute_path, ".yml");
+    } else {
+        FS::ListAllFile(files, absolute_path, ".json");
+    }
+
+    for (const auto& file : files) {
+        auto t = FS::LastWriteTime(file);
+        {
+            LOCK_GUARD(s_mutex);
+            if (s_filelastmodtime[file] == t) {
+                continue;
+            }
+            s_filelastmodtime[file] = t;
+        }
+        try {
+            if constexpr(!json) {
+                YAML::Node root = YAML::LoadFile(file);
+                LoadFromYaml(root);
+            } else {
+                static Json::Reader r;
+                std::ifstream is;
+                Json::Value root;
+                r.parse(is, root);
+                LoadFromJson(root);
+            }
+            FLEXY_LOG_INFO(g_logger) << "LoadConfFile file = " << file << " ok";
+        } catch (...) {
+            FLEXY_LOG_ERROR(g_logger) << "LoadConfFile file = " << file << " failed";
+        }
+    }
+}
+
+void Config::LoadFromConDir(std::string_view path) {
+    LoadFromConDir<false>(path);
+    LoadFromConDir<true>(path);
+}
 
 } // namespace flexy

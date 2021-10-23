@@ -125,4 +125,10 @@ bool FS::OpenForRead(std::ifstream& ifs, std::string_view filename,
     return ifs.is_open();
 }
 
+uint64_t FS::LastWriteTime(std::string_view filename) {
+    auto ftime = fs::last_write_time(filename);
+    return std::chrono::duration_cast<std::chrono::microseconds>(ftime.time_since_epoch()).count();
+}
+
+
 } // namespace flexy

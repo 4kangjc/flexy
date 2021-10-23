@@ -151,6 +151,8 @@ public:
     static void LoadFromYaml(const YAML::Node& root);
     static void LoadFromJson(const Json::Value& root);
     static void LoadFromConDir(std::string_view path);
+    template <bool json>
+    static void LoadFromConDir(std::string_view path);
     static ConfigVarBase::ptr LookupBase(const std::string& name);
     static void Visit(std::function<void(ConfigVarBase::ptr)> cb);
 private:

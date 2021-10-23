@@ -26,6 +26,8 @@ struct FS {
     // open不支持std::string_view, 注意std::string_view 以 \\0 结尾
     static bool OpenForWrite(std::ofstream& ofs, std::string_view filename,
                 std::ios_base::openmode mode);
+    // 上次文件修改时间
+    static uint64_t LastWriteTime(std::string_view filename); 
 };
 
 

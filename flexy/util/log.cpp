@@ -1,5 +1,6 @@
 #include "log.h"
 #include "config.h"
+#include "file.h"
 #include "flexy/net/address.h"
 #include "flexy/net/socket.h"
 #include <iostream>
@@ -313,9 +314,7 @@ bool FileLogAppender::reopen() {
     if (filestream_) {
         filestream_.close();
     }
-    filestream_.open(filename_);
-    return !!filestream_;
-    // TODO filesystem
+    return FS::OpenForWrite(filestream_, filename_, std::ios::app);
 }
 
 std::string FileLogAppender::toYamlString() const {
