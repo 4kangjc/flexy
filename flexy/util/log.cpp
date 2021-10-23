@@ -216,11 +216,38 @@ inline auto Logger::getFormatter() const {
 }
 
 std::string Logger::toYamlString() const {
-    return "";
+    LOCK_GUARD(mutex_);
+    YAML::Node node;
+    node["name"] = name_;
+    node["level"] = LogLevel::ToString(level_);
+    if (formatter_) {
+        node["formatter"] = formatter_->getPattern();
+    }
+    for (const auto& appender : appenders_) {
+        node["appenders"].push_back(YAML::Load(appender->toYamlString()));
+    }
+    std::stringstream ss;
+    ss << node;
+    return ss.str();
 }
 
 std::string Logger::toJsonString() const {
-    return "";
+    LOCK_GUARD(mutex_);
+    Json::Value node;
+    node["name"] = name_;
+    node["level"] = LogLevel::ToString(level_);
+    if (formatter_) {
+        node["formatter"] = formatter_->getPattern();
+    }
+    Json::Reader r;
+    for (const auto& appender : appenders_) {
+        Json::Value v;
+        r.parse(appender->toJsonString(), v);
+        node["appenders"].append(std::move(v));
+    }
+    std::stringstream ss;
+    ss << node;
+    return ss.str();
 }
 
 /********************* LogAppender ************************************/
@@ -244,11 +271,29 @@ void StdoutLogAppender::log(Logger::ptr& logger, LogContext::ptr& contex) {
 }
 
 std::string StdoutLogAppender::toYamlString() const {
-    return "";
+    LOCK_GUARD(mutex_);
+    YAML::Node node;
+    node["type"] = "StdoutLogAppender";
+    node["level"] = LogLevel::ToString(level_);
+    if (hasFormatter_ && formatter_) {
+        node["formatter"] = formatter_->getPattern();
+    }
+    std::stringstream ss;
+    ss << node;
+    return ss.str();
 }
 
 std::string StdoutLogAppender::toJsonString() const {
-    return "";
+    LOCK_GUARD(mutex_);
+    Json::Value node;
+    node["type"] = "StdoutLogAppender";
+    node["level"] = LogLevel::ToString(level_);
+    if (hasFormatter_ && formatter_) {
+        node["formatter"] = formatter_->getPattern();
+    }
+    std::stringstream ss;
+    ss << node;
+    return ss.str();
 }
 
 FileLogAppender::FileLogAppender(std::string_view filename) : filename_(filename) {
@@ -274,11 +319,31 @@ bool FileLogAppender::reopen() {
 }
 
 std::string FileLogAppender::toYamlString() const {
-    return "";
+    LOCK_GUARD(mutex_);
+    YAML::Node node;
+    node["type"] = "FileLogAppender";
+    node["file"] = filename_;
+    node["level"] = LogLevel::ToString(level_);
+    if (hasFormatter_ && formatter_) {
+        node["formatter"] = formatter_->getPattern();
+    }
+    std::stringstream ss;
+    ss << node;
+    return ss.str();
 }
 
 std::string FileLogAppender::toJsonString() const {
-    return "";
+    LOCK_GUARD(mutex_);
+    Json::Value node;
+    node["type"] = "FileLogAppender";
+    node["file"] = filename_;
+    node["level"] = LogLevel::ToString(level_);
+    if (hasFormatter_ && formatter_) {
+        node["formatter"] = formatter_->getPattern();
+    }
+    std::stringstream ss;
+    ss << node;
+    return ss.str();
 }
 
 ServerLogAppender::ServerLogAppender(std::string_view host) {
@@ -302,11 +367,31 @@ void ServerLogAppender::log(Logger::ptr& logger, LogContext::ptr& context) {
 }
 
 std::string ServerLogAppender::toYamlString() const {
-    return "";
+    LOCK_GUARD(mutex_);
+    YAML::Node node;
+    node["type"] = "FileLogAppender";
+    node["file"] = addr_->toString();
+    node["level"] = LogLevel::ToString(level_);
+    if (hasFormatter_ && formatter_) {
+        node["formatter"] = formatter_->getPattern();
+    }
+    std::stringstream ss;
+    ss << node;
+    return ss.str();
 }
 
 std::string ServerLogAppender::toJsonString() const {
-    return "";
+    LOCK_GUARD(mutex_);
+    Json::Value node;
+    node["type"] = "FileLogAppender";
+    node["file"] = addr_->toString();
+    node["level"] = LogLevel::ToString(level_);
+    if (hasFormatter_ && formatter_) {
+        node["formatter"] = formatter_->getPattern();
+    }
+    std::stringstream ss;
+    ss << node;
+    return ss.str();
 }
 
 /*********************** LogFormatter *******************/
@@ -441,7 +526,28 @@ Logger::ptr LoggerManager::getLogger(const std::string& name) {
 }
 
 std::string LoggerManager::toYamlString() {
-    return "";
+    LOCK_GUARD(mutex_);
+    YAML::Node node;
+    for (const auto& [_, logger] : loggers_) {
+        node.push_back(YAML::Load(logger->toYamlString()));
+    }
+    std::stringstream ss;
+    ss << node;
+    return ss.str();
+}
+
+std::string LoggerManager::toJsonString() {
+    LOCK_GUARD(mutex_);
+    Json::Value node;
+    Json::Reader r;
+    for (const auto& [_, logger] : loggers_) {
+        Json::Value v;
+        r.parse(logger->toYamlString(), v);
+        node.append(std::move(v));
+    }
+    std::stringstream ss;
+    ss << node;
+    return ss.str();
 }
 
 /*************************** Log Config  ***********************************/
@@ -760,7 +866,7 @@ struct LogIniter {
             }
         }
     }
-    
+
     LogIniter() {
         g_logy_defines->addListener(on_log_change);
         g_logj_defines->addListener(on_log_change);

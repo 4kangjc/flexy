@@ -216,6 +216,7 @@ public:
     Logger::ptr getLogger(const std::string& name);
     auto& getRoot() { return root_; }
     std::string toYamlString();
+    std::string toJsonString();
 private:
     LoggerManager();                                                // 只能由单例类调用 
     std::unordered_map<std::string, Logger::ptr> loggers_;          // 日志器集合
