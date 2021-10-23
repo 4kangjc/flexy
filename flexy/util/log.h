@@ -28,7 +28,8 @@ struct LogLevel {
         INFO,
         WARN,
         ERROR,
-        FATAL  
+        FATAL,
+        UNKOWN
     };
     static const char* ToString(LogLevel::Level level);
     static LogLevel::Level FromString(std::string_view s);
