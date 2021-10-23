@@ -29,6 +29,13 @@ Scheduler::Scheduler(size_t threads, bool use_caller, std::string_view name) : n
         rootThreadId_ = -1;
     }
     threadCount_ = threads;
+
+    idle_ = [this]() {
+        FLEXY_LOG_INFO(g_logger) << "idle";
+        while (!stopping()) {
+            Fiber::Yield();
+        }
+    };
 }
 
 Scheduler* Scheduler::GetThis() {
@@ -102,7 +109,7 @@ void Scheduler::run() {
     if (GetThreadId() != rootThreadId_) {                   // 非主线程
         t_scheduler_fiber = Fiber::GetThis().get();         // 调度协程为主协程
     }
-    auto idle_fiber(std::make_shared<Fiber>([this]() { idle(); } ));
+    auto idle_fiber(std::make_shared<Fiber>([this]() { idle_(); } ));
     // auto idle_fiber(std::make_shared<Fiber>(std::bind(&Scheduler::idle, this)));
     Fiber::ptr cb_fiber;
     

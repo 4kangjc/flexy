@@ -34,6 +34,8 @@ IOManager::IOManager(size_t threads, bool use_caller, std::string_view name)
 
     channels_[tickleFds_[0]]->enableRead();
 
+    idle_ = [this]() { idleFiber(); };
+
     start();
 }
 
@@ -209,7 +211,7 @@ bool IOManager::stopping() {
     return stopping(timeout);
 }
 
-void IOManager::idle() {
+void IOManager::idleFiber() {
     FLEXY_LOG_DEBUG(g_logger) << "idle";
     // epoll_event* evs = new 
     std::unique_ptr<epoll_event[]> events(new epoll_event[256]);
@@ -272,6 +274,10 @@ void IOManager::idle() {
 
         Fiber::Yield();
     }
+}
+
+void IOManager::idle() {
+    idleFiber();
 }
 
 void IOManager::onTimerInsertedAtFront() {

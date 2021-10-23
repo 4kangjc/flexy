@@ -76,6 +76,9 @@ public:
     void operator-(T&& args) {
         return async(std::forward<T>(args));
     }
+
+    template <typename... Args>
+    void onIdle(Args&&... args) { idle_ = __task(std::forward<Args>(args)...); }
 private:
     // 可执行对象
     struct Task {
@@ -101,9 +104,9 @@ protected:
     // 协程调度实体函数
     void run();
     // 返回是否可以停止
-    virtual bool stopping();
-    // 协程无任务调度时执行idle协程
-    virtual void idle();
+    bool stopping();
+    // 协程无任务调度时执行idle协程 
+    [[deprecated]]  virtual void idle();
     // 设置当前协程调度器
     void setThis();
     // 是否有空闲线程
@@ -121,7 +124,7 @@ protected:
     std::atomic<size_t> idleThreadCount_   = {0};                              // 空闲线程数量
     bool stopping_ = true;                                                     // 是否正在停止
     int rootThreadId_ = 0;                                                     // 主线程id(use_caller)
-
+    __task idle_;                                                              // 协程无任务调度时执行idle协程
 };
 
 

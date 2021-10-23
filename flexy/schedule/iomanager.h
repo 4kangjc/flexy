@@ -45,7 +45,8 @@ public:
     static IOManager* GetThis();
 protected:
     void tickle() override;
-    bool stopping() override;
+    bool stopping();
+    void idleFiber();
     void idle() override;
     void onTimerInsertedAtFront() override;
     // 判断是否可以停止
