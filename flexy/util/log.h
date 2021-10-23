@@ -16,6 +16,8 @@ namespace flexy {
 class Logger;
 class LogAppender;
 class LogFormatter;
+class Socket;
+class IPAddress;
 
 
 /********************************** 日志级别 *****************************************/
@@ -123,8 +125,8 @@ public:
     void setFormatter(std::string_view fmt);
     auto getFormatter() const;
     const auto& getName() const { return name_; }
-    std::string toYamlString();
-    std::string toJsonString();
+    std::string toYamlString() const;
+    std::string toJsonString() const;
 private:
     Logger(std::string_view name = "root");         // 只能由LoggerManager调用
 private:
@@ -145,8 +147,8 @@ public:
     using ptr = std::shared_ptr<LogAppender>;
     virtual ~LogAppender() = default;
     virtual void log(Logger::ptr& logger, LogContext::ptr& contex) = 0;
-    virtual std::string toYamlString() = 0;
-    virtual std::string toJsonString() = 0;
+    virtual std::string toYamlString() const = 0;
+    virtual std::string toJsonString() const = 0;
     void setFormatter(const LogFormatter::ptr& val);
     auto& getFormatter() const { LOCK_GUARD(mutex_); return formatter_; }
     auto getLevel() const { return level_; }
@@ -162,8 +164,8 @@ protected:
 class StdoutLogAppender : public LogAppender {
 public:
     void log(Logger::ptr& logger, LogContext::ptr& contex) override;
-    std::string toYamlString() override;
-    std::string toJsonString() override;
+    std::string toYamlString() const override;
+    std::string toJsonString() const override;
 };
 
 // 输出到文件的Appender
@@ -171,8 +173,8 @@ class FileLogAppender : public LogAppender {
 public:
     FileLogAppender(std::string_view filename);
     void log(Logger::ptr& logger, LogContext::ptr& contex) override;
-    std::string toYamlString() override;
-    std::string toJsonString() override;
+    std::string toYamlString() const override;
+    std::string toJsonString() const override;
     //重新打开文件，文件打开成功返回true
     bool reopen();
 private:
@@ -180,7 +182,17 @@ private:
     std::ofstream filestream_;
 };
 
-// TODO ServerLogAppender
+// 输出到服务器的Appender
+class ServerLogAppender : public LogAppender {
+public:
+    ServerLogAppender(std::string_view host);
+    void log(Logger::ptr& logger, LogContext::ptr& contex) override;
+    std::string toYamlString() const override;
+    std::string toJsonString() const override;
+private:
+    std::shared_ptr<Socket> sock_;
+    std::shared_ptr<IPAddress> addr_;
+};
 
 /****************************** 日志上下文包装器 *****************************/
 

@@ -1,4 +1,7 @@
 #include "log.h"
+#include "config.h"
+#include "flexy/net/address.h"
+#include "flexy/net/socket.h"
 #include <iostream>
 #include <functional>
 
@@ -212,11 +215,11 @@ inline auto Logger::getFormatter() const {
     return formatter_;
 }
 
-std::string Logger::toYamlString() {
+std::string Logger::toYamlString() const {
     return "";
 }
 
-std::string Logger::toJsonString() {
+std::string Logger::toJsonString() const {
     return "";
 }
 
@@ -240,11 +243,11 @@ void StdoutLogAppender::log(Logger::ptr& logger, LogContext::ptr& contex) {
     }
 }
 
-std::string StdoutLogAppender::toYamlString() {
+std::string StdoutLogAppender::toYamlString() const {
     return "";
 }
 
-std::string StdoutLogAppender::toJsonString() {
+std::string StdoutLogAppender::toJsonString() const {
     return "";
 }
 
@@ -270,11 +273,39 @@ bool FileLogAppender::reopen() {
     // TODO filesystem
 }
 
-std::string FileLogAppender::toYamlString() {
+std::string FileLogAppender::toYamlString() const {
     return "";
 }
 
-std::string FileLogAppender::toJsonString() {
+std::string FileLogAppender::toJsonString() const {
+    return "";
+}
+
+ServerLogAppender::ServerLogAppender(std::string_view host) {
+    addr_ = Address::LookupAnyIPAddress(host, AF_UNSPEC);
+    if (!addr_) {
+        FLEXY_LOG_ERROR(FLEXY_LOG_ROOT()) << "get address failed";
+    }
+    sock_ = Socket::CreateTCP(addr_->getFamily());
+    sock_->connect(addr_);
+}
+
+void ServerLogAppender::log(Logger::ptr& logger, LogContext::ptr& context) {
+    if (!sock_->isConnected()) {
+        sock_->connect(addr_);
+    }
+    auto level = context->getLevel();
+    if (level >= level_) {
+        LOCK_GUARD(mutex_);
+        sock_->send(formatter_->format(logger, context));
+    }
+}
+
+std::string ServerLogAppender::toYamlString() const {
+    return "";
+}
+
+std::string ServerLogAppender::toJsonString() const {
     return "";
 }
 
@@ -377,13 +408,13 @@ void LogFormatter::init() {
     }
 }
 
-// std::string LogFormatter::format(Logger::ptr& logger, LogContext::ptr& context) {
-//     std::stringstream ss;
-//     for (auto& item : items_) {
-//         item->format(ss, logger, context);
-//     }
-//     return ss.str();
-// }
+std::string LogFormatter::format(Logger::ptr& logger, LogContext::ptr& context) {
+    std::stringstream ss;
+    for (auto& item : items_) {
+        item->format(ss, logger, context);
+    }
+    return ss.str();
+}
 
 std::ostream& LogFormatter::format(std::ostream& os, Logger::ptr& logger, LogContext::ptr& context) {
     for (auto& item : items_) {
@@ -413,5 +444,55 @@ std::string LoggerManager::toYamlString() {
     return "";
 }
 
+/*************************** Log Config  ***********************************/
+
+struct LogAppenderDefine {
+    int type = 0;               // 1 file 2 stdout 3 server
+    LogLevel::Level level = LogLevel::Level::TRACE;
+    std::string format;
+    std::string fist;           // 1: filename or 3: hostname + port
+
+    bool operator==(const LogAppenderDefine& other) const {
+        return type == other.type && level == other.level 
+        && format == other.format && fist == other.fist;
+    }
+};
+
+struct LogDefine {
+    std::string name;
+    LogLevel::Level level = LogLevel::Level::TRACE;
+    std::string formatter;
+    std::vector<LogAppenderDefine> appenders;
+
+    bool operator==(const LogDefine& other) const {
+        return name == other.name && level == other.level 
+        && formatter == other.formatter 
+        && appenders == other.appenders;
+    }
+
+    bool operator<(const LogDefine& other) const {
+        return name < other.name;
+    }
+};
+
+template <>
+struct LexicalCastYaml<std::string, LogDefine> {
+
+};
+
+template <>
+struct LexicalCastYaml<LogDefine, std::string> {
+
+};
+
+template <>
+struct LexicalCastJson<std::string, LogDefine> {
+
+};
+
+template <>
+struct LexicalCastJson<LogDefine, std::string> {
+
+};
 
 } // namespace flexy
