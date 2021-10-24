@@ -4,8 +4,9 @@
 static auto&& g_logger = FLEXY_LOG_ROOT();
 
 void test_timer() {
+    flexy::Timer::ptr timer;
     flexy::IOManager iom(2);
-    flexy::Timer::ptr timer = iom.addRecTimer(1000, [](flexy::Timer::ptr& t) {
+    timer = iom.addRecTimer(1000, [](flexy::Timer::ptr& t) {
         static int i = 0;
         FLEXY_LOG_INFO(g_logger) << "hello timer";
         if (++i == 5) {
