@@ -24,6 +24,7 @@ set(LIB_SRC
     flexy/net/socket.cpp
     flexy/net/tcp_server.cpp
     flexy/env/signal.cpp
+    flexy/http/http.cpp
 )
 
 set(LIBS
@@ -71,6 +72,7 @@ flexy_add_executable(test_tcp_server "tests/test_tcp_server.cc" "${LIBS}")
 flexy_add_executable(test_signal "tests/test_signal.cc" "${LIBS}")
 flexy_add_executable(test_go "tests/test_go.cc" "${LIBS}")
 flexy_add_executable(test_logconf "tests/test_logconfig.cc" "${LIBS}")
+flexy_add_executable(test_http "tests/test_http.cc" "${LIBS}")
 
 
 flexy_add_executable(echo_server "examples/echo_server.cc" "${LIBS}")
