@@ -44,11 +44,11 @@ public:
     // 返回当前的IOManager
     static IOManager* GetThis();
 protected:
-    void tickle() override;
-    bool stopping();
+    [[deprecated]] void tickle() override;
+    bool stopping() override;
     void idleFiber();
-    void idle() override;
-    void onTimerInsertedAtFront() override;
+    [[deprecated]] void idle() override;
+    [[deprecated]] void onTimerInsertedAtFront() override;
     // 判断是否可以停止
     bool stopping(uint64_t& timeout);
     // 对 Channel 集合容器扩容

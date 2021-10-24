@@ -39,7 +39,7 @@ public:
             tasks_.emplace_back(std::forward<FiberOrcb>(fc)...);
         }
         if (need_tickle) {
-            tickle();
+            tickle_();
         }
     }
     // 将任务加入到协程调度器中优先运行
@@ -52,7 +52,7 @@ public:
             tasks_.emplace_front(std::forward<FiberOrcb>(fc)...);
         }
         if (need_tickle) {
-            tickle();
+            tickle_();
         }
     }
     // 将 [begin, end)里的任务加入到协程调度器中运行
@@ -68,7 +68,7 @@ public:
             }
         }
         if (need_tikle) {
-            tickle();
+            tickle_();
         }
     }
 
@@ -79,6 +79,9 @@ public:
 
     template <typename... Args>
     void onIdle(Args&&... args) { idle_ = __task(std::forward<Args>(args)...); }
+
+    template <typename... Args>
+    void onTickle(Args&&... args) { tickle_ = __task(std::forward<Args>(args)...); }
 private:
     // 可执行对象
     struct Task {
@@ -100,11 +103,11 @@ private:
 
 protected:
     // 通知调度器有任务了
-    virtual void tickle();
+    [[deprecated]] virtual void tickle();
     // 协程调度实体函数
     void run();
     // 返回是否可以停止
-    bool stopping();
+    virtual bool stopping();
     // 协程无任务调度时执行idle协程 
     [[deprecated]]  virtual void idle();
     // 设置当前协程调度器
@@ -125,6 +128,7 @@ protected:
     bool stopping_ = true;                                                     // 是否正在停止
     int rootThreadId_ = 0;                                                     // 主线程id(use_caller)
     __task idle_;                                                              // 协程无任务调度时执行idle协程
+    __task tickle_;                                                            // 通知调度器有任务了
 };
 
 

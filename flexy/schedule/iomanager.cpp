@@ -35,6 +35,14 @@ IOManager::IOManager(size_t threads, bool use_caller, std::string_view name)
     channels_[tickleFds_[0]]->enableRead();
 
     idle_ = [this]() { idleFiber(); };
+    tickle_ = [this]() {
+        if (!hasIdleThreads()) {
+            return;
+        }
+        int rt = write(tickleFds_[1], "", 1);
+        FLEXY_ASSERT(rt == 1);
+    };
+    refreshNearest_ = [this]() { tickle_(); };
 
     start();
 }

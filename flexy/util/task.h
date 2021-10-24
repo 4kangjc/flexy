@@ -12,6 +12,7 @@ public:
     __task() = default;
     __task(__task&& other) noexcept : cb_(std::move(other.cb_)) { }
     __task(__task& other) : cb_(other.cb_) {}
+    __task(const __task& other) : cb_(other.cb_) {}
     ~__task() = default;
     __task& operator=(const __task& cb) { cb_ = cb.cb_; return *this; }
     __task& operator=(__task&& cb) { cb_ = std::move(cb.cb_); return *this; }

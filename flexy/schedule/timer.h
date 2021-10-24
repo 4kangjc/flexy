@@ -70,7 +70,10 @@ public:
     bool hasTimer() const;
 protected:
     // 当有新的定时器插入到定时器的首部,执行该函数
-    virtual void onTimerInsertedAtFront() = 0;
+    [[deprecated]] virtual void onTimerInsertedAtFront() = 0;
+    // 注册函数
+    template <typename... Args>
+    void onRefreshNearest(Args&&... args) { refreshNearest_ = __task(std::forward<Args>(args)...); }
     // 将定时器添加到timers_中
     void addTimer(Timer::ptr& val, unique_lock<mutex>& lock);
     // 将定时器添加到timers_中
@@ -82,7 +85,9 @@ private:
     std::set<Timer::ptr, Timer::Comparator> timers_;            // 定时器集合
     bool tickled_ = false;                                      // 是否触发onTimerInsertedAtFront
     uint64_t previouseTime_;                                    // 上次执行时间
-
+protected:
+    __task refreshNearest_;                                     // 当有新的定时器插入到定时器的首部,执行该函数
+private:
     static void OnTimer(std::weak_ptr<void()> weak_cond, __task&& cb);
 };
 

@@ -88,7 +88,8 @@ void TimerManager::addTimer(Timer::ptr&& val, unique_lock<mutex>& lock) {
     }
     lock.unlock();
     if (at_front) {
-        onTimerInsertedAtFront();
+        // onTimerInsertedAtFront();
+        refreshNearest_();
     }
 }
 

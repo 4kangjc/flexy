@@ -82,7 +82,7 @@ void Scheduler::stop() {
 
     stopping_ = true;
     for (size_t i = 0; i < threadCount_; ++i) {
-        tickle();
+        tickle_();
     }
 
     if (rootFiber_) {                           // usercaller 调度协程执行 run()
@@ -133,7 +133,7 @@ void Scheduler::run() {
         }
 
         if (tickle_me) {
-            tickle();
+            tickle_();
         }
 
         if (tk.fiber) {
