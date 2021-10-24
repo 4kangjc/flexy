@@ -1,5 +1,6 @@
 #include <flexy/schedule/iomanager.h>
 #include <flexy/util/macro.h>
+#include <flexy/net/hook.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -16,16 +17,16 @@ int sock = 0;
  
 
 void test_fiber() {
-    sock = socket(AF_INET, SOCK_STREAM, 0);
+    sock = socket_f(AF_INET, SOCK_STREAM, 0);
     FLEXY_ASSERT(sock >= 0);
     FLEXY_LOG_INFO(g_logger) << "test_fiber sock = " << sock;
-    fcntl(sock, F_SETFL, O_NONBLOCK);
+    fcntl_f(sock, F_SETFL, O_NONBLOCK);
     sockaddr_in addr;
     bzero(&addr, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_port = htons(80);
     inet_pton(AF_INET, "36.152.44.95", &addr.sin_addr);   // 百度ip会更换
-    if (!connect(sock, (sockaddr*)&addr, sizeof(addr))) {
+    if (!connect_f(sock, (sockaddr*)&addr, sizeof(addr))) {
 
     } else if (errno == EINPROGRESS) {
         FLEXY_LOG_INFO(g_logger) << "add event error = " << errno << " " << strerror(errno);

@@ -36,6 +36,10 @@ Scheduler::Scheduler(size_t threads, bool use_caller, std::string_view name) : n
             Fiber::Yield();
         }
     };
+
+    tickle_ = []() {
+        FLEXY_LOG_INFO(g_logger) << "tickle";
+    };
 }
 
 Scheduler* Scheduler::GetThis() {
