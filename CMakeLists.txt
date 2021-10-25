@@ -26,6 +26,8 @@ set(LIB_SRC
     flexy/env/signal.cpp
     flexy/http/http.cpp
     flexy/http/http_parser.cpp
+    flexy/stream/stream.cpp
+    flexy/stream/socket_stream.cpp
 )
 
 ragelmaker(flexy/http/http11_parser.rl LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/flexy/http)
