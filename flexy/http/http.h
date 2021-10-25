@@ -170,6 +170,7 @@ struct CaseInsensitiveLess {
 
 class HttpRequest {
 public:
+    using ptr = std::unique_ptr<HttpRequest>;
     using MapType = std::map<std::string, std::string, CaseInsensitiveLess>;
     HttpRequest(uint8_t version = 0x11, bool close = true);
     HttpMethod getMehod() const { return method_; }
@@ -271,6 +272,7 @@ private:
 
 class HttpResponse {
 public:
+    using ptr = std::unique_ptr<HttpResponse>;
     using MapType = std::map<std::string, std::string, CaseInsensitiveLess>;
     HttpResponse(uint8_t version = 0x11, bool close = true);
     HttpStatus getStatus() const { return status_; }

@@ -20,7 +20,7 @@ void test_request() {
     << " content_length = " << parser.getContentLength() << ", " << tmp.size() - s;
 
     tmp.resize(tmp.size() - s);
-    FLEXY_LOG_INFO(g_logger) << parser.getData();
+    FLEXY_LOG_INFO(g_logger) << *parser.getData();
     FLEXY_LOG_INFO(g_logger) << begin;
 }
 
@@ -57,7 +57,7 @@ void test_response() {
             break;
         }
     }
-    FLEXY_LOG_INFO(g_logger) << parser.getData();
+    FLEXY_LOG_INFO(g_logger) << *parser.getData();
 }
 
 int main() {

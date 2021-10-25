@@ -23,7 +23,7 @@ public:
     static uint64_t GetHttpRequestMaxBodySize();
 private:
     http_parser parser_;
-    HttpRequest data_;
+    HttpRequest::ptr data_;
     int error_; /*
  * 1000 : invalid method
  * 1001 : invalid version
@@ -47,7 +47,7 @@ public:
     static uint64_t GetHttpResponseMaxBodySize();
 private:
     httpclient_parser parser_;
-    HttpResponse data_;
+    HttpResponse::ptr data_;
     int error_;
 };
 

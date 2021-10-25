@@ -5,7 +5,7 @@ namespace flexy {
 
 class Stream {
 public:
-    virtual ~Stream();
+    virtual ~Stream() { }
     virtual int read(void* buffer, size_t length) = 0;
 
     virtual int readFixSize(void* buffer, size_t length);

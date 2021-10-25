@@ -70,7 +70,7 @@ void on_request_method(void* data, const char* at, size_t length) {
         parser->setError(1000);
         return;
     }
-    parser->getData().setMethod(m);
+    parser->getData()->setMethod(m);
 }
 
 void on_request_uri(void *data, const char *at, size_t length) {
@@ -79,17 +79,17 @@ void on_request_uri(void *data, const char *at, size_t length) {
 
 void on_requese_fragment(void *data, const char *at, size_t length) {
     HttpRequestParser* parser = static_cast<HttpRequestParser*>(data);
-    parser->getData().setFragment(std::string_view(at, length));
+    parser->getData()->setFragment(std::string_view(at, length));
 }
 
 void on_request_path(void *data, const char *at, size_t length) {
     HttpRequestParser* parser = static_cast<HttpRequestParser*>(data);
-    parser->getData().setPath(std::string_view(at, length));
+    parser->getData()->setPath(std::string_view(at, length));
 }
 
 void on_request_query(void *data, const char *at, size_t length) {
     HttpRequestParser* parser = static_cast<HttpRequestParser*>(data);
-    parser->getData().setQuery(std::string_view(at, length));
+    parser->getData()->setQuery(std::string_view(at, length));
 }
 
 void on_request_version(void *data, const char *at, size_t length) {
@@ -105,7 +105,7 @@ void on_request_version(void *data, const char *at, size_t length) {
         parser->setError(1001);
         return;
     }
-    parser->getData().setVersion(v);
+    parser->getData()->setVersion(v);
 }
 
 void on_request_header_done(void *data, const char *at, size_t length) {
@@ -118,10 +118,10 @@ void on_request_http_field(void *data, const char *field, size_t flen, const cha
         FLEXY_LOG_WARN(g_logger) << "invalid http request field length = 0";
         return; 
     }
-    parser->getData().setHeader(std::string(field, flen), std::string(value, vlen));
+    parser->getData()->setHeader(std::string(field, flen), std::string(value, vlen));
 }
 
-HttpRequestParser::HttpRequestParser() : error_(0) {
+HttpRequestParser::HttpRequestParser() : data_(new HttpRequest), error_(0) {
     http_parser_init(&parser_);
     parser_.request_method = on_request_method;
     parser_.request_uri = on_request_uri;
@@ -135,7 +135,7 @@ HttpRequestParser::HttpRequestParser() : error_(0) {
 }
 
 uint64_t HttpRequestParser::getContentLength() const {
-    return data_.getHeaderAs<uint64_t>("content-length", 0);
+    return data_->getHeaderAs<uint64_t>("content-length", 0);
 }
 
 size_t HttpRequestParser::execute(char* data, size_t len) {
@@ -154,13 +154,13 @@ int HttpRequestParser::hasError() {
 
 void on_response_reason(void *data, const char *at, size_t length) {
     HttpResponseParser* parser = static_cast<HttpResponseParser*>(data);
-    parser->getData().setReason(std::string_view(at, length));
+    parser->getData()->setReason(std::string_view(at, length));
 }
 
 void on_response_status(void *data, const char *at, size_t length) {
     HttpResponseParser* parser = static_cast<HttpResponseParser*>(data);
     HttpStatus status = (HttpStatus)(atoi(at, at + length));
-    parser->getData().setStatus(status);
+    parser->getData()->setStatus(status);
 }
 
 void on_response_chunk(void *data, const char *at, size_t length) {
@@ -180,7 +180,7 @@ void on_response_version(void *data, const char *at, size_t length) {
         parser->setError(1001);
         return;
     }
-    parser->getData().setVersion(v);
+    parser->getData()->setVersion(v);
 }
 
 void on_response_header_done(void *data, const char *at, size_t length) {
@@ -197,10 +197,10 @@ void on_response_http_field(void *data, const char *field, size_t flen, const ch
         FLEXY_LOG_WARN(g_logger) << "invalid http response field length = 0";
         return;
     }
-    parser->getData().setHeader(std::string(field, flen), std::string(value, vlen));
+    parser->getData()->setHeader(std::string(field, flen), std::string(value, vlen));
 }
 
-HttpResponseParser::HttpResponseParser() : error_(0) {
+HttpResponseParser::HttpResponseParser() : data_(new HttpResponse), error_(0) {
     httpclient_parser_init(&parser_);
     parser_.reason_phrase = on_response_reason;
     parser_.status_code = on_response_status;
@@ -230,7 +230,7 @@ int HttpResponseParser::hasError() {
 }
 
 uint64_t HttpResponseParser::getContentLength() const {
-    return data_.getHeaderAs<uint64_t>("content-length", 0);
+    return data_->getHeaderAs<uint64_t>("content-length", 0);
 }
 
 } // namespace flexy http

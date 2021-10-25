@@ -28,6 +28,7 @@ set(LIB_SRC
     flexy/http/http_parser.cpp
     flexy/stream/stream.cpp
     flexy/stream/socket_stream.cpp
+    flexy/http/http_session.cpp
 )
 
 ragelmaker(flexy/http/http11_parser.rl LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/flexy/http)
@@ -80,6 +81,7 @@ flexy_add_executable(test_go "tests/test_go.cc" "${LIBS}")
 flexy_add_executable(test_logconf "tests/test_logconfig.cc" "${LIBS}")
 flexy_add_executable(test_http "tests/test_http.cc" "${LIBS}")
 flexy_add_executable(test_http_parser "tests/test_http_parser.cc" "${LIBS}")
+flexy_add_executable(test_http_session "tests/test_http_session.cc" "${LIBS}")
 
 
 flexy_add_executable(echo_server "examples/echo_server.cc" "${LIBS}")
