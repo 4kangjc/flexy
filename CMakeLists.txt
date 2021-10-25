@@ -25,7 +25,11 @@ set(LIB_SRC
     flexy/net/tcp_server.cpp
     flexy/env/signal.cpp
     flexy/http/http.cpp
+    flexy/http/http_parser.cpp
 )
+
+ragelmaker(flexy/http/http11_parser.rl LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/flexy/http)
+ragelmaker(flexy/http/httpclient_parser.rl LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/flexy/http)
 
 set(LIBS
     flexy
@@ -73,6 +77,7 @@ flexy_add_executable(test_signal "tests/test_signal.cc" "${LIBS}")
 flexy_add_executable(test_go "tests/test_go.cc" "${LIBS}")
 flexy_add_executable(test_logconf "tests/test_logconfig.cc" "${LIBS}")
 flexy_add_executable(test_http "tests/test_http.cc" "${LIBS}")
+flexy_add_executable(test_http_parser "tests/test_http_parser.cc" "${LIBS}")
 
 
 flexy_add_executable(echo_server "examples/echo_server.cc" "${LIBS}")

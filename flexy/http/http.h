@@ -219,7 +219,7 @@ public:
     }
 
     template <typename T>
-    T getHeaderAs(const std::string& key, const T& def = T()) {
+    T getHeaderAs(const std::string& key, const T& def = T()) const {
         return getAs(headers_, key, def);
     }
 
@@ -229,7 +229,7 @@ public:
     }
 
     template <typename T>
-    T getParamAs(const std::string& key, const T& def = T()) {
+    T getParamAs(const std::string& key, const T& def = T()) const {
         return getAs(params_, key, def);
     }
 
@@ -239,7 +239,7 @@ public:
     }
 
     template <typename T>
-    T getCookieAs(const std::string& key, const T& def = T()) {
+    T getCookieAs(const std::string& key, const T& def = T()) const {
         return getAs(cookies_, key, def);
     }
 
@@ -281,8 +281,8 @@ public:
 
     void setStatus(HttpStatus status) { status_ = status; }
     void setVersion(uint8_t version) { version_ = version; }
-    void setBody(const std::string& body) { body_ = body; }
-    void setReason(const std::string& reason) { reason_ = reason; }
+    void setBody(std::string_view body) { body_ = body; }
+    void setReason(std::string_view reason) { reason_ = reason; }
     void setHeaders(const MapType& v) { headers_ = v; }
 
     bool isClose() const { return close_; }
@@ -298,7 +298,7 @@ public:
     }
 
     template <typename T>
-    T getHeaderAs(const std::string& key, const T& def = T()) {
+    T getHeaderAs(const std::string& key, const T& def = T()) const {
         return getAs(headers_, key, def);
     }
 
