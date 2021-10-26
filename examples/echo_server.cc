@@ -6,19 +6,20 @@ static auto&& g_logger = FLEXY_LOG_ROOT();
 
 class EchoServer : public TcpServer {
 public:
+    void handleClient(const Socket::ptr& client) override {
+        FLEXY_LOG_DEBUG(g_logger) << "handleClient " << *client;
+        std::string s;
+        s.resize(4096);
+        while (true) {
+            memset(s.data(), 0, 4096);
+            if (client->recv(s) <= 0)  break;
+            client->send(s);
+        }
+    }
 };
 
 void run() {
     auto es = std::make_shared<EchoServer>();
-    es->onHandleClient([](const TcpServer::ptr& self, const Socket::ptr& client) {
-        FLEXY_LOG_INFO(g_logger) << "handleClient " << *client;
-        while (true) {
-            std::string s;
-            s.resize(4096);
-            if (client->recv(s) <= 0)  break;
-            client->send(s);
-        }
-    });
     auto addr = Address::LookupAny("0.0.0.0:8021");
     es->bind(addr);
     es->start();

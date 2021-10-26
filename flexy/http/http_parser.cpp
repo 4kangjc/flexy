@@ -96,7 +96,7 @@ void on_request_version(void *data, const char *at, size_t length) {
     HttpRequestParser* parser = static_cast<HttpRequestParser*>(data);
     uint8_t v = 0;
     if (strncmp(at, "HTTP/1.1", length) == 0) {
-        v = 0x01;
+        v = 0x11;
     } else if (strncmp(at, "HTTP/1.0", length) == 0) {
         v = 0x10;
     } else {

@@ -56,9 +56,9 @@ body:
     return std::move(parser.getData());
 }
 
-int HttpSession::sendResponse(const HttpResponse& rsp) {
+int HttpSession::sendResponse(const HttpResponse::ptr& rsp) {
     std::stringstream ss;
-    ss << rsp;
+    ss << *rsp;
     std::string data = ss.str();
     return writeFixSize(data.c_str(), data.size());
 }

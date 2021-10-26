@@ -10,7 +10,7 @@ class HttpSession : public SockStream {
 public:
     HttpSession(const Socket::ptr& sock, bool owner = true);
     HttpRequest::ptr recvRequest();
-    int sendResponse(const HttpResponse& rsp); 
+    int sendResponse(const HttpResponse::ptr& rsp); 
 };
 
 } // namespace flexy http

@@ -28,7 +28,7 @@ int SockStream::write(const void* buffer, size_t length) {
     if (!isConnected()) {
         return -1;
     }
-    return sock_ && sock_->isConnected();
+    return sock_->send(buffer, length);
 }
 
 void SockStream::close() {

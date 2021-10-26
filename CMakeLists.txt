@@ -3,7 +3,7 @@ project(flexy)
 
 include (cmake/utils.cmake)
 
-set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O0 -ggdb -std=c++17 -Wall -Wno-deprecated -Werror -Wno-unused-function -Wno-builtin-macro-redefined -Wno-deprecated-declarations")
+set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O3 -ggdb -std=c++17 -Wall -Wno-deprecated -Werror -Wno-unused-function -Wno-builtin-macro-redefined -Wno-deprecated-declarations")
 
 include_directories(./)
 
@@ -29,6 +29,8 @@ set(LIB_SRC
     flexy/stream/stream.cpp
     flexy/stream/socket_stream.cpp
     flexy/http/http_session.cpp
+    flexy/http/http_server.cpp
+    flexy/http/servlet.cpp
 )
 
 ragelmaker(flexy/http/http11_parser.rl LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/flexy/http)
@@ -86,6 +88,7 @@ flexy_add_executable(test_http_session "tests/test_http_session.cc" "${LIBS}")
 
 flexy_add_executable(echo_server "examples/echo_server.cc" "${LIBS}")
 flexy_add_executable(chat_room "examples/chat_room.cc" "${LIBS}")
+flexy_add_executable(http_server "examples/http_server.cc" "${LIBS}")
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)

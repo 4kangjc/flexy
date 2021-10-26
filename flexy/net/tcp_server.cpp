@@ -9,15 +9,15 @@ static auto g_logger = FLEXY_LOG_NAME("system");
 static auto g_tcp_server_read_timeout = Config::Lookup("tcp_server.read_timeout", 
     (uint64_t)(60 * 1000 * 2), "tcp server read timeout");
 
-
-static void handleClient(const TcpServer::ptr& self, const Socket::ptr& client) {
+[[deprecated]]
+static void handleClientCb(const TcpServer::ptr& self, const Socket::ptr& client) {
     FLEXY_LOG_INFO(g_logger) << *client;
 }
 
 TcpServer::TcpServer(IOManager* worker, IOManager* io_worker,
         IOManager* accept_worker) : worker_(worker), ioWorker_(io_worker),
         acceptWorker_(accept_worker), recvTimeout_(g_tcp_server_read_timeout->getValue()),
-        name_("flexy/1.0.0"), isStop_(true), handleClient_(handleClient) {
+        name_("flexy/1.0.0"), isStop_(true) /*, handleClient_(handleClientCb)*/ {
 }
 
 TcpServer::~TcpServer() {
@@ -25,6 +25,10 @@ TcpServer::~TcpServer() {
         sock->close();
     }
     socks_.clear();
+}
+
+void TcpServer::handleClient(const Socket::ptr& client) {
+    FLEXY_LOG_INFO(g_logger) << *client;
 }
 
 bool TcpServer::bind(const Address::ptr& addr) {
@@ -68,7 +72,8 @@ void TcpServer::startAccept(const Socket::ptr& sock) {
         auto client = sock->accept();
         if (client) {
             client->setRecvTimeout(recvTimeout_);
-            worker_->async(handleClient_, shared_from_this(), client);
+            // worker_->async(handleClient_, shared_from_this(), client);
+            worker_->async(&TcpServer::handleClient, shared_from_this(), client);
         } else {
             FLEXY_LOG_ERROR(g_logger) << "accept errno = " << errno << "," 
             << " errstr = " << strerror(errno);

@@ -32,9 +32,12 @@ public:
     IOManager* getWorker() const { return worker_; }
     bool isStop() const { return isStop_; }
 
+    [[deprecated]]
     void onHandleClient(TcpCallBack&& cb) { handleClient_ = std::move(cb); }
+    [[deprecated]]
     void onHandleClient(const TcpCallBack& cb) { handleClient_ = cb; }
 protected:
+    virtual void handleClient(const Socket::ptr& client); 
     void startAccept(const Socket::ptr& sock);
 protected:
     std::vector<Socket::ptr> socks_;
@@ -44,7 +47,7 @@ protected:
     uint64_t recvTimeout_;
     std::string name_;
     std::atomic<bool> isStop_;
-    TcpCallBack handleClient_;
+    [[deprecated]] TcpCallBack handleClient_;
 
 };
 
