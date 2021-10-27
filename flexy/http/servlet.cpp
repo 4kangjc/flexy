@@ -30,24 +30,52 @@ int32_t ServletDispatch::handle(const HttpRequest::ptr& request,
     return 0;
 }
 
-void addServlet(const std::string& uri, const Servlet::ptr& slt) {
-
+void ServletDispatch::addServlet(const std::string& uri, const Servlet::ptr& slt) {
+    WRITELOCK(mutex_);
+    datas_[uri] = slt;
 }
 
-void addServlet(const std::string& uri, FuncionServlet::callback&& cb) {
-
+void ServletDispatch::addServlet(const std::string& uri, FuncionServlet::callback&& cb) {
+    WRITELOCK(mutex_);
+    datas_[uri] = std::make_shared<FuncionServlet>(cb);
 }
 
-void addGlobServlet(const std::string& uri, const Servlet::ptr& slt) {
-
+void ServletDispatch::addGlobServlet(const std::string& uri, const Servlet::ptr& slt) {
+    WRITELOCK(mutex_);
+    for (auto it = globs_.begin(); it != globs_.end(); ++it) {
+        if (it->first == uri) {
+            globs_.erase(it);
+            break;
+        }
+    }
+    globs_.emplace_back(uri, slt);
 }
 
-void delServletconst(const std::string& uri) {
 
+void ServletDispatch::addGlobServlet(const std::string& uri, FuncionServlet::callback&& cb) {
+    WRITELOCK(mutex_);
+    for (auto it = globs_.begin(); it != globs_.end(); ++it) {
+        if (it->first == uri) {
+            globs_.erase(it);
+            break;
+        }
+    }
+    globs_.emplace_back(uri, std::make_shared<FuncionServlet>(cb));
 }
 
-void delGlobServlet(const std::string& uri) {
+void ServletDispatch::delServletconst(const std::string& uri) {
+    WRITELOCK(mutex_);
+    datas_.erase(uri);
+}
 
+void ServletDispatch::delGlobServlet(const std::string& uri) {
+    WRITELOCK(mutex_);
+    for (auto it = globs_.begin(); it != globs_.end(); ++it) {
+        if (!fnmatch(it->first.c_str(), uri.c_str(), 0)) {
+            globs_.erase(it);
+            break;
+        }
+    }
 }
 
 

@@ -36,6 +36,7 @@ public:
     void addServlet(const std::string& uri, const Servlet::ptr& slt);
     void addServlet(const std::string& uri, FuncionServlet::callback&& cb);
     void addGlobServlet(const std::string& uri, const Servlet::ptr& slt);
+    void addGlobServlet(const std::string& uri, FuncionServlet::callback&& slt);
 
     void delServletconst(const std::string& uri);
     void delGlobServlet(const std::string& uri);
