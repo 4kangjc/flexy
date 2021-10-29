@@ -1,5 +1,6 @@
 #include "config.h"
 #include "file.h"
+#include "flexy/env/env.h"
 namespace flexy {
 
 static auto g_logger = FLEXY_LOG_NAME("system");
@@ -88,7 +89,12 @@ static mutex s_mutex;
 
 template <bool json>
 void Config::LoadFromConDir(std::string_view path) {
-    auto absolute_path = FS::AbsolutePath(path);     // TODO env 
+    std::string absolute_path;
+    if (auto& env = EnvMgr::GetInstance(); env.init_) {
+        absolute_path = env.getAbsolutePath(path);
+    } else {
+        absolute_path = FS::AbsolutePath(path);
+    }
     std::vector<std::string> files;
     if constexpr (!json) {
         FS::ListAllFile(files, absolute_path, ".yml");
