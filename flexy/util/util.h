@@ -22,6 +22,8 @@ uint64_t GetTimeMs();
 uint64_t GetSteadyUs();
 // 获得当前Steady时钟毫秒数
 uint64_t GetSteadyMs();
+// 时间秒数 装换为 时间
+std::string TimeToStr(time_t ts = time(0), const std::string& fmt = "%Y-%m-%d %H:%M:%S");
 // c语言格式化字符串 -> std::string
 std::string format(const char* fmt, ...);
 // 查找元素 [begin, end) 找不到返回end, find_first -> 是否从前往后找

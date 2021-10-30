@@ -47,6 +47,14 @@ uint64_t GetSteadyUs() {
 
 uint64_t GetSteadyMs() { return GetSteadyUs() / 1000; }
 
+std::string TimeToStr(time_t ts, const std::string& fmt) {
+    struct tm tm;
+    localtime_r(&ts, &tm);
+    char buf[64];
+    strftime(buf, sizeof(buf), fmt.c_str(), &tm);
+    return buf;
+}
+
 std::string format(const char* fmt, ...) {
     char buffer[500];
     std::unique_ptr<char[]> release1;
