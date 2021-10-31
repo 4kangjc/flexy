@@ -33,6 +33,7 @@ set(LIB_SRC
     flexy/http/servlet.cpp
     flexy/env/env.cpp
     flexy/env/daemon.cpp
+    flexy/env/application.cpp
 )
 
 ragelmaker(flexy/http/http11_parser.rl LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/flexy/http)
@@ -88,6 +89,7 @@ flexy_add_executable(test_http_parser "tests/test_http_parser.cc" "${LIBS}")
 flexy_add_executable(test_http_session "tests/test_http_session.cc" "${LIBS}")
 flexy_add_executable(test_env "tests/test_env.cc" "${LIBS}")
 flexy_add_executable(test_deamon "tests/test_daemon.cc" "${LIBS}")
+flexy_add_executable(test_application "tests/test_application.cc" "${LIBS}")
 
 
 flexy_add_executable(echo_server "examples/echo_server.cc" "${LIBS}")

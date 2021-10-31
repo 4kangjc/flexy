@@ -1,10 +1,12 @@
 #include "env.h"
 #include "flexy/util/log.h"
 #include "flexy/util/file.h"
-#include <filesystem>
+// #include <filesystem>
 #include <iostream>
+#include <unistd.h>
+#include <iomanip>
 
-namespace fs = std::filesystem;
+// namespace fs = std::filesystem;
 
 namespace flexy {
 
@@ -13,7 +15,12 @@ static auto g_logger = FLEXY_LOG_NAME("system");
 bool Env::init(int argc, char** argv) {
     init_ = true;
     program_ = argv[0];
-    exe_ = fs::current_path()/program_;
+    // exe_ = fs::current_path()/program_;      // 环境变量时不对
+
+    char path[1024] = {0};
+    readlink("/proc/self/exe", path, sizeof(path));
+    exe_ = path;
+
     auto pos = exe_.find_last_of("/") + 1;
     cwd_ = exe_.substr(0, pos);
     

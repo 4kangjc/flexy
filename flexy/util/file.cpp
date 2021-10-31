@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <unistd.h>
 #include <string.h>
+#include <signal.h>
 
 namespace fs = std::filesystem;
 
@@ -106,6 +107,24 @@ bool FS::Rm(std::string_view path, bool v) {
     return true;
 }
 
+bool FS::IsRunningPidfile(std::string_view pidfile) {
+    std::ifstream ifs(pidfile.data());
+    std::string line;
+    if (!ifs || !std::getline(ifs, line)) {
+        return false;
+    }
+    if (line.empty()) {
+        return false;
+    }
+    pid_t pid = ::atoi(line.c_str());
+    if (pid <= 1) {
+        return false;
+    }
+    if (kill(pid, 0) != 0) {
+        return false;
+    }
+    return true;
+}
 
 bool FS::OpenForWrite(std::ofstream& ofs, std::string_view filename,
             std::ios_base::openmode mode) {
