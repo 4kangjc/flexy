@@ -354,12 +354,17 @@ struct LexicalCastJson<std::string, std::map<std::string, T>> {
         Json::Value node;
         reader.parse(v, node);
         std::map<std::string, T> vec;
-        auto me = node.getMemberNames();
+        // auto me = node.getMemberNames();
         std::stringstream ss;
-        for (auto it = me.begin(); it != me.end(); ++it) {
+        // for (auto it = me.begin(); it != me.end(); ++it) {
+        //     ss.str("");
+        //     ss << node[*it];
+        //     vec.emplace(*it, LexicalCastJson<std::string, T>()(ss.str()));
+        // }
+        for (auto it = node.begin(); it != node.end(); ++it) {
             ss.str("");
-            ss << node[*it];
-            vec.emplace(*it, LexicalCastJson<std::string, T>()((ss.str())));
+            ss << *it;
+            vec.emplace(it.name(), LexicalCastJson<std::string, T>()(ss.str()));
         }
         return vec;
     }
@@ -391,12 +396,17 @@ struct LexicalCastJson<std::string, std::unordered_map<std::string, T>> {
         Json::Value node;
         reader.parse(v, node);
         std::unordered_map<std::string, T> vec;
-        auto me = node.getMemberNames();
+        // auto me = node.getMemberNames();
         std::stringstream ss;
-        for (auto it = me.begin(); it != me.end(); ++it) {
+        // for (auto it = me.begin(); it != me.end(); ++it) {
+        //     ss.str("");
+        //     ss << node[*it];
+        //     vec.emplace(*it, LexicalCastJson<std::string, T>()(ss.str()));
+        // }
+        for (auto it = node.begin(); it != node.end(); ++it) {
             ss.str("");
-            ss << node[*it];
-            vec.emplace(*it, LexicalCastJson<std::string, T>()(ss.str()));
+            ss << *it;
+            vec.emplace(it.name(), LexicalCastJson<std::string, T>()(ss.str()));
         }
         return vec;
     }
@@ -419,6 +429,67 @@ struct LexicalCastJson<std::unordered_map<std::string, T>, std::string> {
         // return w.write(node);
     }
 };
+
+static bool YamlToJson(const YAML::Node& ynode, Json::Value& jnode) {
+    try {
+        if (ynode.IsScalar()) {
+            Json::Value v(ynode.Scalar());
+            jnode.swapPayload(v);
+            return true;
+        } else if (ynode.IsSequence()) {
+            for (size_t i = 0; i < ynode.size(); ++i) {
+                Json::Value v;
+                if (YamlToJson(ynode[i], v)) {
+                    jnode.append(std::move(v));
+                } else {
+                    return false;
+                }
+            }
+        } else if (ynode.IsMap()) {
+            for (auto it = ynode.begin(); it != ynode.end(); ++it) {
+                Json::Value v;
+                if (YamlToJson(it->second, v)) {
+                    jnode[it->first.Scalar()] = std::move(v);
+                } else {
+                    return false;
+                }
+            }
+        }
+    } catch (...) {
+        return false;
+    }
+    return true;
+}
+
+static bool JsonToYaml(const Json::Value& jnode, YAML::Node& ynode) {
+    try {
+        if (jnode.isArray()) {
+            int n = jnode.size();
+            for (int i = 0; i < n; ++i) {
+                YAML::Node v;
+                if (JsonToYaml(jnode[i], v)) {
+                    ynode.push_back(std::move(v));
+                } else {
+                    return false;
+                }
+            }
+        } else if (jnode.isObject()) {
+            for (auto it = jnode.begin(); it != jnode.end(); ++it) {
+                YAML::Node v;
+                if (JsonToYaml(*it, v)) {
+                    ynode[it.name()] = std::move(v);
+                } else {
+                    return false;
+                }
+            } 
+        } else {
+            ynode = jnode.asString();
+        }
+    } catch (...) {
+        return false;
+    }
+    return true;
+}
 
 }
 
