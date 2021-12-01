@@ -14,7 +14,7 @@ static auto g_logger = FLEXY_LOG_NAME("system");
 
 template <typename T>
 static T CreateMask(uint32_t bits) {
-
+    return (1 << (sizeof(T) * 8 - bits)) - 1;
 }
 
 template <typename T>
@@ -298,15 +298,32 @@ std::ostream& IPv4Address::insert(std::ostream& os) const {
 }
 
 IPAddress::ptr IPv4Address::broadcastAddress(uint32_t prefix_len) {
-    return nullptr;
+    if (prefix_len > 32) {
+        return nullptr;
+    }
+    sockaddr_in baddr(addr_);
+    baddr.sin_addr.s_addr |= byteswap(CreateMask<uint32_t>(prefix_len));
+    return std::make_shared<IPv4Address>(baddr);
 }
 
 IPAddress::ptr IPv4Address::networkAddress(uint32_t prefix_len) {
-    return nullptr;
+    if (prefix_len > 32) {
+        return nullptr;
+    }
+    sockaddr_in baddr(addr_);
+    baddr.sin_addr.s_addr &= ~byteswap(CreateMask<uint32_t>(prefix_len));
+    return std::make_shared<IPv4Address>(baddr);
 }
 
 IPAddress::ptr IPv4Address::subnetMask(uint32_t prefix_len) {
-    return nullptr;
+    if (prefix_len > 32) {
+        return nullptr;
+    }
+    sockaddr_in subnet;
+    bzero(&subnet, sizeof(subnet));
+    subnet.sin_family = AF_INET;
+    subnet.sin_addr.s_addr = ~byteswap(CreateMask<uint32_t>(prefix_len));
+    return std::make_shared<IPv4Address>(subnet);
 }
 
 uint32_t IPv4Address::getPort() const {
@@ -376,15 +393,33 @@ std::ostream& IPv6Address::insert(std::ostream& os) const {
 }
 
 IPAddress::ptr IPv6Address::broadcastAddress(uint32_t prefix_len) {
-    return nullptr;
+    sockaddr_in6 baddr(addr_);
+    baddr.sin6_addr.s6_addr[prefix_len / 8] |= CreateMask<uint8_t>(prefix_len % 8);
+    for (int i = prefix_len / 8; i < 16; ++i) {
+        baddr.sin6_addr.s6_addr[i] = 0xff;
+    }
+
+    return std::make_shared<IPv6Address>(baddr);
 }
 
 IPAddress::ptr IPv6Address::networkAddress(uint32_t prefix_len) {
-    return nullptr;
+    sockaddr_in6 baddr(addr_);
+    baddr.sin6_addr.s6_addr[prefix_len / 8] &= ~CreateMask<uint8_t>(prefix_len % 8);
+    for (int i = prefix_len / 8 + 1; i < 16; ++i) {
+        baddr.sin6_addr.s6_addr[i] = 0x00;
+    }
+    return std::make_shared<IPv6Address>(baddr);
 }
 
 IPAddress::ptr IPv6Address::subnetMask(uint32_t prefix_len) {
-    return nullptr;
+    sockaddr_in6 subnet;
+    bzero(&subnet, sizeof(subnet));
+    subnet.sin6_family = AF_INET6;
+    subnet.sin6_addr.s6_addr[prefix_len / 8] = ~CreateMask<uint8_t>(prefix_len % 8);
+    for (uint32_t i = 0; i < prefix_len / 8; ++i) {
+        subnet.sin6_addr.s6_addr[i] = 0xff;
+    }
+    return std::make_shared<IPv6Address>(subnet);
 }
 
 inline uint32_t IPv6Address::getPort() const {
