@@ -285,7 +285,7 @@ int Socket::recv(iovec* buffer, size_t length, int flags) {
 int Socket::recvFrom(void* buffer, size_t length, Address::ptr& from, int flags) {
     if (isConnected_) {
         socklen_t len = from->getAddrLen();
-        return ::recvfrom(sock_, buffer, length, flags, (sockaddr*)from->getAddr(), &len);
+        return ::recvfrom(sock_, buffer, length, flags, from->getAddr(), &len);
     }
     return -1;
 }
