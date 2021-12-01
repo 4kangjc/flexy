@@ -19,7 +19,7 @@ public:
     // 将 t 与 v 相或， 结果更新到 t，并返回操作之后新 t的值
     template <typename T, class S = T>
     static T orFetch(volatile T& t, S v) {
-        return __sync_or_and_fetch(&s, (T)v);
+        return __sync_or_and_fetch(&t, (T)v);
     }
     // 将 t 与 v 相与，结果更新到 t ，并返回操作之后新 t的值
     template<class T, class S>
