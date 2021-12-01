@@ -91,6 +91,7 @@ private:
         template <typename... Args>
         Task(Args&&... args) : cb(std::forward<Args>(args)...) { }
         Task(const Fiber::ptr& fiber) : fiber(fiber) { }
+        Task(Fiber::ptr& fiber) : fiber(fiber) { }
         Task(Fiber::ptr&& f) noexcept : fiber(std::move(f)) { }
         Task(__task* c) { cb.swap(*c); }
         Task(Fiber::ptr* f) { fiber.swap(*f); }
