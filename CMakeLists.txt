@@ -34,6 +34,10 @@ set(LIB_SRC
     flexy/env/env.cpp
     flexy/env/daemon.cpp
     flexy/env/application.cpp
+    flexy/thread/fibersem.cpp
+    flexy/schedule/async_io.cpp
+    flexy/db/mysql.cpp
+    flexy/db/sqlite3.cpp
 )
 
 ragelmaker(flexy/http/http11_parser.rl LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/flexy/http)
@@ -47,6 +51,8 @@ set(LIBS
     yaml-cpp
     jsoncpp
     dl
+    mysqlclient
+    sqlite3
 )
 
 option(YAML "Config by Json" ON)
@@ -90,6 +96,9 @@ flexy_add_executable(test_http_session "tests/test_http_session.cc" "${LIBS}")
 flexy_add_executable(test_env "tests/test_env.cc" "${LIBS}")
 flexy_add_executable(test_deamon "tests/test_daemon.cc" "${LIBS}")
 flexy_add_executable(test_application "tests/test_application.cc" "${LIBS}")
+
+flexy_add_executable(test_async_io "tests/test_async_io.cc" "${LIBS}")
+flexy_add_executable(test_mysql "tests/test_mysql.cc" "${LIBS}")
 
 
 flexy_add_executable(echo_server "examples/echo_server.cc" "${LIBS}")
