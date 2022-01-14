@@ -55,6 +55,15 @@ std::string TimeToStr(time_t ts, const std::string& fmt) {
     return buf;
 }
 
+time_t StrToTime(const char* str, const char* fmt) {
+    struct tm t;
+    memset(&t, 0, sizeof(t));
+    if (!strptime(str, fmt, &t)) {
+        return 0;
+    }
+    return mktime(&t);
+}
+
 std::string format(const char* fmt, ...) {
     char buffer[500];
     std::unique_ptr<char[]> release1;
@@ -82,13 +91,25 @@ std::string format(const char* fmt, ...) {
             if (iter == 0) {
                 continue;  // Try again with larger buffer
             } else {
-                p = limit - 1;
-                *p = '\0';
+                //p = limit - 1;
+                // *p = '\0';
+                base[bufsize - 1] = '\0';
             }
         }
         break;
     }
     return base;
+}
+
+std::string format(const char* fmt, va_list ap) {
+    char* buf = nullptr;
+    auto len = vasprintf(&buf, fmt, ap);
+    if (len == -1) {
+        return "";
+    }
+    std::string ret(buf, len);
+    free(buf);
+    return ret;
 }
 
 int64_t atoi(const char* begin, const char* end) {

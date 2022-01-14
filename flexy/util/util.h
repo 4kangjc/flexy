@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
+#include <boost/lexical_cast.hpp>
 
 namespace flexy {
 
@@ -22,10 +23,41 @@ uint64_t GetTimeMs();
 uint64_t GetSteadyUs();
 // 获得当前Steady时钟毫秒数
 uint64_t GetSteadyMs();
-// 时间秒数 装换为 时间
+// 时间秒数 装换为 时间字符串
 std::string TimeToStr(time_t ts = time(0), const std::string& fmt = "%Y-%m-%d %H:%M:%S");
+// 时间字符串 转换为 时间秒数
+time_t StrToTime(const char* str, const char* fmt = "%Y-%m-%d %H:%M%S");
+// 从 map m 中获得 key 为 k 的 value(type to V) 
+template<class V, class Map, class K>
+V GetParamValue(const Map& m, const K& k, const V& def = V()) {
+    auto it = m.find(k);
+    if(it == m.end()) {
+        return def;
+    }
+    try {
+        return boost::lexical_cast<V>(it->second);
+    } catch (...) {
+    }
+    return def;
+}
+
+template<class V, class Map, class K>
+bool CheckGetParamValue(const Map& m, const K& k, V& v) {
+    auto it = m.find(k);
+    if(it == m.end()) {
+        return false;
+    }
+    try {
+        v = boost::lexical_cast<V>(it->second);
+        return true;
+    } catch (...) {
+    }
+    return false;
+}
+
 // c语言格式化字符串 -> std::string
 std::string format(const char* fmt, ...);
+std::string format(const char* fmt, va_list ap);
 // 查找元素 [begin, end) 找不到返回end, find_first -> 是否从前往后找
 template <typename Iter, typename T>
 Iter find(Iter&& begin, Iter&& end, T&& val, bool find_first = true) {
