@@ -107,7 +107,7 @@ static MYSQL* mysql_init(std::map<std::string, std::string>& params, int timeout
 
 //    FLEXY_LOG_INFO(g_logger) << "mysql_real_connect(" << host
 //    << ", " << user << ", " << passwd << ", " << dbname << ", "
-//    << port << ") error: " << mysql_error(mysql);
+//    << port;
 
     if (mysql_real_connect(mysql, host.c_str(), user.c_str(), passwd.c_str(),
             dbname.c_str(), port, nullptr, 0) == nullptr) {
@@ -136,7 +136,7 @@ bool MySQL::connect() {
         return false;
     }
     hasError_ = false;
-    poolSize_ = GetParamValue(params_, "poll", 5);
+    poolSize_ = GetParamValue(params_, "pool", 5);
     mysql_.reset(m, mysql_close);
     return true;
 }
@@ -329,7 +329,11 @@ ISQLData::ptr MySQL::query(const std::string &sql) {
 //    auto st = mysql_stmt_init(db)
 //}
 
-MySQLRes::MySQLRes(MYSQL_RES *res, int eno, const char *estr) {
+MySQLRes::MySQLRes(MYSQL_RES *res, int eno, const char *estr)
+    : errno_(eno), errstr_(estr), cur_(nullptr), curLength_(nullptr) {
+    if (res) {
+        data_.reset(res, mysql_free_result);
+    }
 
 }
 

@@ -60,7 +60,7 @@ private:
     std::string errstr_;
     MYSQL_ROW cur_;
     unsigned long* curLength_;
-    std::unique_ptr<MYSQL_RES> data_;
+    std::shared_ptr<MYSQL_RES> data_;
 };
 
 class MySQLStmtRes : public ISQLData {
