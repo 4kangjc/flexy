@@ -50,9 +50,12 @@ struct LexicalCastJson<std::string, Person> {
         Json::Value node;
         r.parse(v, node);
         Person p;
-        p.name = node["name"].as<std::string>();
-        p.age = node["age"].as<int>();
-        p.sex = node["sex"].as<bool>();
+        // p.name = node["name"].as<std::string>();
+        // p.age = node["age"].as<int>();
+        // p.sex = node["sex"].as<bool>();
+        p.name = node["name"].asString();
+        p.age = node["age"].asInt();
+        p.sex = node["sex"].asBool();
         return p;
     }
 };
