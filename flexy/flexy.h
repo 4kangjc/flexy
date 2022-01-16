@@ -7,3 +7,4 @@
 #include "stream.h"
 #include "thread.h"
 #include "util.h"
+#include "db.h"

@@ -14,7 +14,9 @@
 **Ubuntu**    : `sudo apt install libboost-all-dev`  
 **Centos**    :  `sudo yum install boost-devel`
 2. yaml-cpp  
-**ArchLinux** : `sudo pacman -S yaml-cpp`
+**ArchLinux** : `sudo pacman -S yaml-cpp`    
+**Ubuntu**    : `sudo apt install libyaml-cpp-dev`  
+**Centos**    : `sudo yum install yaml-cpp-devel`  
 ```
 git clone https://github.com/jbeder/yaml-cpp.git
 cd yaml-cpp
@@ -23,9 +25,13 @@ cmake -DBUILD_SHARED_LIBS=ON .. //动态库, 默认为静态库(cmake ..)
 make && make install
 ```
 3. jsoncpp  
-**ArchLinux** : `sudo pacman -S jsoncpp`
+**ArchLinux** : `sudo pacman -S jsoncpp`  
+**Ubuntu**   : `sudo apt install libjsoncpp-dev`  
+**Centos**   : `sudo yum install jsoncpp-devel`  
 4. fmt  
-**ArchLinux** : `sudo pacman -S fmt`
+**ArchLinux** : `sudo pacman -S fmt`  
+**Ubuntu**    : `sudo apt install libfmt-dev`  
+**Centos**    : `sudo yum install fmt-devel`
 ```
 git clone  https://github.com/fmtlib/fmt.git
 cd fmt

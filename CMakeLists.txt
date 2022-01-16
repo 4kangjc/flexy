@@ -3,7 +3,7 @@ project(flexy)
 
 include (cmake/utils.cmake)
 
-set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O3 -ggdb -std=c++17 -Wall -Wno-deprecated -Werror -Wno-unused-function -Wno-builtin-macro-redefined -Wno-deprecated-declarations")
+set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O0 -ggdb -std=c++17 -Wall -Wno-deprecated -Werror -Wno-unused-function -Wno-builtin-macro-redefined -Wno-deprecated-declarations")
 
 include_directories(./)
 
@@ -99,6 +99,7 @@ flexy_add_executable(test_application "tests/test_application.cc" "${LIBS}")
 
 flexy_add_executable(test_async_io "tests/test_async_io.cc" "${LIBS}")
 flexy_add_executable(test_mysql "tests/test_mysql.cc" "${LIBS}")
+flexy_add_executable(test_sqlite3 "tests/test_sqlite3.cc" "${LIBS}")
 
 
 flexy_add_executable(echo_server "examples/echo_server.cc" "${LIBS}")
