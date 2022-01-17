@@ -3,6 +3,8 @@
 #include <sqlite3.h>
 #include <memory>
 #include <map>
+#include <unordered_map>
+#include <deque>
 #include "db.h"
 #include "flexy/thread/mutex.h"
 #include "flexy/util/singleton.h"
@@ -52,7 +54,7 @@ private:
 
 private:
     sqlite3* db_;
-    uint64_t lastUsedTime = 0;
+    uint64_t lastUsedTime_ = 0;
 };
 
 class SQLite3Stmt;
@@ -196,19 +198,26 @@ public:
 
     SQLite3::ptr get(const std::string& name);
     void registerSQLite3(const std::string& name, const std::map<std::string, std::string>& params);
+    void registerSQLite3(const std::string& name, std::map<std::string, std::string>&& params);
 
-    void checkConnection(int sec = 30);
+    void checkConnection(uint64_t sec = 30);
 
     uint32_t getMaxConn() const { return maxConn_; }
     void setMaxConn(uint32_t v) { maxConn_ = v; }
 
     int execute(const std::string& name, const char* fmt, ...);
     int execute(const std::string& name, const char* fmt, va_list ap);
-    int execute(const std::string& name, std::string& sql);
+    int execute(const std::string& name, const std::string& sql);
 
     ISQLData::ptr query(const std::string& name, const char* fmt, ...);
     ISQLData::ptr query(const std::string& name, const char* fmt, va_list ap);
     ISQLData::ptr query(const std::string& name, const std::string& sql);
+
+    template <class... Args>
+    int execStmt(const std::string& name, const char* stmt, Args&&... args);
+
+    template <class... Args>
+    ISQLData::ptr queryStmt(const std::string& name, const char* stmt, Args&&... args);
 
     SQLite3Transaction::ptr openTransaction(const std::string& name, bool auto_commit);
 
@@ -218,8 +227,9 @@ private:
 private:
     uint32_t maxConn_;
     mutex mutex_;
-//    std::map<std::string,
+    std::map<std::string, std::deque<SQLite3*>> conns_;
     std::map<std::string, std::map<std::string, std::string>> dbDefines_;
+    std::unordered_map<std::string, int> counts_;       // conns_删除的个数 采用延迟删除
 };
 
 using SQLite3Mgr = Singleton<SQLite3Manager>;
@@ -250,6 +260,24 @@ ISQLData::ptr SQLite3::queryStmt(const char *stmt, Args &&...args) {
         return nullptr;
     }
     return st->query();
+}
+
+template <class... Args>
+int SQLite3Manager::execStmt(const std::string& name, const char* stmt, Args&&... args) {
+    auto conn = get(name);
+    if (!conn) {
+        return -1;
+    }
+    return conn->execStmt(stmt, std::forward<Args>(args)...);
+}
+
+template <class... Args>
+ISQLData::ptr SQLite3Manager::queryStmt(const std::string& name, const char* stmt, Args&&... args) {
+    auto conn = get(name);
+    if (!conn) {
+        return nullptr;
+    } 
+    return conn->queryStmt(stmt, std::forward<Args>(args)...);
 }
 
 }
