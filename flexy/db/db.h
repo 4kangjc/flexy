@@ -33,6 +33,7 @@ public:
     virtual std::string getString(int idx) = 0;
     virtual std::string getBlob(int idx) = 0;
     virtual time_t getTime(int idx) = 0;
+    virtual std::string getTimeStr(int idx) = 0;
     virtual bool next() = 0;
 };
 
@@ -98,6 +99,11 @@ public:
     virtual int getErrno() = 0;
     virtual std::string getErrStr() = 0;
     virtual ITransaction::ptr openTransaction(bool auto_commit = false) = 0;
+};
+
+struct Blob {
+    const void* value;
+    int len;
 };
 
 }

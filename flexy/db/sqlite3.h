@@ -87,6 +87,7 @@ public:
     std::string getString(int idx) override;
     std::string getBlob(int idx) override;
     time_t getTime(int idx) override;
+    std::string getTimeStr(int idx) override;
     bool next() override;
 
 private:
@@ -118,6 +119,7 @@ public:
     int bind(int idx, uint64_t value);
     int bind(int idx, const char* value, Type type = COPY);
     int bind(int idx, const void* value, int len, Type type = COPY);
+    int bind(int idx, Blob blob, Type type = COPY) { return bind(idx, blob.value, blob.len, type); }
     int bind(int idx, const std::string& value, Type type = COPY);
     int bind(int idx);
 

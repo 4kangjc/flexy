@@ -26,7 +26,7 @@ uint64_t GetSteadyMs();
 // 时间秒数 装换为 时间字符串
 std::string TimeToStr(time_t ts = time(0), const std::string& fmt = "%Y-%m-%d %H:%M:%S");
 // 时间字符串 转换为 时间秒数
-time_t StrToTime(const char* str, const char* fmt = "%Y-%m-%d %H:%M%S");
+time_t StrToTime(const char* str, const char* fmt = "%Y-%m-%d %H:%M:%S");
 // 从 map m 中获得 key 为 k 的 value(type to V) 
 template<class V, class Map, class K>
 V GetParamValue(const Map& m, const K& k, const V& def = V()) {

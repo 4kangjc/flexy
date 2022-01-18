@@ -165,6 +165,10 @@ time_t SQLite3Data::getTime(int idx) {
     return StrToTime(str.c_str());
 }
 
+std::string SQLite3Data::getTimeStr(int idx) {
+    return getString(idx);
+}
+
 bool SQLite3Data::next() {
     int rt = stmt_->step();
     if (first_) {
