@@ -193,4 +193,26 @@ void Scheduler::idle() {
     }
 }
 
+SchedulerSwitcher::SchedulerSwitcher(Scheduler* target) {
+    caller_ = Scheduler::GetThis();
+    if (target) {
+        SwitchTo(target);
+    }
+}
+
+SchedulerSwitcher::~SchedulerSwitcher() {
+    if (caller_) {
+        SwitchTo(caller_);
+    }
+}
+
+void SchedulerSwitcher::SwitchTo(Scheduler* target) {
+    FLEXY_ASSERT(Scheduler::GetThis() != nullptr);
+    if (Scheduler::GetThis() == target) {
+        return;
+    }
+    target->async(Fiber::GetThis());
+    Fiber::Yield();
+}
+
 } // namespace flexy

@@ -132,6 +132,16 @@ protected:
     __task tickle_;                                                            // 通知调度器有任务了
 };
 
+// 生命周期开始： 将当前协程切换到 target 协程调度器中执行 生命周期结束： 切换回最初的协程调度器中执行
+class SchedulerSwitcher : public noncopyable {
+public:
+    SchedulerSwitcher(Scheduler* target);
+    ~SchedulerSwitcher();
+private:
+    static void SwitchTo(Scheduler* target);
+private:
+    Scheduler* caller_;
+};
 
 } // namespace flexy
 
