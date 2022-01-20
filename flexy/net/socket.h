@@ -59,6 +59,7 @@ public:
 
     bool bind(const Address::ptr& addr);
     bool connect(const Address::ptr& addr, uint64_t timeout_ms = -1);
+    bool reconnect(uint64_t timeout_ms = -1);
     bool listen(int backlog = SOMAXCONN);
     bool close();
 

@@ -140,6 +140,15 @@ bool Socket::bind(const Address::ptr& addr) {
     return true;
 }
 
+bool Socket::reconnect(uint64_t timeout_ms) {
+    if (!remoteAddress_) {
+        FLEXY_LOG_ERROR(g_logger) << "reconnect remoteAddress is null";
+        return false;
+    }
+    localAddress_ = nullptr;
+    return connect(remoteAddress_, timeout_ms);
+}
+
 bool Socket::connect(const Address::ptr& addr, uint64_t timeout_ms) {
     if (sock_ == -1) {
         newSock();
