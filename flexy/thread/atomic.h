@@ -67,14 +67,14 @@ public:
         return __sync_fetch_and_nand(&t, (T)v);
     }
     // 比较 t 和 old_val的值，如果两者相等，则将new_val更新到 t 并返回操作之前的 t
-    template<class T, class S>
-    static T compareAndSwap(volatile T& t, S&& old_val, S&& new_val) {
+    template<class T, class S, class Q>
+    static T compareAndSwap(volatile T& t, S&& old_val, Q&& new_val) {
         return __sync_val_compare_and_swap(&t, (T)old_val, (T)new_val);
     }
     // 比较 t 和 old_val的值，如果两者相等，则将new_val更新到 t 并返回true
-    template <typename T, class S>
-    static bool compareAndSwapBool(volatile T& t, S&& old_val, S&& new_val) {
-        return __sync__bool_compare_and_swap(&t, (T)old_val, (T)new_val);
+    template <typename T, class S, class Q>
+    static bool compareAndSwapBool(volatile T& t, S&& old_val, Q&& new_val) {
+        return __sync_bool_compare_and_swap(&t, (T)old_val, (T)new_val);
     }
 };
 

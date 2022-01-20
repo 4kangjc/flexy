@@ -38,6 +38,7 @@ set(LIB_SRC
     flexy/schedule/async_io.cpp
     flexy/db/mysql.cpp
     flexy/db/sqlite3.cpp
+    flexy/stream/async_socket_stream.cpp
 )
 
 ragelmaker(flexy/http/http11_parser.rl LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/flexy/http)
