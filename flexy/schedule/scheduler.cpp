@@ -193,6 +193,20 @@ void Scheduler::idle() {
     }
 }
 
+std::ostream& Scheduler::dump(std::ostream& os) {
+    os << "[Scheduler name = " << name_ << " size = " << threadCount_
+    << " active_count = " << activeThreadCount_ << " idle_count = "
+    << idleThreadCount_ << " stopping = " << stopping_ << " ]" << std::endl
+    << "    ";
+    for (size_t i = 0; i < threadIds_.size(); ++i) {
+        if (i) {
+            os << ", ";
+        }
+        os << threadIds_[i];
+    }
+    return os;
+}
+
 SchedulerSwitcher::SchedulerSwitcher(Scheduler* target) {
     caller_ = Scheduler::GetThis();
     if (target) {

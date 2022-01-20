@@ -82,6 +82,8 @@ public:
 
     template <typename... Args>
     void onTickle(Args&&... args) { tickle_ = __task(std::forward<Args>(args)...); }
+
+    std::ostream& dump(std::ostream& os);
 private:
     // 可执行对象
     struct Task {
