@@ -23,9 +23,13 @@ public:
 
     template <class... FnAndArgs>
     void schedule(FnAndArgs&&... args) {
+        static_assert(sizeof...(args) > 0);
         sem_.wait();
-        scheduler_->async(&WorkerGroup::doWork, shared_from_this(), 
-                            std::forward<FnAndArgs>(args)...);
+        scheduler_->async([self = shared_from_this()](auto&&... args) {
+            // std::invoke(std::forward<decltype(args)>(args)...);      // functor 失败
+            __task(std::forward<decltype(args)>(args)...)();
+            self->sem_.post();
+        }, std::forward<FnAndArgs>(args)...);
     }
     
     void waitAll() {
@@ -37,8 +41,8 @@ public:
         }
     }
 private:
-    template <class Fn, class Args>
-    void doWork(Fn&& fn, Args&& args) {
+    template <class Fn, class... Args>
+    void doWork(Fn&& fn, Args&&... args) {
         fn(std::forward<Args>(args)...);
         sem_.post();
     }

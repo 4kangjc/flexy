@@ -102,6 +102,8 @@ flexy_add_executable(test_async_io "tests/test_async_io.cc" "${LIBS}")
 flexy_add_executable(test_mysql "tests/test_mysql.cc" "${LIBS}")
 flexy_add_executable(test_sqlite3 "tests/test_sqlite3.cc" "${LIBS}")
 
+flexy_add_executable(test_worker "tests/test_worker.cc" "${LIBS}")
+
 
 flexy_add_executable(echo_server "examples/echo_server.cc" "${LIBS}")
 flexy_add_executable(chat_room "examples/chat_room.cc" "${LIBS}")

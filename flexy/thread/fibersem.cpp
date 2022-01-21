@@ -36,9 +36,10 @@ void FiberSemaphore::wait() {
 void FiberSemaphore::post() {
     LOCK_GUARD(mutex_);
     if (!waiters_.empty()) {
-        auto&& [scheduler, fiber] = std::move(waiters_.front());
-        waiters_.pop();
+        auto&& [scheduler, fiber] = std::move(waiters_.front());    // reference
+        // auto [scheduler, fiber] = std::move(waiters_.front());   // move construct
         scheduler->async(std::move(fiber));
+        waiters_.pop();
     } else {
         ++concurrency_;
     }

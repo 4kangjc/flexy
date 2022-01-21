@@ -32,6 +32,7 @@ public:
     // 将任务加入到协程调度器中运行
     template <typename... FiberOrcb>
     void async(FiberOrcb&&... fc) {
+        static_assert(sizeof...(fc) > 0);
         bool need_tickle = false;
         {
             LOCK_GUARD(mutex_);
@@ -45,7 +46,8 @@ public:
     // 将任务加入到协程调度器中优先运行
     template <typename... FiberOrcb>
     void async_first(FiberOrcb&&... fc) {
-                bool need_tickle = false;
+        static_assert(sizeof...(fc) > 0);
+        bool need_tickle = false;
         {
             LOCK_GUARD(mutex_);
             need_tickle = tasks_.empty();
