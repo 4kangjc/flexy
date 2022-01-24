@@ -128,7 +128,7 @@ bool FS::IsRunningPidfile(std::string_view pidfile) {
 
 bool FS::OpenForWrite(std::ofstream& ofs, std::string_view filename,
             std::ios_base::openmode mode) {
-    ofs.open(filename.data());
+    ofs.open(filename.data(), mode);
     if (!ofs.is_open()) {
         fs::path file(filename);
         fs::create_directories(file.parent_path());
