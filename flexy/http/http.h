@@ -168,11 +168,73 @@ struct CaseInsensitiveLess {
     }
 };
 
+// Http 响应报文
+class HttpResponse {
+public:
+    using ptr = std::unique_ptr<HttpResponse>;
+    using MapType = std::map<std::string, std::string, CaseInsensitiveLess>;
+    HttpResponse(uint8_t version = 0x11, bool close = true);
+    HttpStatus getStatus() const { return status_; }
+    uint8_t getVersion() const { return version_; }
+    auto& getBody() const { return body_; }
+    auto& getReason() const { return reason_; }
+    auto& getHeaders() const { return headers_; }
+
+    void setStatus(HttpStatus status) { status_ = status; }
+    void setVersion(uint8_t version) { version_ = version; }
+    void setBody(std::string_view body) { body_ = body; }
+    void setReason(std::string_view reason) { reason_ = reason; }
+    void setHeaders(const MapType& v) { headers_ = v; }
+
+    bool isClose() const { return close_; }
+    void setClose(bool v) { close_ = v; }
+
+    void setWebsocket(bool v) { websocket_ = v; }
+    bool isWebsocket() { return websocket_; } 
+
+    std::string getHeader(const std::string& key, const std::string& def = "") const;
+    void setHeader(const std::string& key, const std::string& val);
+    void delHeader(const std::string& key);
+
+    template <typename T>
+    bool checkGetHeaderAs(const std::string& key, T& val, const T& def = T()) {
+        return checkGetAs(headers_, key, val, def);
+    }
+
+    template <typename T>
+    T getHeaderAs(const std::string& key, const T& def = T()) const {
+        return getAs(headers_, key, def);
+    }
+
+    std::ostream& dump(std::ostream& os) const;
+    std::string toString() const {
+        std::stringstream ss;
+        dump(ss);
+        return ss.str();
+    }
+private:
+    HttpStatus status_;                     // 响应状态码
+    uint8_t version_;                       // 版本
+    bool close_;                            // 是否自动关闭
+    bool websocket_;                        // 是否为websocket
+
+    std::string body_;                      // 响应消息体
+    std::string reason_;                    // 响应原因
+    MapType headers_;                       // 响应头部报文
+};
+
+// Htpp请求报文
 class HttpRequest {
 public:
     using ptr = std::unique_ptr<HttpRequest>;
     using MapType = std::map<std::string, std::string, CaseInsensitiveLess>;
+
     HttpRequest(uint8_t version = 0x11, bool close = true);
+
+    std::unique_ptr<HttpResponse> createResponse() { 
+        return std::make_unique<HttpResponse>(version_, close_); 
+    }
+
     HttpMethod getMehod() const { return method_; }
     uint8_t getVesion() const { return version_; }
     auto& getPath() const { return path_; }
@@ -193,6 +255,9 @@ public:
 
     bool isClose() const { return close_; }
     void setClose(bool v) { close_ = v; } 
+
+    void setWebsocket(bool v) { websocket_ = v; }
+    bool isWebsocket() { return websocket_; } 
 
     void setHeaders(const MapType& v) { headers_ = v; }
     void setParams(const MapType& v) { params_ = v; }
@@ -268,56 +333,6 @@ private:
     MapType headers_;                       // 请求头部 Map
     MapType params_;                        // 请求参数 Map
     MapType cookies_;                       // 请求 Cookie Map
-};
-
-class HttpResponse {
-public:
-    using ptr = std::unique_ptr<HttpResponse>;
-    using MapType = std::map<std::string, std::string, CaseInsensitiveLess>;
-    HttpResponse(uint8_t version = 0x11, bool close = true);
-    HttpStatus getStatus() const { return status_; }
-    uint8_t getVersion() const { return version_; }
-    auto& getBody() const { return body_; }
-    auto& getReason() const { return reason_; }
-    auto& getHeaders() const { return headers_; }
-
-    void setStatus(HttpStatus status) { status_ = status; }
-    void setVersion(uint8_t version) { version_ = version; }
-    void setBody(std::string_view body) { body_ = body; }
-    void setReason(std::string_view reason) { reason_ = reason; }
-    void setHeaders(const MapType& v) { headers_ = v; }
-
-    bool isClose() const { return close_; }
-    void setClose(bool v) { close_ = v; }
-
-    std::string getHeader(const std::string& key, const std::string& def = "") const;
-    void setHeader(const std::string& key, const std::string& val);
-    void delHeader(const std::string& key);
-
-    template <typename T>
-    bool checkGetHeaderAs(const std::string& key, T& val, const T& def = T()) {
-        return checkGetAs(headers_, key, val, def);
-    }
-
-    template <typename T>
-    T getHeaderAs(const std::string& key, const T& def = T()) const {
-        return getAs(headers_, key, def);
-    }
-
-    std::ostream& dump(std::ostream& os) const;
-    std::string toString() const {
-        std::stringstream ss;
-        dump(ss);
-        return ss.str();
-    }
-private:
-    HttpStatus status_;
-    uint8_t version_;
-    bool close_;
-
-    std::string body_;
-    std::string reason_;
-    MapType headers_;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const HttpRequest& req) {
