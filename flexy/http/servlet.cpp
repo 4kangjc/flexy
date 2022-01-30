@@ -23,7 +23,7 @@ ServletDispatch::ServletDispatch()
 
 int32_t ServletDispatch::handle(const HttpRequest::ptr& request, 
                                 const HttpResponse::ptr& response, const HttpSession& session) {
-    auto&& slt = getMatchedServerlet(request->getPath());
+    auto&& slt = getMatchedServlet(request->getPath());
     if (slt) {
         slt->handle(request, response, session);
     }
@@ -63,7 +63,7 @@ void ServletDispatch::addGlobServlet(const std::string& uri, FuncionServlet::cal
     globs_.emplace_back(uri, std::make_shared<FuncionServlet>(cb));
 }
 
-void ServletDispatch::delServletconst(const std::string& uri) {
+void ServletDispatch::delServlet(const std::string& uri) {
     WRITELOCK(mutex_);
     datas_.erase(uri);
 }
@@ -95,7 +95,7 @@ Servlet::ptr ServletDispatch::getGlobServlet(const std::string& uri) const {
     return nullptr;
 }
 
-Servlet::ptr ServletDispatch::getMatchedServerlet(const std::string& uri) const {
+Servlet::ptr ServletDispatch::getMatchedServlet(const std::string& uri) const {
     READLOCK(mutex_);
     auto it = datas_.find(uri);
     if (it != datas_.end()) {

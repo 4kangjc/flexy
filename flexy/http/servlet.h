@@ -13,7 +13,7 @@ public:
     virtual ~Servlet() {}
     virtual int32_t handle(const HttpRequest::ptr& request, const HttpResponse::ptr& response, const HttpSession& sesion) = 0;
     auto& getName() const { return name_; }
-private:
+protected:
     std::string name_;
 };
 
@@ -38,7 +38,7 @@ public:
     void addGlobServlet(const std::string& uri, const Servlet::ptr& slt);
     void addGlobServlet(const std::string& uri, FuncionServlet::callback&& slt);
 
-    void delServletconst(const std::string& uri);
+    void delServlet(const std::string& uri);
     void delGlobServlet(const std::string& uri);
 
     auto& getDefault() const { return default_; }
@@ -46,7 +46,7 @@ public:
 
     Servlet::ptr getServlet(const std::string& uri) const;
     Servlet::ptr getGlobServlet(const std::string& uri) const;
-    Servlet::ptr getMatchedServerlet(const std::string& uri) const;
+    Servlet::ptr getMatchedServlet(const std::string& uri) const;
     
 private:
     mutable rw_mutex mutex_;

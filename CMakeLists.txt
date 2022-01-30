@@ -41,6 +41,7 @@ set(LIB_SRC
     flexy/stream/async_socket_stream.cpp
     flexy/util/hash_util.cpp
     flexy/http/ws_session.cpp
+    flexy/http/ws_servlet.cpp
 )
 
 ragelmaker(flexy/http/http11_parser.rl LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/flexy/http)
