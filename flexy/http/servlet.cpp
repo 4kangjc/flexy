@@ -12,7 +12,7 @@ FuncionServlet::FuncionServlet(const callback& cb)
 }
 
 int32_t FuncionServlet::handle(const HttpRequest::ptr& request, 
-                               const HttpResponse::ptr& response, const HttpSession& session) {
+                               const HttpResponse::ptr& response, const HttpSession::ptr& session) {
     return cb_(request, response, session);
 }
 
@@ -22,7 +22,7 @@ ServletDispatch::ServletDispatch()
 }
 
 int32_t ServletDispatch::handle(const HttpRequest::ptr& request, 
-                                const HttpResponse::ptr& response, const HttpSession& session) {
+                                const HttpResponse::ptr& response, const HttpSession::ptr& session) {
     auto&& slt = getMatchedServlet(request->getPath());
     if (slt) {
         slt->handle(request, response, session);
@@ -114,7 +114,7 @@ NotFoundServlet::NotFoundServlet() : Servlet("NotFoundServlet") {
 }
 
 int32_t NotFoundServlet::handle(const HttpRequest::ptr& request, 
-                                const HttpResponse::ptr& response, const HttpSession& session) {
+                                const HttpResponse::ptr& response, const HttpSession::ptr& session) {
     static const std::string BODY1 = "<html><head>\n"
                                      "<title>404 Not Found</title>\n"
                                      "</head><body>\n"

@@ -2,14 +2,14 @@
 
 namespace flexy::http {
 
-int32_t FunctionWSServlet::onConnect(const HttpRequest::ptr& header, const WSSession& session) {
+int32_t FunctionWSServlet::onConnect(const HttpRequest::ptr& header, const WSSession::ptr& session) {
     if (onConnect_) {
         return onConnect_(header, session);
     }
     return 0;
 }
 
-int32_t FunctionWSServlet::onClose(const HttpRequest::ptr& header, const WSSession& session) {
+int32_t FunctionWSServlet::onClose(const HttpRequest::ptr& header, const WSSession::ptr& session) {
     if (onClose_) {
         return onClose_(header, session);
     }
@@ -17,7 +17,7 @@ int32_t FunctionWSServlet::onClose(const HttpRequest::ptr& header, const WSSessi
 }
 
 int32_t FunctionWSServlet::handle(const HttpRequest::ptr& header, const WSFrameMessage::ptr& msg,
-               const WSSession& session) {
+               const WSSession::ptr& session) {
     if (callback_) {
         return callback_(header, msg, session);
     }

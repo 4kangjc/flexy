@@ -46,6 +46,7 @@ protected:
     IOManager* acceptWorker_;
     uint64_t recvTimeout_;
     std::string name_;
+    std::string type_;
     std::atomic<bool> isStop_;
     [[deprecated]] TcpCallBack handleClient_;
 

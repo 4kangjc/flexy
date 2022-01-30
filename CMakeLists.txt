@@ -42,6 +42,7 @@ set(LIB_SRC
     flexy/util/hash_util.cpp
     flexy/http/ws_session.cpp
     flexy/http/ws_servlet.cpp
+    flexy/http/ws_server.cpp
 )
 
 ragelmaker(flexy/http/http11_parser.rl LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/flexy/http)
@@ -109,6 +110,7 @@ flexy_add_executable(test_sqlite3 "tests/test_sqlite3.cc" "${LIBS}")
 flexy_add_executable(test_worker "tests/test_worker.cc" "${LIBS}")
 
 flexy_add_executable(test_hash_util "tests/test_hash_util.cc" "${LIBS}")
+flexy_add_executable(test_ws_server "tests/test_ws_server.cc" "${LIBS}")
 
 
 flexy_add_executable(echo_server "examples/echo_server.cc" "${LIBS}")

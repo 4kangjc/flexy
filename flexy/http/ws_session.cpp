@@ -66,7 +66,7 @@ HttpRequest::ptr WSSession::handleShake() {
 std::string WSFrameHead::toString() const {
     std::stringstream ss;
     ss << "[WSFrameHead fin = " << fin << " rsv1 = "
-    << rsv1 << " rsv2 = " << rsv2 << " rsv3" << rsv3
+    << rsv1 << " rsv2 = " << rsv2 << " rsv3 = " << rsv3
     << " opcode = " << opcode << " mask = " << mask
     << " payload = " << payload << "]";
     return ss.str();

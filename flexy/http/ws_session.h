@@ -57,7 +57,7 @@ private:
 
 class WSSession : public HttpSession {
 public:
-    using ptr = std::shared_ptr<WSSession>;
+    using ptr = std::unique_ptr<WSSession>;
     WSSession(const Socket::ptr& sock, bool owner = true);
     
     HttpRequest::ptr handleShake();

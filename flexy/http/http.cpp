@@ -130,18 +130,23 @@ std::ostream& HttpRequest::dump(std::ostream& os) const {
        << " HTTP/" << (uint32_t)(version_ >> 4) << "."
        << (uint32_t)(version_ & 0x0f) << "\r\n";
 
-    os << "connection: " << (close_ ? "close" : "keep-alive")
-       << "\r\n";
-    
-    for (auto& [x, y] : headers_) {
-        if (strncasecmp(x.c_str(), "connection", 10) == 0) {
-            continue;
+    if (!websocket_) {
+        os << "Connection: " << (close_ ? "close" : "keep-alive")
+        << "\r\n";
+        for (auto& [x, y] : headers_) {
+            if (strncasecmp(x.c_str(), "connection", 10) == 0) {
+                continue;
+            }
+            os << x << ": " << y << "\r\n";
         }
-        os << x << ": " << y << "\r\n";
+    } else {
+        for (auto& [x, y] : headers_) {
+            os << x << ": " << y << "\r\n";
+        }
     }
 
     if (!body_.empty()) {
-        os << "content-length " << body_.size() << "\r\n\r\n"
+        os << "Content-length " << body_.size() << "\r\n\r\n"
            << body_;
     } else {
         os << "\r\n";
@@ -188,15 +193,20 @@ std::ostream& HttpResponse::dump(std::ostream &os) const {
        << (reason_.empty() ? HttpStatusToString(status_) : reason_)
        << "\r\n";
 
-    for (auto& [x, y] : headers_) {
-        if (strncasecmp(x.c_str(), "connection", 10) == 0) {
-            continue;
+    if (!websocket_) {
+        for (auto& [x, y] : headers_) {
+            if (strncasecmp(x.c_str(), "connection", 10) == 0) {
+                continue;
+            }
+            os << x << ": " << y << "\r\n";
         }
-        os << x << ": " << y << "\r\n";
+        os << "connection: " << (close_ ? "close" : "keep-alive")
+        << "\r\n";
+    } else {
+        for (auto& [x, y] : headers_) {
+            os << x << ": " << y << "\r\n";
+        }
     }
-
-    os << "connection: " << (close_ ? "close" : "keep-alive")
-       << "\r\n";
 
     if (!body_.empty()) {
         os << "content-length: " << body_.size() << "\r\n\r\n"

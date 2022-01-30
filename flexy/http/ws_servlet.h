@@ -12,20 +12,20 @@ public:
     WSServlet(const std::string& name) : Servlet(name) {}
     virtual ~WSServlet() {}
     virtual int32_t handle(const HttpRequest::ptr& request, const HttpResponse::ptr& response, 
-                           const HttpSession& session) override { return 0; }
-    virtual int32_t onConnect(const HttpRequest::ptr& header, const WSSession& session) = 0;
-    virtual int32_t onClose(const HttpRequest::ptr& header, const WSSession& session) = 0;
+                           const HttpSession::ptr& session) override { return 0; }
+    virtual int32_t onConnect(const HttpRequest::ptr& header, const WSSession::ptr& session) = 0;
+    virtual int32_t onClose(const HttpRequest::ptr& header, const WSSession::ptr& session) = 0;
     virtual int32_t handle(const HttpRequest::ptr& header, const WSFrameMessage::ptr& msg,
-                           const WSSession& session) = 0;
+                           const WSSession::ptr& session) = 0;
 };
 
 class FunctionWSServlet : public WSServlet {
 public:
     using ptr = std::shared_ptr<FunctionWSServlet>;
-    using on_connect_cb = std::function<int32_t(const HttpRequest::ptr&, const WSSession&)>;
-    using on_close_cb   = std::function<int32_t(const HttpRequest::ptr&, const WSSession&)>;
+    using on_connect_cb = std::function<int32_t(const HttpRequest::ptr&, const WSSession::ptr&)>;
+    using on_close_cb   = std::function<int32_t(const HttpRequest::ptr&, const WSSession::ptr&)>;
     using callback      = std::function<int32_t(const HttpRequest::ptr&, const WSFrameMessage::ptr&,
-                                                const WSSession&)>;
+                                                const WSSession::ptr&)>;
 
     template <typename T>
     using enable_connect_close_cb = std::enable_if_t<std::is_convertible_v<T, on_connect_cb>>;
@@ -36,18 +36,18 @@ public:
     // FunctionWSServlet(callback&& cb, on_connect_cb&& connect_cb = nullptr, on_close_cb&& close_cb = nullptr);
 
     template <class Callback, class Connect = on_connect_cb, class Close = on_close_cb,
-                typename = enable_callback<callback>,
-                typename = enable_connect_close_cb<on_close_cb>,
-                typename = enable_connect_close_cb<on_connect_cb>>
+                typename = enable_callback<Callback>,
+                typename = enable_connect_close_cb<Connect>,
+                typename = enable_connect_close_cb<Close>>
     FunctionWSServlet(Callback&& cb, Connect&& connect_cb = nullptr, Close&& close_cb = nullptr)
                     : WSServlet("FunctionWSServlet"), callback_(std::forward<Callback>(cb)), 
                       onConnect_(std::forward<Connect>(connect_cb)),
                       onClose_(std::forward<Close>(close_cb)) { }
 
-    virtual int32_t onConnect(const HttpRequest::ptr& header, const WSSession& session) override;
-    virtual int32_t onClose(const HttpRequest::ptr& header, const WSSession& session) override;
+    virtual int32_t onConnect(const HttpRequest::ptr& header, const WSSession::ptr& session) override;
+    virtual int32_t onClose(const HttpRequest::ptr& header, const WSSession::ptr& session) override;
     virtual int32_t handle(const HttpRequest::ptr& header, const WSFrameMessage::ptr& msg,
-                           const WSSession& session) override;
+                           const WSSession::ptr& session) override;
 private:
     callback callback_;
     on_connect_cb onConnect_;
@@ -55,21 +55,27 @@ private:
 };
 
 class WSServletDispatch : public ServletDispatch {
-    WSServletDispatch();
+public:
+    using ptr = std::shared_ptr<WSServletDispatch>;
+    WSServletDispatch() { name_ = "WSServletDispatch"; }
     template <class Callback, class Connect = FunctionWSServlet::on_connect_cb, class Close = FunctionWSServlet::on_close_cb,
-            typename = FunctionWSServlet::enable_callback<FunctionWSServlet::callback>,
-            typename = FunctionWSServlet::enable_connect_close_cb<FunctionWSServlet::on_close_cb>,
-            typename = FunctionWSServlet::enable_connect_close_cb<FunctionWSServlet::on_connect_cb>>
+            typename = FunctionWSServlet::enable_callback<Callback>,
+            typename = FunctionWSServlet::enable_connect_close_cb<Connect>,
+            typename = FunctionWSServlet::enable_connect_close_cb<Close>>
     void addServlet(const std::string& uri, Callback&& cb, Connect&& connect_cb = nullptr, Close&& close_cb = nullptr) {
-        ServletDispatch::addServlet(uri, std::make_shared<FunctionWSServlet>(cb, connect_cb, close_cb));
+        ServletDispatch::addServlet(uri, std::make_shared<FunctionWSServlet>(
+                            std::forward<Callback>(cb), std::forward<Connect>(connect_cb), 
+                            std::forward<Close>(close_cb)));
     }
 
     template <class Callback, class Connect = FunctionWSServlet::on_connect_cb, class Close = FunctionWSServlet::on_close_cb,
-            typename = FunctionWSServlet::enable_callback<FunctionWSServlet::callback>,
-            typename = FunctionWSServlet::enable_connect_close_cb<FunctionWSServlet::on_close_cb>,
-            typename = FunctionWSServlet::enable_connect_close_cb<FunctionWSServlet::on_connect_cb>>
+            typename = FunctionWSServlet::enable_callback<Callback>,
+            typename = FunctionWSServlet::enable_connect_close_cb<Connect>,
+            typename = FunctionWSServlet::enable_connect_close_cb<Close>>
     void addGlobServlet(const std::string& uri, Callback&& cb, Connect&& connect_cb = nullptr, Close&& close_cb = nullptr) {
-        ServletDispatch::addGlobServlet(uri, std::make_shared<FunctionWSServlet>(cb, connect_cb, close_cb));
+        ServletDispatch::addGlobServlet(uri, std::make_shared<FunctionWSServlet>(
+                            std::forward<Callback>(cb), std::forward<Connect>(connect_cb), 
+                            std::forward<Close>(close_cb)));
     }
     
     WSServlet::ptr getWSServlet(const std::string& uri);

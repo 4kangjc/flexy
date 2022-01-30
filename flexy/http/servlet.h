@@ -11,7 +11,7 @@ public:
     using ptr = std::shared_ptr<Servlet>;
     Servlet(std::string_view name) : name_(name) {}
     virtual ~Servlet() {}
-    virtual int32_t handle(const HttpRequest::ptr& request, const HttpResponse::ptr& response, const HttpSession& sesion) = 0;
+    virtual int32_t handle(const HttpRequest::ptr& request, const HttpResponse::ptr& response, const HttpSession::ptr& sesion) = 0;
     auto& getName() const { return name_; }
 protected:
     std::string name_;
@@ -20,10 +20,10 @@ protected:
 class FuncionServlet : public Servlet {
 public:
     using callback = std::function<int32_t
-                    (const HttpRequest::ptr&, const HttpResponse::ptr&, const HttpSession&)>;
+                    (const HttpRequest::ptr&, const HttpResponse::ptr&, const HttpSession::ptr&)>;
     FuncionServlet(callback&& cb);
     FuncionServlet(const callback& cb);
-    int32_t handle(const HttpRequest::ptr& request, const HttpResponse::ptr& response, const HttpSession& session) override;
+    int32_t handle(const HttpRequest::ptr& request, const HttpResponse::ptr& response, const HttpSession::ptr& session) override;
 private:
     callback cb_;
 };
@@ -32,7 +32,7 @@ class ServletDispatch : public Servlet {
 public:
     using ptr = std::shared_ptr<ServletDispatch>;
     ServletDispatch();
-    int32_t handle(const HttpRequest::ptr& request, const HttpResponse::ptr& response, const HttpSession& session) override;
+    int32_t handle(const HttpRequest::ptr& request, const HttpResponse::ptr& response, const HttpSession::ptr& session) override;
     void addServlet(const std::string& uri, const Servlet::ptr& slt);
     void addServlet(const std::string& uri, FuncionServlet::callback&& cb);
     void addGlobServlet(const std::string& uri, const Servlet::ptr& slt);
@@ -58,6 +58,6 @@ private:
 class NotFoundServlet : public Servlet {
 public:
     NotFoundServlet();
-    int32_t handle(const HttpRequest::ptr& request, const HttpResponse::ptr& response, const HttpSession& session) override;
+    int32_t handle(const HttpRequest::ptr& request, const HttpResponse::ptr& response, const HttpSession::ptr& session) override;
 };
 } // namespace flexy http
