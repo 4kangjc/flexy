@@ -41,7 +41,7 @@ const char* HttpStatusToString(HttpStatus s) {
 
 HttpRequest::HttpRequest(uint8_t version, bool close) :
     method_(HttpMethod::GET), version_(version), close_(false),
-    parseParmFlag_(0), path_("/") {
+    websocket_(false), parseParmFlag_(0), path_("/") {
 
 }
 
@@ -101,7 +101,7 @@ bool HttpRequest::hasHeader(const std::string& key, std::string* val) {
     return true;
 }
 
-bool HttpRequest::hasParam (const std::string& key, std::string* val) {
+bool HttpRequest::hasParam(const std::string& key, std::string* val) {
     auto it = params_.find(key);
     if (it == params_.end()) {
         return false;
@@ -167,7 +167,8 @@ void HttpRequest::init() {
 }
 
 HttpResponse::HttpResponse(uint8_t version, bool close)
-: status_(HttpStatus::OK), version_(version), close_(close) {
+: status_(HttpStatus::OK), version_(version), close_(close),
+  websocket_(false) {
 
 }
 
