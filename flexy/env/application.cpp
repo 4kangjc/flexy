@@ -326,10 +326,18 @@ void Application::run_fiber() {
         // httpservers_.push_back(std::move(server));
     }
 
+    if (serverReady) {
+        serverReady();
+    }
+
     for (auto& [type, servers] : servers_) {
         for (auto& server : servers) {
             server->start();
         }
+    }
+
+    if (serverUp) {
+        serverUp();
     }
 }
 

@@ -7,6 +7,8 @@ namespace flexy {
 class Application {
 public:
     Application();
+
+    static Application* GetInstance() { return s_instance; }
     bool init(int argc, char** argv);
     bool run();
 
@@ -23,6 +25,9 @@ private:
     // std::vector<http::HttpServer::ptr> httpservers_;
     std::unordered_map<std::string, std::vector<TcpServer::ptr>> servers_;
     inline static Application* s_instance = nullptr;
+public:
+    std::function<void()> serverReady = nullptr;
+    std::function<void()> serverUp = nullptr;
 };
 
 template <class T>
