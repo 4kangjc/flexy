@@ -40,6 +40,7 @@ set(LIB_SRC
     flexy/db/sqlite3.cpp
     flexy/stream/async_socket_stream.cpp
     flexy/util/hash_util.cpp
+    flexy/schedule/worker.cpp
     flexy/http/ws_session.cpp
     flexy/http/ws_servlet.cpp
     flexy/http/ws_server.cpp

@@ -3,6 +3,7 @@
 #include "daemon.h"
 #include "flexy/util/config.h"
 #include "flexy/util/file.h"
+#include "flexy/schedule/worker.h"
 
 namespace flexy {
 
@@ -12,30 +13,40 @@ static auto g_server_work_path = Config::Lookup<std::string>("server.work_path",
 
 static auto g_server_pid_file = Config::Lookup<std::string>("server.pid_file", "flexy.pid", "server pid file");
 
-struct HttpServerConf {
+struct TcpServerConf {
     std::vector<std::string> address;
     int keepalive = 0;
     int timeout = 1000 * 2 * 60;
     std::string name;
+    std::string type = "http";
+    std::string accept_worker;
+    std::string io_worker;
+    std::string process_worker;
 
     bool isValid() const {
         return !address.empty();
     }
 
-    bool operator==(const HttpServerConf& other) const {
+    bool operator==(const TcpServerConf& other) const {
         return name == other.name && keepalive == other.keepalive
-         && timeout == other.timeout && address == other.address;
+         && timeout == other.timeout && address == other.address
+         && type == other.type && accept_worker == other.accept_worker
+         && io_worker == other.io_worker && process_worker == other.process_worker;
     }
 };
 
 template<>
-struct LexicalCastYaml<std::string, HttpServerConf> {
+struct LexicalCastYaml<std::string, TcpServerConf> {
     decltype(auto) operator() (const std::string& v) {
         YAML::Node node = YAML::Load(v);
-        HttpServerConf conf;
+        TcpServerConf conf;
         conf.name = node["name"].as<std::string>();
         conf.keepalive = node["keepalive"].as<int>();
         conf.timeout = node["timeout"].as<int>();
+        conf.type = node["type"].as<std::string>();
+        conf.accept_worker = node["accept_worker"].as<std::string>();
+        conf.io_worker = node["io_worker"].as<std::string>();
+        conf.process_worker = node["process_worker"].as<std::string>();
         if (node["address"].IsDefined()) {
             conf.address.reserve(node["address"].size());
             for (size_t i = 0; i < node["address"].size(); ++i) {
@@ -48,12 +59,16 @@ struct LexicalCastYaml<std::string, HttpServerConf> {
 };
 
 template<>
-struct LexicalCastYaml<HttpServerConf, std::string> {
-    decltype(auto) operator() (const HttpServerConf& v) {
+struct LexicalCastYaml<TcpServerConf, std::string> {
+    decltype(auto) operator() (const TcpServerConf& v) {
         YAML::Node node;
         node["name"] = v.name;
         node["keepalive"] = v.keepalive;
         node["timeout"] = v.timeout;
+        node["type"] = v.type;
+        node["accept_worker"] = v.accept_worker;
+        node["io_worker"] = v.io_worker;
+        node["process_worker"] = v.process_worker;
         for (const auto& s : v.address) {
             node["address"].push_back(s);
         }
@@ -64,15 +79,19 @@ struct LexicalCastYaml<HttpServerConf, std::string> {
 };
 
 template<>
-struct LexicalCastJson<std::string, HttpServerConf> {
+struct LexicalCastJson<std::string, TcpServerConf> {
     decltype(auto) operator() (const std::string& v) {
         Json::Reader r;
         Json::Value node;
         r.parse(v, node);
-        HttpServerConf conf;
+        TcpServerConf conf;
         conf.name = node["name"].asString();
         conf.keepalive = node["keepalive"].asInt();
         conf.timeout = node["timeout"].asInt();
+        conf.type = node["type"].asString();
+        conf.accept_worker = node["accept_worker"].asString();
+        conf.io_worker = node["io_worker"].asString();
+        conf.process_worker = node["process_worker"].asString();
         if (node.isMember("address")) {
             int n = node["address"].size();
             conf.address.reserve(n);
@@ -85,12 +104,16 @@ struct LexicalCastJson<std::string, HttpServerConf> {
 };
 
 template<>
-struct LexicalCastJson<HttpServerConf, std::string> {
-    decltype(auto) operator() (const HttpServerConf& v) {
+struct LexicalCastJson<TcpServerConf, std::string> {
+    decltype(auto) operator() (const TcpServerConf& v) {
         Json::Value node;
         node["name"] = v.name;
         node["keepalive"] = v.keepalive;
         node["timeout"] = v.timeout;
+        node["type"] = v.type;
+        node["accept_worker"] = v.accept_worker;
+        node["io_worker"] = v.io_worker;
+        node["process_worker"] = v.process_worker;
         for (const auto& i : v.address) {
             node["address"].append(i);
         }
@@ -101,7 +124,7 @@ struct LexicalCastJson<HttpServerConf, std::string> {
 };
 
 
-static auto g_http_server_conf = Config::Lookup("http_servers", std::vector<HttpServerConf>(), "http server config");
+static auto g_tcp_server_conf = Config::Lookup("servers", std::vector<TcpServerConf>(), "tcp server config");   
 
 Application::Application() {
     s_instance = this;
@@ -188,14 +211,18 @@ bool Application::run() {
 }
 
 void Application::run_fiber() {
-    auto http_confs = g_http_server_conf->getValue();
-    for (auto& i : http_confs) {
-        FLEXY_LOG_INFO(g_logger) << YamlToStr<HttpServerConf>()(i);
+    FLEXY_LOG_DEBUG(g_logger) << "run fiber";
+    WorkerMgr::GetInstance().init();
+
+    auto tcp_confs = g_tcp_server_conf->getValue();
+    for (auto& i : tcp_confs) {
+        FLEXY_LOG_INFO(g_logger) << YamlToStr<TcpServerConf>()(i);
         std::vector<Address::ptr> address;
         for (auto& a : i.address) {
             size_t pos = a.find(":");
             if (pos == a.npos) {
-                FLEXY_LOG_ERROR(g_logger) << "invalid address: " << a;
+                // FLEXY_LOG_ERROR(g_logger) << "invalid address: " << a;
+                address.push_back(std::make_shared<UnixAddress>(a));
                 continue;
             }
             auto addr = Address::LookupAny(a);
@@ -219,7 +246,69 @@ void Application::run_fiber() {
             }
         }
 
-        auto server = std::make_shared<http::HttpServer>(i.keepalive);
+        IOManager* accept_worker = IOManager::GetThis();
+        IOManager* io_worker = IOManager::GetThis();
+        IOManager* process_worker = IOManager::GetThis();
+
+        if (!i.accept_worker.empty()) {
+            accept_worker = WorkerMgr::GetInstance().getAsIOManager(i.accept_worker).get();
+            if (!accept_worker) {
+                FLEXY_LOG_ERROR(g_logger) << "accept_worker: " << i.accept_worker
+                << " not exists";
+                exit(0);
+            }
+        }
+
+        if(!i.io_worker.empty()) {
+            io_worker = WorkerMgr::GetInstance().getAsIOManager(i.io_worker).get();
+            if(!io_worker) {
+                FLEXY_LOG_ERROR(g_logger) << "io_worker: " << i.io_worker
+                    << " not exists";
+                exit(0);
+            }
+        }
+
+        if(!i.process_worker.empty()) {
+            process_worker = WorkerMgr::GetInstance().getAsIOManager(i.process_worker).get();
+            if(!process_worker) {
+                FLEXY_LOG_ERROR(g_logger) << "process_worker: " << i.process_worker
+                    << " not exists";
+                exit(0);
+            }
+        }
+
+        TcpServer::ptr server;
+
+        static std::unordered_map<std::string, std::function<TcpServer::ptr(int, IOManager*, IOManager*, IOManager*)>> tcp_creater = {
+            {"http", [](int keep_alive, IOManager* worker, IOManager* io_worker, IOManager* accept_worker) {
+                return std::make_shared<http::HttpServer>(keep_alive, worker, io_worker, accept_worker);
+            }},
+            {"ws", [](int keep_alive, IOManager* worker, IOManager* io_worker, IOManager* accept_worker) {
+                return std::make_shared<http::WSServer>(worker, io_worker, accept_worker);
+            }},
+            {"tcp", [](int keep_alive, IOManager* worker, IOManager* io_worker, IOManager* accept_worker) {
+                return std::make_shared<TcpServer>(worker, io_worker, accept_worker);
+            }},
+        };
+
+
+
+        // if (i.type == "http") {
+        //     server = std::make_shared<http::HttpServer>(i.keepalive, process_worker, io_worker, accept_worker);
+        // } else if (i.type == "ws") {
+        //     server = std::make_shared<http::WSServer>(process_worker, io_worker, accept_worker);
+        // } else {
+
+        // }
+        if (auto it = tcp_creater.find(i.type); it != tcp_creater.end()) {
+            server = it->second(i.keepalive, process_worker, io_worker, accept_worker);     // 若不是httpserver, 则忽略keep-alive参数
+        } else {
+            FLEXY_LOG_ERROR(g_logger) << "invalid server type = " << i.type 
+            << LexicalCastYaml<TcpServerConf, std::string>()(i);
+            exit(0);
+        }
+
+        // auto server = std::make_shared<http::HttpServer>(i.keepalive);
         std::vector<Address::ptr> fails;
         if (!server->bind(address, fails)) {
             for (auto& x : fails) {
@@ -227,12 +316,20 @@ void Application::run_fiber() {
                 exit(0);
             }
         }
+        
         if (!i.name.empty()) {
             server->setName(i.name);
         }
         server->setRecvTimeout(i.timeout);
-        server->start();
-        httpservers_.push_back(std::move(server));
+        // server->start();
+        servers_[i.type].push_back(std::move(server));
+        // httpservers_.push_back(std::move(server));
+    }
+
+    for (auto& [type, servers] : servers_) {
+        for (auto& server : servers) {
+            server->start();
+        }
     }
 }
 
@@ -246,9 +343,10 @@ int Application::main(int argc, char** argv) {
     }
     ofs << getpid();
 
-    IOManager iom;
+    IOManager iom(1, true, "main");
     
     go_args(&Application::run_fiber, this);
+    iom.addRecTimer(2000, [](){});
 
     return 0;
 }

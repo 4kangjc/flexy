@@ -60,7 +60,7 @@ public:
     template <class T>
     using ptr = std::shared_ptr<T>;
 
-    WorkerManager();
+    WorkerManager() : stop_(false) { }
     void add(const ptr<Scheduler>& s);
     ptr<Scheduler> get(const std::string& name);
     ptr<IOManager> getAsIOManager(const std::string& name);
@@ -101,5 +101,7 @@ private:
     std::map<std::string, std::vector<ptr<Scheduler>>> datas_;
     bool stop_;
 };
+
+using WorkerMgr = Singleton<WorkerManager>;
 
 } // namespace flexy
