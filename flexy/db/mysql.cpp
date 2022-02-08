@@ -702,8 +702,9 @@ MySQLStmtRes::ptr MySQLStmtRes::Create(const std::shared_ptr<MySQLStmt> &stmt) {
         rt->binds_[i].buffer = rt->datas_[i].data;
         rt->binds_[i].buffer_length = rt->datas_[i].data_length;
         rt->binds_[i].length = &rt->datas_[i].length;
-        rt->binds_[i].is_null = &rt->datas_[i].is_null;
-        rt->binds_[i].error = &rt->datas_[i].error;
+	using BoolPtr = decltype(rt->binds_[i].is_null);
+        rt->binds_[i].is_null = (BoolPtr)&rt->datas_[i].is_null;
+        rt->binds_[i].error = (BoolPtr)&rt->datas_[i].error;
     }
 
     if (mysql_stmt_bind_result(stmt->getRaw(), &rt->binds_[0])) {
