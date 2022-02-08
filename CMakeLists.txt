@@ -3,7 +3,7 @@ project(flexy)
 
 include (cmake/utils.cmake)
 
-set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O0 -ggdb -std=c++17 -Wall -Wno-deprecated -Werror -Wno-unused-function -Wno-builtin-macro-redefined -Wno-deprecated-declarations")
+set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O3 -ggdb -std=c++17 -Wall -Wno-deprecated -Werror -Wno-unused-function -Wno-builtin-macro-redefined -Wno-deprecated-declarations")
 
 include_directories(./)
 
@@ -81,6 +81,9 @@ endif(BUILD_STATIC_LIBS)
 
 redefine_file_macro(flexy)
 
+option(TESTS "flexy tests execute" OFF)
+
+if(TESTS)
 flexy_add_executable(test_thread "tests/test_thread.cc" "${LIBS}")
 flexy_add_executable(test_log "tests/test_logger.cc" "${LIBS}")
 flexy_add_executable(test_file "tests/test_file.cc" "${LIBS}")
@@ -117,6 +120,7 @@ flexy_add_executable(test_ws_server "tests/test_ws_server.cc" "${LIBS}")
 flexy_add_executable(echo_server "examples/echo_server.cc" "${LIBS}")
 flexy_add_executable(chat_room "examples/chat_room.cc" "${LIBS}")
 flexy_add_executable(http_server "examples/http_server.cc" "${LIBS}")
+endif(TESTS)
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
