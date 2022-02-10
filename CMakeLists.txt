@@ -75,8 +75,10 @@ endif(JSON)
 
 if (BUILD_STATIC_LIBS)
 add_library(flexy STATIC ${LIB_SRC})
+target_link_libraries(${LIBS})
 elseif (BUILD_SHARED_LIBS)
 add_library(flexy SHARED ${LIB_SRC})
+target_link_libraries(${LIBS})
 endif(BUILD_STATIC_LIBS)
 
 redefine_file_macro(flexy)
