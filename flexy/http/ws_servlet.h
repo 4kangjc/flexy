@@ -62,7 +62,7 @@ public:
             typename = FunctionWSServlet::enable_callback<Callback>,
             typename = FunctionWSServlet::enable_connect_close_cb<Connect>,
             typename = FunctionWSServlet::enable_connect_close_cb<Close>>
-    void addServlet(const std::string& uri, Callback&& cb, Connect&& connect_cb = nullptr, Close&& close_cb = nullptr) {
+    void addWSServlet(const std::string& uri, Callback&& cb, Connect&& connect_cb = nullptr, Close&& close_cb = nullptr) {
         ServletDispatch::addServlet(uri, std::make_shared<FunctionWSServlet>(
                             std::forward<Callback>(cb), std::forward<Connect>(connect_cb), 
                             std::forward<Close>(close_cb)));
@@ -72,7 +72,7 @@ public:
             typename = FunctionWSServlet::enable_callback<Callback>,
             typename = FunctionWSServlet::enable_connect_close_cb<Connect>,
             typename = FunctionWSServlet::enable_connect_close_cb<Close>>
-    void addGlobServlet(const std::string& uri, Callback&& cb, Connect&& connect_cb = nullptr, Close&& close_cb = nullptr) {
+    void addGlobWSServlet(const std::string& uri, Callback&& cb, Connect&& connect_cb = nullptr, Close&& close_cb = nullptr) {
         ServletDispatch::addGlobServlet(uri, std::make_shared<FunctionWSServlet>(
                             std::forward<Callback>(cb), std::forward<Connect>(connect_cb), 
                             std::forward<Close>(close_cb)));

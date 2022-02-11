@@ -13,7 +13,7 @@ public:
     bool run();
 
     template <class T>
-    std::vector<T> getServer() const;
+    std::vector<std::shared_ptr<T>> getServer() const;
 
     auto listAllServer() const { return servers_; }
 private:
@@ -31,10 +31,10 @@ public:
 };
 
 template <class T>
-std::vector<T> Application::getServer() const {
+std::vector<std::shared_ptr<T>> Application::getServer() const {
 #define XX(type) \
     if (auto it = servers_.find(#type); it != servers_.end()) {      \
-        std::vector<T> servers;                                      \
+        std::vector<std::shared_ptr<T>> servers;                     \
         servers.reserve(it->second.size());                          \
         for (auto& server : it->second) {                            \
             servers.push_back(std::dynamic_pointer_cast<T>(server)); \
