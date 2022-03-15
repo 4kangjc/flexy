@@ -18,7 +18,7 @@ void run() {
         return 0;
     };
 
-    server->getWSServletDispatch()->addServlet("/flexy", fun);
+    server->getWSServletDispatch()->addWSServlet("/flexy", fun);
     while (!server->bind(addr)) {
         FLEXY_LOG_ERROR(g_logger) << "bind " << *addr << " fail";
         sleep(1);
