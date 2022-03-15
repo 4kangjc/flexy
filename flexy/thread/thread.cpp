@@ -6,6 +6,7 @@ namespace flexy {
 static thread_local Thread* t_thread = nullptr;
 static thread_local std::string t_name = "UNKOWN";
 static thread_local uint64_t t_start = 0;                  // 线程开始运行的时间 毫秒数
+static thread_local int t_id = -1;
 
 
 Thread::~Thread() {
@@ -29,8 +30,16 @@ const std::string& Thread::GetName() {
     return t_name;
 }
 
-uint32_t Thread::GetStartTime() {
+uint64_t Thread::GetStartTime() {
     return t_start;
+}
+
+pid_t Thread::GetThreadId() {
+    if (t_id == -1) {
+        // t_id = syscall(SYS_gettid);  
+        t_id = gettid();
+    }
+    return t_id;
 }
 
 void Thread::SetName(std::string_view name) {
@@ -47,7 +56,7 @@ void* Thread::run(void* arg) {
     Thread* thread = (Thread*)arg;
     t_thread = thread;
     t_name = thread->name_;
-    thread->tid_ = GetThreadId();
+    thread->tid_ = Thread::GetThreadId();
     pthread_setname_np(pthread_self(), thread->name_.substr(0, 15).c_str());
 
     thread->semapthore_.post();             // 确保Thread创建时就已经运行起来

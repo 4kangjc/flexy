@@ -18,7 +18,8 @@ static auto g_logger = FLEXY_LOG_NAME("system");
 namespace flexy {
 
 int GetThreadId() {
-    return syscall(SYS_gettid);
+    // return syscall(SYS_gettid);
+    return Thread::GetThreadId();
 }
 
 const std::string& GetThreadName() {

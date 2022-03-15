@@ -32,7 +32,9 @@ public:
     // 设置当前线程的名称
     static void SetName(std::string_view name);  
     // 返回当前线程开始的毫秒数 不包括主线程
-    static uint32_t GetStartTime();
+    static uint64_t GetStartTime();
+    // 返回当前线程真实id
+    static pid_t GetThreadId();
 private:
     static void* run(void* arg);                 // 线程真正执行函数
 private:
