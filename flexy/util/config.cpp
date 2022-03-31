@@ -117,7 +117,7 @@ void Config::LoadFromConDir(std::string_view path) {
                 LoadFromYaml(root);
             } else {
                 static Json::Reader r;
-                std::ifstream is;
+                std::ifstream is(file);
                 Json::Value root;
                 r.parse(is, root);
                 LoadFromJson(root);
