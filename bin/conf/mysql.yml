@@ -1,0 +1,14 @@
+mysql:
+  host: "121.41.169.58"
+  user: root
+  dbname: "blog"
+  # host: 127.0.0.1
+  # user: arlent
+  passwd: '1'
+
+  dbs:
+    test_0:
+      host: "121.41.169.58"
+      user: root
+      dbname: "blog"
+      passwd: '1'

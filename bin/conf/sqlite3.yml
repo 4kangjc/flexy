@@ -1,0 +1,11 @@
+sqlite3:
+  dbs:
+      test_0: 
+        path: "db/test1.db"
+        # sql: "create table user (
+        #   id integer primary key autoincrement, 
+        #   name varchar(50) not null default '', 
+        #   age int not null default 0
+        #   )"
+      test_1:
+        path: "db/test2"

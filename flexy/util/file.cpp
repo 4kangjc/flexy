@@ -16,6 +16,10 @@ namespace flexy {
 std::string FS::AbsolutePath(std::string_view filename, bool v) {
     if (filename[0] == '/') {
         return std::string(filename);
+    } else if (filename[0] == '~') {
+        std::string file = getenv("HOME");
+        file += filename.substr(1);
+        return file;
     }
     if (v) {
         char path[512] = {0};
