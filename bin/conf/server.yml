@@ -1,0 +1,20 @@
+servers:
+    - address: ["0.0.0.0:8090", "127.0.0.1:8091", "/tmp/test.sock"]
+      keepalive: 1
+      timeout: 1000
+      name: flexy/1.1
+      accept_worker: accept
+      io_worker: io
+      process_worker:  io
+      type: http
+    - address: ["0.0.0.0:8072", "localhost:8071"]
+      keepalive: 1
+      timeout: 1000
+      name: flexy/2.1
+      accept_worker: accept
+      io_worker: io
+      process_worker:  io
+      type: ws
+
+server:
+  work_path: /home/arlent/workspace/project/flexy/bin/work/

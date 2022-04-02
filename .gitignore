@@ -7,13 +7,13 @@
 /include/*
 #忽略.idea目录下的文件
 /.idea/*
-#忽略.yaml文件
-*.yaml
-*.yml
+
 #忽略ragel编译出来的文件
 *.rl.cpp
 #忽略二进制文件
 /bin/*
+
+!/bin/conf/
 
 #忽略txt目录下文件 存放log日志和yaml配置文件
 /txt/*
