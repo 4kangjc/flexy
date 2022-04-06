@@ -72,24 +72,29 @@ void Fiber::resume() {
     } else {
         t_threadFiber->state_ = READY;
     }
-    auto p = jump_fcontext(ctx_, nullptr);
-    ctx_ = p.fctx;   
+    ctx_ = jump_fcontext(ctx_, nullptr).fctx;
+}
+
+transfer_t ontop_callback(transfer_t from) {
+    Fiber* fiber = (Fiber*)(from.data);
+    fiber->state_ = Fiber::READY;
+    
+    return from;
 }
 
 void Fiber::yield() {
     FLEXY_ASSERT(state_ != READY);
-    if (state_ != TERM) {
-        state_ = READY;
-    }
     if (use_scheduler_) {
         SetThis(Scheduler::GetMainFiber());
         Scheduler::GetMainFiber()->state_ = EXEC;
-        auto p = jump_fcontext(Scheduler::GetMainFiber()->ctx_, nullptr);
+        // auto p = jump_fcontext(Scheduler::GetMainFiber()->ctx_, nullptr);
+        auto p = ontop_fcontext(Scheduler::GetMainFiber()->ctx_, this, ontop_callback);
         Scheduler::GetMainFiber()->ctx_ = p.fctx;
     } else {
         SetThis(t_threadFiber.get());
         t_threadFiber->state_ = EXEC;
-        auto p = jump_fcontext(t_threadFiber->ctx_, nullptr);
+        // auto p = jump_fcontext(t_threadFiber->ctx_, nullptr);
+        auto p = ontop_fcontext(t_threadFiber->ctx_, this, ontop_callback);
         t_threadFiber->ctx_ = p.fctx;
     }
 }
