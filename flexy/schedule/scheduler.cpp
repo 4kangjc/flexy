@@ -128,12 +128,13 @@ void Scheduler::run() {
                 tk = std::move(tasks_.front());
                 tasks_.pop_front();
                 if (!tk)   continue;            // nullptr task continue
+                if (tk.fiber && FLEXY_UNLIKELY(tk.fiber->getState() == Fiber::EXEC)) {
+                    tasks_.push_back(std::move(tk));
+                    continue;
+                }
                 ++activeThreadCount_;
                 tickle_me = true;
             }
-        }
-        if (tk.fiber) {
-            FLEXY_ASSERT(tk.fiber->getState() == Fiber::READY);
         }
 
         if (tickle_me) {

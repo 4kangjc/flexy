@@ -14,6 +14,7 @@ extern "C" {
 
 transfer_t jump_fcontext( fcontext_t const to, void * vp);
 fcontext_t make_fcontext( void * sp, std::size_t size, void (* fn)( transfer_t) );
+transfer_t ontop_fcontext( fcontext_t const to, void * vp, transfer_t (*fn) (transfer_t));
 
 }
 
@@ -23,6 +24,7 @@ class Fiber : public std::enable_shared_from_this<Fiber> {
 public:
     using ptr = std::shared_ptr<Fiber>;
     friend class Scheduler;
+    friend transfer_t ontop_callback(transfer_t);
     enum State {
         READY,          // 就绪状态
         EXEC,           // 执行状态
