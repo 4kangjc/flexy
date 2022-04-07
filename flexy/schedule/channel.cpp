@@ -43,9 +43,9 @@ int Channel::handleEvents(Event events) {
     if (events & Event::READ) {
         // handleRead();
         if (read_.cb) {
-            read_.scheduler->async(&read_.cb);
+            read_.scheduler->async(std::move(read_.cb));
         } else {
-            read_.scheduler->async(&read_.fiber);
+            read_.scheduler->async(std::move(read_.fiber));
         }
         read_.scheduler = nullptr;
         ++res;
@@ -54,9 +54,9 @@ int Channel::handleEvents(Event events) {
     if (events & Event::WRITE) {
         // handleWrite();
         if (write_.cb) {
-            write_.scheduler->async(&write_.cb);
+            write_.scheduler->async(std::move(write_.cb));
         } else {
-            write_.scheduler->async(&write_.fiber);
+            write_.scheduler->async(std::move(write_.fiber));
         }
         write_.scheduler = nullptr;
         ++res;
@@ -66,9 +66,9 @@ int Channel::handleEvents(Event events) {
 
 void Channel::handleRead() {
     if (read_.cb) {
-        read_.scheduler->async(&read_.cb);
+        read_.scheduler->async(std::move(read_.cb));
     } else {
-        read_.scheduler->async(&read_.fiber);
+        read_.scheduler->async(std::move(read_.fiber));
     }
     read_.scheduler = nullptr;
     enableRead(false);
@@ -76,9 +76,9 @@ void Channel::handleRead() {
 
 void Channel::handleWrite() {
     if (write_.cb) {
-        write_.scheduler->async(&write_.cb);
+        write_.scheduler->async(std::move(write_.cb));
     } else {
-        write_.scheduler->async(&write_.fiber);
+        write_.scheduler->async(std::move(write_.fiber));
     }
     write_.scheduler = nullptr;
     enableWrite(false);
