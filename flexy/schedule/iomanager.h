@@ -12,7 +12,7 @@ public:
     // 添加事件及其回调函数
     template <typename... Args>
     bool addEvent(int fd, Event events, Args&&... args) {
-        return onEvent(fd, events, __task(std::forward<Args>(args)...));
+        return onEvent(fd, events, detail::__task(std::forward<Args>(args)...));
     }
     // 删除事件及其回调函数
     bool delEvent(int fd, Event event);
@@ -29,17 +29,17 @@ public:
     // 取消写事件
     bool cancelWrite(int fd) { return cancelEvent(fd, Event::WRITE); }
     // 添加事件及其回调函数
-    bool onEvent(int fd, Event event, __task&& cb = nullptr);
+    bool onEvent(int fd, Event event, detail::__task&& cb = nullptr);
 
     // 注册读事件
     template <typename... Args>
     bool onRead(int fd, Args&&... args) {
-        return onEvent(fd, Event::READ, __task(std::forward<Args>(args)...));
+        return onEvent(fd, Event::READ, detail::__task(std::forward<Args>(args)...));
     }
     // 注册写事件
     template <typename... Args>
     bool onWrite(int fd, Args&&... args) {
-        return onEvent(fd, Event::WRITE, __task(std::forward<Args>(args)...)); 
+        return onEvent(fd, Event::WRITE, detail::__task(std::forward<Args>(args)...)); 
     }
     // 返回当前的IOManager
     static IOManager* GetThis();

@@ -9,10 +9,10 @@ struct Signal {
 public:
     template <typename... Args>
     static void signal(int sig, Args&&... args) {
-        return signal(sig, __task(std::forward<Args>(args)...));
+        return signal(sig, detail::__task(std::forward<Args>(args)...));
     }
 private:
-    static void signal(int sig, __task&& handler);
+    static void signal(int sig, detail::__task&& handler);
 };
 
 } // namespace flexy

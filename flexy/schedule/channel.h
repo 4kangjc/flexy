@@ -18,8 +18,8 @@ private:
     // 事件上下文
     struct EventContext {
         Scheduler* scheduler = nullptr;             // 事件执行的调度器
-        Fiber::ptr fiber = nullptr;                 // 事件协程
-        __task cb = nullptr;                        // 事件回调函数
+        Fiber::ptr fiber  = nullptr;                // 事件协程
+        detail::__task cb = nullptr;                // 事件回调函数
     };
 public:
     // 处理读写事件， 返回处理的事件数量

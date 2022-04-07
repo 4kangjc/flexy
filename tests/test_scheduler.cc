@@ -20,7 +20,7 @@ void test() {
 }
 
 int main(int argc, char** argv) {
-    flexy::Scheduler sc(2, true, "TEST");
+    flexy::Scheduler sc(1, true, "TEST");
     sc.async(println, "hello scheduler", argc, argv); 
     sc.start();
     // sleep(1);

@@ -15,7 +15,7 @@ static std::atomic<uint64_t> s_fiber_count {0};         // 记录正在运行的
 static thread_local Fiber* t_fiber = nullptr;               // run fiber
 static thread_local Fiber::ptr t_threadFiber = nullptr;     // main fiber
 
-static auto g_fiber_stack_size = Config::Lookup<uint32_t>("fiber.stack_size", 128 * 1024, "fiber stack size");
+static auto g_fiber_stack_size = Config::Lookup("fiber.stack_size", 128u * 1024u, "fiber stack size");
 
 using StackAllocator = MallocStackAllocator;
 
@@ -27,14 +27,27 @@ Fiber::Fiber() {
     FLEXY_LOG_DEBUG(g_logger) << "Fiber::Fiber main";
 }
 
-Fiber::Fiber(std::function<void()>&& cb, size_t stacksize, bool use_scheduler)
-        : id_(++s_fiber_id), cb_(std::move(cb)), use_scheduler_(use_scheduler) {
+// Fiber::Fiber(std::function<void()>&& cb, size_t stacksize)
+//         : id_(++s_fiber_id), cb_(std::move(cb)) {
+//     ++s_fiber_count;
+//     stacksize_ = stacksize ? stacksize : g_fiber_stack_size->getValue();
+
+//     stack_ = StackAllocator::Alloc(stacksize_);
+
+//     ctx_ = make_fcontext((char*)stack_ + stacksize_, stacksize_, &Fiber::MainFunc);
+//     FLEXY_LOG_DEBUG(g_logger) << "Fiber::Fiber id = " << id_;
+// }
+
+Fiber::Fiber(size_t stacksize, detail::__task&& task) 
+    : id_(++s_fiber_id), cb_(std::move(task))
+{
     ++s_fiber_count;
     stacksize_ = stacksize ? stacksize : g_fiber_stack_size->getValue();
 
     stack_ = StackAllocator::Alloc(stacksize_);
 
     ctx_ = make_fcontext((char*)stack_ + stacksize_, stacksize_, &Fiber::MainFunc);
+
     FLEXY_LOG_DEBUG(g_logger) << "Fiber::Fiber id = " << id_;
 }
 
@@ -67,11 +80,9 @@ void Fiber::resume() {
     FLEXY_ASSERT(state_ == READY);
     SetThis(this);                         
     state_ = EXEC;
-    if (use_scheduler_) {
-        Scheduler::GetMainFiber()->state_ = READY;
-    } else {
-        t_threadFiber->state_ = READY;
-    }
+    
+    t_threadFiber->state_ = READY;
+
     ctx_ = jump_fcontext(ctx_, nullptr).fctx;
 }
 
@@ -84,19 +95,20 @@ transfer_t ontop_callback(transfer_t from) {
 
 void Fiber::yield() {
     FLEXY_ASSERT(state_ != READY);
-    if (use_scheduler_) {
-        SetThis(Scheduler::GetMainFiber());
-        Scheduler::GetMainFiber()->state_ = EXEC;
-        // auto p = jump_fcontext(Scheduler::GetMainFiber()->ctx_, nullptr);
-        auto p = ontop_fcontext(Scheduler::GetMainFiber()->ctx_, this, ontop_callback);
-        Scheduler::GetMainFiber()->ctx_ = p.fctx;
-    } else {
-        SetThis(t_threadFiber.get());
-        t_threadFiber->state_ = EXEC;
-        // auto p = jump_fcontext(t_threadFiber->ctx_, nullptr);
-        auto p = ontop_fcontext(t_threadFiber->ctx_, this, ontop_callback);
-        t_threadFiber->ctx_ = p.fctx;
-    }
+    
+    SetThis(t_threadFiber.get());
+    t_threadFiber->state_ = EXEC;
+    // auto p = jump_fcontext(t_threadFiber->ctx_, nullptr);
+    auto p = ontop_fcontext(t_threadFiber->ctx_, this, ontop_callback);
+    t_threadFiber->ctx_ = p.fctx;
+}
+
+void Fiber::_M_return() const {
+    FLEXY_ASSERT(state_ == Fiber::TERM);
+    SetThis(t_threadFiber.get());
+    t_threadFiber->state_ = EXEC;
+    // t_threadFiber->ctx_ = jump_fcontext(t_threadFiber->ctx_, nullptr).fctx;
+    jump_fcontext(t_threadFiber->ctx_, nullptr);
 }
 
 void Fiber::SetThis(Fiber* f) {
@@ -109,7 +121,7 @@ Fiber::ptr Fiber::GetThis() {
     }
     Fiber::ptr main_fiber(new Fiber);
     FLEXY_ASSERT(t_fiber == main_fiber.get());
-    t_threadFiber = main_fiber;
+    t_threadFiber = std::move(main_fiber);
     return t_fiber->shared_from_this();
 } 
 
@@ -122,11 +134,8 @@ void Fiber::MainFunc(transfer_t t) {
     auto&& cur = GetThis();
     FLEXY_ASSERT(cur);
 
-    if (cur->use_scheduler_) {
-        Scheduler::GetMainFiber()->ctx_ = t.fctx;
-    } else {
-        t_threadFiber->ctx_ = t.fctx;
-    }
+   
+    t_threadFiber->ctx_ = t.fctx;
 
     try {
         cur->cb_();
@@ -144,7 +153,8 @@ void Fiber::MainFunc(transfer_t t) {
 
     auto raw_ptr = cur.get();
     cur = nullptr;
-    raw_ptr->yield();
+    // raw_ptr->yield();
+    raw_ptr->_M_return();
 
     FLEXY_ASSERT2(false, "never reach fiber id = " + std::to_string(raw_ptr->getId()));
 }

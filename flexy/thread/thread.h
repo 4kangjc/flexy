@@ -2,6 +2,7 @@
 
 #include "semaphore.h"
 #include "flexy/util/task.h"
+#include <memory>
 
 namespace flexy {
 
@@ -41,7 +42,7 @@ private:
     pid_t tid_ = -1;                            // 线程真实id
     pthread_t thread_;                          // 线程结构
     std::string name_;                          // 线程名称
-    __task cb_;                                 // 线程执行函数
+    detail::__task cb_;                         // 线程执行函数
     Semaphore semapthore_;                      // 信号量
 };
 

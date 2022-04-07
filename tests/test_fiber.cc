@@ -1,5 +1,6 @@
 #include <flexy/schedule/fiber.h>
 #include <flexy/util/log.h>
+#include <flexy/util/memory.h>
 
 static auto&& g_logger = FLEXY_LOG_ROOT();
 
@@ -14,7 +15,7 @@ int main() {
     {
         flexy::Fiber::GetThis();
         FLEXY_LOG_INFO(g_logger) << "main begin";
-        flexy::Fiber::ptr fiber(new flexy::Fiber(run_in_fiber, 0, false));    
+        auto fiber = flexy::make_shared<flexy::Fiber>(run_in_fiber);
         fiber->resume();
         FLEXY_LOG_INFO(g_logger) << "main after call end";
         fiber->resume();

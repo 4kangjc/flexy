@@ -124,5 +124,7 @@ flexy_add_executable(chat_room "examples/chat_room.cc" "${LIBS}")
 flexy_add_executable(http_server "examples/http_server.cc" "${LIBS}")
 endif(TESTS)
 
+flexy_add_executable(test_bug "tests/test_bug.cc" "${LIBS}")
+
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
