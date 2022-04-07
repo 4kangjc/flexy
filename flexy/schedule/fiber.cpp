@@ -99,6 +99,17 @@ void Fiber::yield() {
     }
 }
 
+void Fiber::_M_return() {
+    FLEXY_ASSERT(state_ == Fiber::TERM);
+    if (use_scheduler_) {
+        SetThis(Scheduler::GetMainFiber());
+    } else {
+        SetThis(t_threadFiber.get());
+    }
+    t_fiber->state_ = EXEC;
+    jump_fcontext(t_fiber->ctx_, nullptr);
+}
+
 void Fiber::SetThis(Fiber* f) {
     t_fiber = f;
 }
@@ -144,7 +155,7 @@ void Fiber::MainFunc(transfer_t t) {
 
     auto raw_ptr = cur.get();
     cur = nullptr;
-    raw_ptr->yield();
+    raw_ptr->_M_return();
 
     FLEXY_ASSERT2(false, "never reach fiber id = " + std::to_string(raw_ptr->getId()));
 }
