@@ -23,8 +23,6 @@ public:
     auto& getName() const { return name_; }
     // 返回当前协程调度器
     static Scheduler* GetThis();
-    // 返回当前协程调度器的调度协程
-    static Fiber* GetMainFiber();
     // 开始协程调度器
     void start();
     // 停止协程调度器
@@ -89,15 +87,15 @@ public:
 private:
     // 可执行对象
     struct Task {
-        Fiber::ptr fiber = nullptr;
-        __task cb = nullptr;
+        Fiber::ptr fiber  = nullptr;
+        detail::__task cb = nullptr;
 
         template <typename... Args>
         Task(Args&&... args) : cb(std::forward<Args>(args)...) { }
         Task(const Fiber::ptr& fiber) : fiber(fiber) { }
         Task(Fiber::ptr& fiber) : fiber(fiber) { }
         Task(Fiber::ptr&& f) noexcept : fiber(std::move(f)) { }
-        Task(__task* c) { cb.swap(*c); }
+        Task(detail::__task* c) { cb.swap(*c); }
         Task(Fiber::ptr* f) { fiber.swap(*f); }
         void reset() {
             fiber = nullptr;
@@ -122,8 +120,7 @@ protected:
 private:    
     mutable mutex mutex_;                                                      // Mutex       
     std::vector<Thread::ptr> threads_;                                         // 线程池                                    
-    std::deque<Task> tasks_;                                                   // 待执行的任务队列 
-    Fiber::ptr rootFiber_;                                                     // user_caller为true时有效，调度协程                                       
+    std::deque<Task> tasks_;                                                   // 待执行的任务队列                                      
     std::string name_;                                                         // 调度器名称        
 protected:
     std::vector<int> threadIds_;                                               // 线程id数组
@@ -132,8 +129,8 @@ protected:
     std::atomic<size_t> idleThreadCount_   = {0};                              // 空闲线程数量
     bool stopping_ = true;                                                     // 是否正在停止
     int rootThreadId_ = 0;                                                     // 主线程id(use_caller)
-    __task idle_;                                                              // 协程无任务调度时执行idle协程
-    __task tickle_;                                                            // 通知调度器有任务了
+    detail::__task idle_;                                                      // 协程无任务调度时执行idle协程
+    detail::__task tickle_;                                                    // 通知调度器有任务了
 };
 
 // 生命周期开始： 将当前协程切换到 target 协程调度器中执行 生命周期结束： 切换回最初的协程调度器中执行

@@ -7,7 +7,7 @@ namespace flexy {
 
 namespace {
 // std::function<void()> handlers[65];
-__task handlers[65];
+detail::__task handlers[65];
 
 static void signal_handler(int sig) {
     auto iom = Scheduler::GetThis();
@@ -20,7 +20,7 @@ static void signal_handler(int sig) {
 
 }
 
-void Signal::signal(int sig, __task&& handler) {
+void Signal::signal(int sig, detail::__task&& handler) {
     // handlers[sig] = std::move(handler.get());
     handlers[sig] = std::move(handler);
     ::signal(sig, signal_handler);

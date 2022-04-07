@@ -149,7 +149,7 @@ bool IOManager::cancelAll(int fd) {
     return true;
 }
 
-bool IOManager::onEvent(int fd, Event event, __task&& cb) {
+bool IOManager::onEvent(int fd, Event event, detail::__task&& cb) {
     Channel* ch = nullptr;
     {
         LOCK_GUARD(mutex_);

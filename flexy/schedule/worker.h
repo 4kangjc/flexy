@@ -21,15 +21,19 @@ public:
 
     ~WorkerGroup() { waitAll(); }
 
-    template <class... FnAndArgs>
-    void schedule(FnAndArgs&&... args) {
-        static_assert(sizeof...(args) > 0);
+    template <class... _Args, typename = std::enable_if_t<std::is_invocable_v<_Args&&...>>>
+    void schedule(_Args&&... args) {
+        static_assert(sizeof...(args) > 0, "args must > 0");
         sem_.wait();
-        scheduler_->async([self = shared_from_this()](auto&&... args) {
-            // std::invoke(std::forward<decltype(args)>(args)...);      // functor 失败
-            __task(std::forward<decltype(args)>(args)...)();
+        // scheduler_->async([self = shared_from_this()](auto&&... args) {
+        //     // std::invoke(std::forward<decltype(args)>(args)...);      // functor 失败
+        //     detail::__task(std::forward<decltype(args)>(args)...)();
+        //     self->sem_.post();
+        // }, std::forward<_Args>(args)...);
+        scheduler_->async([self = shared_from_this(), task = detail::__task(std::forward<_Args>(args)...)]() {
+            task();
             self->sem_.post();
-        }, std::forward<FnAndArgs>(args)...);
+        });
     }
     
     void waitAll() {

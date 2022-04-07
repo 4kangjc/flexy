@@ -3,6 +3,7 @@
 
 static auto&& g_logger = FLEXY_LOG_ROOT();
 
+using namespace flexy::detail;
 
 void print(const char* s) {
     FLEXY_LOG_FMT_INFO(g_logger, "{}", s);
