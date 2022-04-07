@@ -28,28 +28,41 @@ public:
     // 停止协程调度器
     void stop();
     // 将任务加入到协程调度器中运行
-    template <typename... FiberOrcb>
-    void async(FiberOrcb&&... fc) {
-        static_assert(sizeof...(fc) > 0);
+    template <typename... _Args, typename = std::enable_if_t<std::is_invocable_v<_Args&&...>>>
+    void async(_Args&&... __args) {
+        static_assert(sizeof...(__args) > 0);
         bool need_tickle = false;
         {
             LOCK_GUARD(mutex_);
             need_tickle = tasks_.empty();
-            tasks_.emplace_back(std::forward<FiberOrcb>(fc)...);
+            tasks_.emplace_back(std::forward<_Args>(__args)...);
+        }
+        if (need_tickle) {
+            tickle_();
+        }
+    }
+
+    template <typename _Fiber, typename = std::enable_if_t<is_fiber_ptr_v<_Fiber>>>
+    void async(_Fiber&& fiber) {
+        bool need_tickle = false;
+        {
+            LOCK_GUARD(mutex_);
+            need_tickle = tasks_.empty();
+            tasks_.emplace_back(std::forward<_Fiber>(fiber));
         }
         if (need_tickle) {
             tickle_();
         }
     }
     // 将任务加入到协程调度器中优先运行
-    template <typename... FiberOrcb>
-    void async_first(FiberOrcb&&... fc) {
-        static_assert(sizeof...(fc) > 0);
+    template <typename... _Args>
+    void async_first(_Args&&... __args) {
+        static_assert(sizeof...(__args) > 0);
         bool need_tickle = false;
         {
             LOCK_GUARD(mutex_);
             need_tickle = tasks_.empty();
-            tasks_.emplace_front(std::forward<FiberOrcb>(fc)...);
+            tasks_.emplace_front(std::forward<_Args>(__args)...);
         }
         if (need_tickle) {
             tickle_();
@@ -57,13 +70,14 @@ public:
     }
     // 将 [begin, end)里的任务加入到协程调度器中运行
     template <typename Iterator>
-    void async(Iterator&& begin, Iterator&& end) {
+    void async(Iterator begin, Iterator end) {
         bool need_tikle = false;
         {
             LOCK_GUARD(mutex_);
             need_tikle = tasks_.empty();
             while (begin != end) {
-                tasks_.emplace_back(std::forward<decltype(&*begin)>(&*begin));
+                // tasks_.emplace_back(std::forward<decltype(&*begin)>(&*begin));
+                tasks_.push_back(std::move(*begin));
                 ++begin;
             }
         }
@@ -90,13 +104,14 @@ private:
         Fiber::ptr fiber  = nullptr;
         detail::__task cb = nullptr;
 
-        template <typename... Args>
-        Task(Args&&... args) : cb(std::forward<Args>(args)...) { }
-        Task(const Fiber::ptr& fiber) : fiber(fiber) { }
-        Task(Fiber::ptr& fiber) : fiber(fiber) { }
-        Task(Fiber::ptr&& f) noexcept : fiber(std::move(f)) { }
-        Task(detail::__task* c) { cb.swap(*c); }
-        Task(Fiber::ptr* f) { fiber.swap(*f); }
+        template <typename... _Args, typename = std::enable_if_t<std::is_invocable_v<_Args&&...>>>
+        Task(_Args&&... args) : cb(std::forward<_Args>(args)...) { }
+
+        template <typename _Fiber, typename = std::enable_if_t<is_fiber_ptr_v<_Fiber>>>
+        Task(_Fiber&& fb) : fiber(std::forward<_Fiber>(fb)) { }
+
+        Task(std::nullptr_t = nullptr) {}
+        
         void reset() {
             fiber = nullptr;
             cb = nullptr;

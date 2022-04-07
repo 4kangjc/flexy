@@ -75,4 +75,21 @@ private:
     // std::function<void()> cb_;
 };
 
+namespace detail {
+
+template <class _Tp, class = void>
+struct is_fiber_ptr {
+    const static bool value = false;
+};
+
+template <>
+struct is_fiber_ptr<Fiber::ptr> {
+    const static bool value = true;
+};
+
+}
+
+template <class _Tp>
+constexpr bool is_fiber_ptr_v = detail::is_fiber_ptr<std::decay_t<_Tp>>::value;
+
 }

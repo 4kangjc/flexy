@@ -4,12 +4,6 @@
 
 namespace flexy::detail {
 
-extern "C" {
-
-int printf(const char* fmt, ...);
-
-}
-
 class __task;
 
 template <class T, typename = void>
@@ -37,14 +31,11 @@ public:
     { }
 
     template <typename _Fn, typename = std::enable_if_t<std::is_invocable_v<_Fn&&> && !is_task_v<_Fn>>>
-    __task(_Fn&& func) : callback_t(std::forward<_Fn>(func)) {
-        // printf("__task create!\n");
-    }
+    __task(_Fn&& func) : callback_t(std::forward<_Fn>(func)) 
+    { }
 
     __task(std::nullptr_t = nullptr) noexcept : callback_t() {}
 
-    // void operator()() const { callback_t(); }
-    // void swap(__task& rhs) noexcept { callback_t::swap(dynamic_cast<callback_t&>(rhs)); }
 };
 
 

@@ -27,21 +27,22 @@ namespace std {
 
 } // namespace std
 
-int main() {
-    // Fiber::GetThis();
-    // Fiber::ptr f = make_shared<Fiber>(0, [](){
-    //     FLEXY_LOG_DEBUG(g_logger) << "Hello fiber!";
-    //     Fiber::Yield();
-    //     // FLEXY_LOG_DEBUG(g_logger);
-    // });
-    // f->resume();
+int main(int argc, char** argv) {
+    Fiber::GetThis();
+    Fiber::ptr f = make_shared<Fiber>([](int argc, char** argv){
+        FLEXY_LOG_DEBUG(g_logger) << "Hello fiber!";
+        Fiber::Yield();
+        for (int i = 1; i < argc; ++i) {
+            FLEXY_LOG_DEBUG(g_logger) << argv[i];
+        }
+    }, argc, argv);
+    f->resume();
 
-    // Fiber::ptr f2(make_shared<Fiber>(0, [](){
-    //     FLEXY_LOG_DEBUG(g_logger) << "Hello fiber2!";
-    // }));
-    // f2->resume();
-    // f->resume();
-
+    Fiber::ptr f2(make_shared<Fiber>(0, [](){
+        FLEXY_LOG_DEBUG(g_logger) << "Hello fiber2!";
+    }));
+    f2->resume();
+    f->resume();
 
     // detail::__task tk([]() {});
     // detail::__task([]() {
@@ -58,11 +59,11 @@ int main() {
     // detail::__task t2(std::move(t));
     // std::function<void()> cb;
 
-    Scheduler iom;
-    iom.start();
-    go [](){
-        FLEXY_LOG_DEBUG(g_logger) << "HELLO GO";
-    };
-    iom.stop();
+    // Scheduler iom;
+    // iom.start();
+    // go [](){
+    //     FLEXY_LOG_DEBUG(g_logger) << "HELLO GO";
+    // };
+    // iom.stop();
 
 }

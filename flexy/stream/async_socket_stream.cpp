@@ -29,7 +29,7 @@ void AsyncSockStream::Ctx::doRsp() {
     if (timed) {
         result = TIMEOUT;
     }
-    scd->async(&fiber);
+    scd->async(std::move(fiber));
 }
 
 AsyncSockStream::AsyncSockStream(const Socket::ptr& sock, bool owner) 
