@@ -34,13 +34,13 @@ Address::ptr Address::Create(const sockaddr* addr, socklen_t addrlen) {
     Address::ptr result;
     switch (addr->sa_family) {
         case AF_INET:
-            result.reset(new IPv4Address(*(const sockaddr_in*)addr));
+            result = std::make_shared<IPv4Address>(*(const sockaddr_in*)addr);
             break;
         case AF_INET6:
-            result.reset(new IPv6Address(*(const sockaddr_in6*)addr));
+            result = std::make_shared<IPv6Address>(*(const sockaddr_in6*)addr);
             break;
         default:
-            result.reset(new UnkownAddress(*addr));
+            result = std::make_shared<UnkownAddress>(*addr);
             break;
     }
     return result;
@@ -179,10 +179,10 @@ Address::GetInterfaceAddress(const std::string& iface, int family) {
     std::vector<std::pair<Address::ptr, uint32_t>> result;
     if (iface.empty() || iface == "*") {
         if (family == AF_INET || family == AF_UNSPEC) {
-            result.emplace_back(new IPv4Address(), 0u);
+            result.emplace_back(std::make_shared<IPv4Address>(), 0u);
         }
         if (family == AF_INET6 || family == AF_UNSPEC) {
-            result.emplace_back(new IPv6Address(), 0u);
+            result.emplace_back(std::make_shared<IPv6Address>(), 0u);
         }
         return result;
     }

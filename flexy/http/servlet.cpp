@@ -17,7 +17,7 @@ int32_t FuncionServlet::handle(const HttpRequest::ptr& request,
 }
 
 ServletDispatch::ServletDispatch()
-: Servlet("ServletDispatch"), default_(new NotFoundServlet) {
+: Servlet("ServletDispatch"), default_(std::make_shared<NotFoundServlet>()) {
 
 }
 

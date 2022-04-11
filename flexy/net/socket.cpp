@@ -324,16 +324,16 @@ Address::ptr Socket::getRemoteAddress() {
     Address::ptr result;
     switch (family_) {
         case AF_INET:
-            result.reset(new IPv4Address());
+            result = std::make_shared<IPv4Address>();
             break;
         case AF_INET6:
-            result.reset(new IPv6Address());
+            result = std::make_shared<IPv6Address>();
             break;
         case AF_UNIX:
-            result.reset(new UnixAddress());
+            result = std::make_shared<UnixAddress>();
             break;
         default:
-            result.reset(new UnkownAddress(family_));
+            result = std::make_shared<UnkownAddress>(family_);
             break;
     }
     socklen_t addrlen = result->getAddrLen();
@@ -358,16 +358,16 @@ Address::ptr Socket::getLocalAddress() {
     Address::ptr result;
     switch (family_) {
         case AF_INET:
-            result.reset(new IPv4Address());
+            result = std::make_shared<IPv4Address>();
             break;
         case AF_INET6:
-            result.reset(new IPv6Address());
+            result = std::make_shared<IPv6Address>();
             break;
         case AF_UNIX:
-            result.reset(new UnixAddress());
+            result = std::make_shared<UnixAddress>();
             break;
         default:
-            result.reset(new UnkownAddress(family_));
+            result = std::make_shared<UnkownAddress>(family_);
             break;
     }
     socklen_t addrlen = result->getAddrLen();

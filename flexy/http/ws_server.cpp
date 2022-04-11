@@ -12,7 +12,8 @@ WSServer::WSServer(IOManager* worker, IOManager* io_worker, IOManager* accept_wo
 
 void WSServer::handleClient(const Socket::ptr& client) {
     FLEXY_LOG_DEBUG(g_logger) << *client;
-    WSSession::ptr session(new WSSession(client));
+    // WSSession::ptr session(new WSSession(client));
+    auto session = std::make_shared<WSSession>(client);
     do {
         auto header = session->handleShake();
         if (!header) {
