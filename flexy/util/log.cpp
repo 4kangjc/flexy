@@ -459,7 +459,7 @@ void LogFormatter::init() {
     }
     static std::unordered_map<std::string, std::function<FormatItem::ptr(std::string_view)>> s_format_items = {
     #define XX(str, C) \
-        {#str, [](std::string_view fmt) { return FormatItem::ptr(new C(fmt)); } }
+        {#str, [](std::string_view fmt) { return std::make_shared<C>(fmt); } }
         XX(m, MessageFormatItem),           // %m 消息体
         XX(p, LevelFormatItem),             // %p level
         XX(r, ElapseFormatItem),            // %r 启动后的时间
@@ -479,11 +479,11 @@ void LogFormatter::init() {
 
     for (auto& [str, format, type] : vec) {
         if (type == 0) {
-            items_.push_back(FormatItem::ptr(new StringFormatItem(str)));
+            items_.push_back(std::make_shared<StringFormatItem>(str));
         } else {
             auto it = s_format_items.find(str);
             if (it == s_format_items.end()) {
-                items_.push_back(FormatItem::ptr(new StringFormatItem("<<error_format %" + str + ">>")));
+                items_.push_back(std::make_shared<StringFormatItem>("<<error_format % " + str + ">>"));
                 error_ = true;
             } else {
                 items_.push_back(it->second(format));
@@ -509,7 +509,7 @@ std::ostream& LogFormatter::format(std::ostream& os, Logger::ptr& logger, LogCon
 
 /************************* LogManager  ************************************/
 LoggerManager::LoggerManager() : root_(new Logger) {
-    root_->addAppender(LogAppender::ptr(new StdoutLogAppender));
+    root_->addAppender(std::make_shared<StdoutLogAppender>());
     loggers_[root_->name_] = root_;
 }
 
@@ -831,13 +831,13 @@ struct LogIniter {
                 LogAppender::ptr ap;
                 switch (a.type) {
                     case 1 : 
-                        ap.reset(new FileLogAppender(a.fist));
+                        ap = std::make_shared<FileLogAppender>(a.fist);
                         break;
                     case 2 :
-                        ap.reset(new StdoutLogAppender);
+                        ap = std::make_shared<StdoutLogAppender>();
                         break;
                     case 3 :
-                        ap.reset(new ServerLogAppender(a.fist));
+                        ap = std::make_shared<ServerLogAppender>(a.fist);
                         break;
                     default:
                         break;

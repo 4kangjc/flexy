@@ -171,7 +171,8 @@ WSFrameMessage::ptr WSRecvMessage(Stream* stream, bool client) {
 
                 if (ws_head.fin) {
                     FLEXY_LOG_DEBUG(g_logger) << data;
-                    return WSFrameMessage::ptr(new WSFrameMessage(opcode, std::move(data))); 
+                    // return WSFrameMessage::ptr(new WSFrameMessage(opcode, std::move(data))); 
+                    return std::make_unique<WSFrameMessage>(opcode, std::move(data));
                 }
 
                 break;

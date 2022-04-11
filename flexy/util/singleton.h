@@ -17,7 +17,7 @@ template <typename T>
 class SingletonPtr {
 public: 
     static std::shared_ptr<T> GetInstance() {
-        static std::shared_ptr<T> v(new T);
+        static auto v = std::make_shared<T>();
         return v;
     }
 };
