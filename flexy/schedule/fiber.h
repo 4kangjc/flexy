@@ -59,7 +59,7 @@ public:
     static uint64_t GetFiberId();                               // 获得当前协程id
 private:
     void _M_return() const;                                     // 协程返回
-public:
+private:
     uint64_t id_ = 0;              // 协程id
     uint32_t stacksize_ = 0;       // 协程栈大小
     State state_ = READY;          // 协程状态

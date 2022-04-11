@@ -21,7 +21,6 @@ using StackAllocator = MallocStackAllocator;
 
 
 Fiber* MallocFiber(size_t& __first) {
-    FLEXY_LOG_DEBUG(g_logger) << "make_shared!";
     __first = __first ? __first : g_fiber_stack_size->getValue();
     
     Fiber* fiber = (Fiber*)StackAllocator::Alloc(sizeof(Fiber) + __first);
