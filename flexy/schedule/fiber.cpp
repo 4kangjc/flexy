@@ -19,6 +19,24 @@ static auto g_fiber_stack_size = Config::Lookup("fiber.stack_size", 128u * 1024u
 
 using StackAllocator = MallocStackAllocator;
 
+
+Fiber* MallocFiber(size_t& __first) {
+    FLEXY_LOG_DEBUG(g_logger) << "make_shared!";
+    __first = __first ? __first : g_fiber_stack_size->getValue();
+    
+    Fiber* fiber = (Fiber*)StackAllocator::Alloc(sizeof(Fiber) + __first);
+    // new (fiber) Fiber(__first, std::forward<_Args>(__args)...);
+    return fiber;
+}
+
+
+std::shared_ptr<Fiber> FreeFiber(Fiber* fiber) {
+    return std::shared_ptr<Fiber>(fiber, [](Fiber* fiber) {
+        fiber->~Fiber();
+        StackAllocator::Dealloc(fiber, 0);
+    }); 
+}
+
 Fiber::Fiber() {
     state_ = EXEC;
     SetThis(this);
@@ -27,24 +45,14 @@ Fiber::Fiber() {
     FLEXY_LOG_DEBUG(g_logger) << "Fiber::Fiber main";
 }
 
-// Fiber::Fiber(std::function<void()>&& cb, size_t stacksize)
-//         : id_(++s_fiber_id), cb_(std::move(cb)) {
-//     ++s_fiber_count;
-//     stacksize_ = stacksize ? stacksize : g_fiber_stack_size->getValue();
-
-//     stack_ = StackAllocator::Alloc(stacksize_);
-
-//     ctx_ = make_fcontext((char*)stack_ + stacksize_, stacksize_, &Fiber::MainFunc);
-//     FLEXY_LOG_DEBUG(g_logger) << "Fiber::Fiber id = " << id_;
-// }
-
 Fiber::Fiber(size_t stacksize, detail::__task&& task) 
     : id_(++s_fiber_id), cb_(std::move(task))
 {
     ++s_fiber_count;
-    stacksize_ = stacksize ? stacksize : g_fiber_stack_size->getValue();
+    // stacksize_ = stacksize ? stacksize : g_fiber_stack_size->getValue();
+    stacksize_ = stacksize;
 
-    stack_ = StackAllocator::Alloc(stacksize_);
+    // stack_ = StackAllocator::Alloc(stacksize_);
 
     ctx_ = make_fcontext((char*)stack_ + stacksize_, stacksize_, &Fiber::MainFunc);
 
@@ -53,9 +61,9 @@ Fiber::Fiber(size_t stacksize, detail::__task&& task)
 
 Fiber::~Fiber() {
     --s_fiber_count;
-    if (stack_) {                                          // 子协程
+    if (stacksize_) {                                          // 子协程
         FLEXY_ASSERT(state_ != EXEC);
-        StackAllocator::Dealloc(stack_, stacksize_);
+        // StackAllocator::Dealloc(stack_, stacksize_);
     } else {
         FLEXY_ASSERT2(state_ == EXEC, "m_state = " << state_);   // 主协程一定在运行
 
@@ -104,7 +112,7 @@ void Fiber::yield() {
 }
 
 void Fiber::_M_return() const {
-    FLEXY_ASSERT(state_ == Fiber::TERM);
+    FLEXY_ASSERT2(state_ == Fiber::TERM, "state = " << state_);
     SetThis(t_threadFiber.get());
     t_threadFiber->state_ = EXEC;
     // t_threadFiber->ctx_ = jump_fcontext(t_threadFiber->ctx_, nullptr).fctx;

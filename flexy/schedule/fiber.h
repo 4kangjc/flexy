@@ -26,25 +26,19 @@ public:
     friend class Scheduler;
     friend transfer_t ontop_callback(transfer_t);
 
+    template <typename _First, typename... _Args>
+    friend std::shared_ptr<Fiber> fiber_make_shared(_First&& __first, _Args&&... __args);
+
     enum State {
         READY,          // 就绪状态
         EXEC,           // 执行状态
         TERM,           // 结束状态
         EXCEPT,         // 异常状态
     };
-public:
-    // static auto Create()
-    // Fiber(std::function<void()>&& cb, size_t stacksize = 0);
-    // Fiber(const std::function<void()>& cb, size_t stacksize = 0) 
-    //     : Fiber(std::function<void()>(cb), stacksize) { }
-protected:
-    Fiber();                            // 主协程构造函数
-    Fiber(std::size_t stacksize, detail::__task&& cb);
 
-    template <typename... _Args, typename = std::enable_if_t<std::is_invocable_v<_Args&&...>>>
-    Fiber(_Args&&... args)    
-        : Fiber(0, detail::__task(std::forward<_Args>(args)...)) 
-    {}
+private:
+    explicit Fiber(std::size_t stacksize, detail::__task&& cb); // 子协程构造函数
+    explicit Fiber();                                           // 主协程构造函数
 public:
     ~Fiber();
 
@@ -65,15 +59,41 @@ public:
     static uint64_t GetFiberId();                               // 获得当前协程id
 private:
     void _M_return() const;                                     // 协程返回
-private:
+public:
     uint64_t id_ = 0;              // 协程id
     uint32_t stacksize_ = 0;       // 协程栈大小
     State state_ = READY;          // 协程状态
     fcontext_t ctx_;               // 协程上下文
-    void* stack_ = nullptr;        // 协程栈首指针
     detail::__task cb_;            // 协程执行函数
-    // std::function<void()> cb_;
+    char stack_[];                 // 协程栈首指针
 };
+
+
+template <typename _First, typename... _Args>
+std::shared_ptr<Fiber> fiber_make_shared(_First&& __first, _Args&&... __args) {
+
+extern Fiber* MallocFiber(size_t& stacksize);
+extern std::shared_ptr<Fiber> FreeFiber(Fiber* fiber);
+
+    if constexpr (std::is_integral_v<_First>) {
+        size_t stacksize = __first > 0 ? __first : 0;
+        Fiber* fiber = MallocFiber(stacksize);
+        new (fiber) Fiber(stacksize, detail::__task(std::forward<_Args>(__args)...));
+
+        return FreeFiber(fiber);
+    } else {
+        size_t stacksize = 0;
+        Fiber* fiber = MallocFiber(stacksize);
+        new (fiber) Fiber(stacksize, detail::__task(std::forward<_First>(__first), std::forward<_Args>(__args)...));
+
+        return FreeFiber(fiber);
+    }
+}
+
+template <typename _Fiber, typename... _Args>
+std::enable_if_t<std::is_same_v<_Fiber, Fiber>, Fiber::ptr> make_shared(_Args&&... __args) {
+    return fiber_make_shared(std::forward<_Args>(__args)...);
+}
 
 namespace detail {
 
