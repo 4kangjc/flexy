@@ -106,7 +106,7 @@ void Scheduler::run() {
     // if (GetThreadId() != rootThreadId_) {                   // 非主线程
         Fiber::GetThis();
     // }
-    auto idle_fiber(make_shared<Fiber>([this]() { idle_(); } ));
+    auto idle_fiber(fiber_make_shared([this]() { idle_(); } ));
     // auto idle_fiber(std::make_shared<Fiber>(std::bind(&Scheduler::idle, this)));
     Fiber::ptr cb_fiber;
     
@@ -144,7 +144,7 @@ void Scheduler::run() {
                 // cb_fiber->reset(tk.cb);
             } else {
                 // cb_fiber.reset(new Fiber(std::move(tk.cb)));
-                cb_fiber = flexy::make_shared<Fiber>(std::move(tk.cb));
+                cb_fiber = fiber_make_shared(std::move(tk.cb));
             }
             cb_fiber->resume();
             --activeThreadCount_;

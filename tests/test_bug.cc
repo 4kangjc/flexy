@@ -1,6 +1,5 @@
 #include <flexy/flexy.h>
 #include <variant>
-#include "flexy/util/memory.h"
 
 
 using namespace flexy;
@@ -29,7 +28,7 @@ namespace std {
 
 int main(int argc, char** argv) {
     Fiber::GetThis();
-    Fiber::ptr f = make_shared<Fiber>([](int argc, char** argv){
+    Fiber::ptr f = fiber_make_shared([](int argc, char** argv){
         FLEXY_LOG_DEBUG(g_logger) << "Hello fiber!";
         Fiber::Yield();
         for (int i = 1; i < argc; ++i) {
@@ -43,6 +42,7 @@ int main(int argc, char** argv) {
     }));
     f2->resume();
     f->resume();
+    // std::cout << sizeof(std::enable_shared_from_this<Fiber>);
 
     // detail::__task tk([]() {});
     // detail::__task([]() {

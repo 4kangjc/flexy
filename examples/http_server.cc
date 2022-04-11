@@ -11,14 +11,19 @@ void run() {
         FLEXY_LOG_ERROR(g_logger) << "get address error";
         return;
     }
+
     auto http_server = std::make_shared<http::HttpServer>(true);
 
     while (!http_server->bind(addr)) {}
     http_server->start();
 }
 
-int main() {
+int main(int argc, char** argv) {
     g_logger->setLevel(LogLevel::INFO);
-    IOManager iom;
+    int count = 1;
+    if (argc > 1) {
+        count = atoi(argv[1]);
+    }
+    IOManager worker(count, true, "worker");
     go run;
 }
