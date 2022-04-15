@@ -31,11 +31,10 @@ Scheduler::Scheduler(size_t threads, bool use_caller, std::string_view name) : n
         while (!stopping()) {
             Fiber::Yield();
         }
-        FLEXY_LOG_DEBUG(g_logger) << "idle fiber finish!!!";
     };
 
     tickle_ = []() {
-        FLEXY_LOG_INFO(g_logger) << "tickle";
+        FLEXY_LOG_DEBUG(g_logger) << "tickle";
     };
 }
 
