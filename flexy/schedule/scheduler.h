@@ -97,6 +97,7 @@ private:
         Task(const Fiber::ptr& fiber) : fiber(fiber) { }
         Task(Fiber::ptr& fiber) : fiber(fiber) { }
         Task(Fiber::ptr&& f) noexcept : fiber(std::move(f)) { }
+        Task(const Fiber::ptr&& f) noexcept : fiber(std::move(f)) { }
         Task(__task* c) { cb.swap(*c); }
         Task(Fiber::ptr* f) { fiber.swap(*f); }
         void reset() {
