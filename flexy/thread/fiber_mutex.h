@@ -18,7 +18,7 @@ public:
     void unlock();
 private:
     bool locked_ = false;
-    mutable mutex mutex_;
+    mutable Spinlock mutex_;
     std::deque<std::pair<Scheduler*, Fiber::ptr>> waiters_;
 };
 

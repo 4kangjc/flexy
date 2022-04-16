@@ -8,7 +8,7 @@ template <typename _Tp>
 class BlockingQueue {
 public:
     using ptr = std::shared_ptr<BlockingQueue>;
-    using data_type = std::shared_ptr<T>;
+    using data_type = std::shared_ptr<_Tp>;
 
     size_t push(const data_type& data) {
         size_t size = 0;

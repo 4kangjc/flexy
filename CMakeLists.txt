@@ -3,7 +3,7 @@ project(flexy)
 
 include (cmake/utils.cmake)
 
-set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O0 -ggdb -std=c++17 -Wall -Wno-deprecated -Werror -Wno-unused-function -Wno-builtin-macro-redefined -Wno-deprecated-declarations")
+set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O3 -ggdb -std=c++17 -Wall -Wno-deprecated -Werror -Wno-unused-function -Wno-builtin-macro-redefined -Wno-deprecated-declarations")
 
 include_directories(./)
 
@@ -120,6 +120,8 @@ flexy_add_executable(test_worker "tests/test_worker.cc" "${LIBS}")
 flexy_add_executable(test_hash_util "tests/test_hash_util.cc" "${LIBS}")
 flexy_add_executable(test_ws_server "tests/test_ws_server.cc" "${LIBS}")
 
+flexy_add_executable(test_fiber_mutex "tests/test_fiber_mutex.cc" "${LIBS}")
+flexy_add_executable(test_this_fiber "tests/test_this_fiber.cc" "${LIBS}")
 
 flexy_add_executable(echo_server "examples/echo_server.cc" "${LIBS}")
 flexy_add_executable(chat_room "examples/chat_room.cc" "${LIBS}")
@@ -127,7 +129,6 @@ flexy_add_executable(http_server "examples/http_server.cc" "${LIBS}")
 endif(TESTS)
 
 flexy_add_executable(test_bug "tests/test_bug.cc" "${LIBS}")
-flexy_add_executable(test_fiber_mutex "tests/test_fiber_mutex.cc" "${LIBS}")
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
