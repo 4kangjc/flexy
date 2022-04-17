@@ -25,6 +25,7 @@ public:
     using ptr = std::shared_ptr<Fiber>;
     friend class Scheduler;
     friend transfer_t ontop_callback(transfer_t);
+    friend transfer_t ontop_callback2(transfer_t);
 
     template <typename _First, typename... _Args>
     friend std::shared_ptr<Fiber> fiber_make_shared(_First&& __first, _Args&&... __args);
@@ -42,10 +43,17 @@ private:
 public:
     ~Fiber();
 
-    void reset(std::function<void()>&& cb);                      // 重置协程函数 并重置协程状态
-    void reset(const std::function<void()>& cb) { return reset(std::function<void()>(cb)); }
+    template <class... _Args, typename = std::enable_if_t<std::is_invocable_v<_Args&&...>>>
+    void reset(_Args&&... __args) { 
+        return reset(__task(std::forward<_Args>(__args)...)); 
+    }
+
+    template <class... _Args, typename = std::enable_if_t<std::is_invocable_v<_Args&&...>>>
+    void yield_callback(_Args&&... __args) { 
+        return yield_callback(__task(std::forward<_Args>(__args)...)); 
+    }
+
     void yield();                                               // 让出执行权
-    void yield_callback(std::function<void()>&& cb);            // 让出执行权后回调一个函数
     void resume();                                              // 进入协程
 
     uint64_t getId() const { return id_; }                      // 返回协程id
@@ -58,6 +66,8 @@ public:
     static void MainFunc(transfer_t);                           // 协程执行函数体
     static uint64_t GetFiberId();                               // 获得当前协程id
 private:
+    void reset(detail::__task&& cb);                            // 重置协程函数 并重置协程状态
+    void yield_callback(detail::__task&& cb);                   // 让出执行权后回调一个函数
     void _M_return() const;                                     // 协程返回
 private:
     uint64_t id_ = 0;              // 协程id

@@ -74,7 +74,7 @@ Fiber::~Fiber() {
 }
 
 
-void Fiber::reset(std::function<void()>&& cb) {
+void Fiber::reset(detail::__task&& cb) {
     FLEXY_ASSERT(stack_);                            // 子协程才能重置
     FLEXY_ASSERT(state_ != EXEC);                    // 没有在运行
     cb_ = std::move(cb);
@@ -98,6 +98,23 @@ transfer_t ontop_callback(transfer_t from) {
     fiber->state_ = Fiber::READY;
     
     return from;
+}
+
+transfer_t ontop_callback2(transfer_t from) {
+    auto* task = (detail::__task*)(from.data);
+    t_fiber->state_ = Fiber::READY;
+    Fiber::SetThis(t_threadFiber.get());
+    t_fiber->state_ = Fiber::EXEC;
+
+    task->operator()();
+
+    return from;
+}
+
+void Fiber::yield_callback(detail::__task&& cb) {
+    FLEXY_ASSERT(state_ != READY);
+    auto p = ontop_fcontext(t_threadFiber->ctx_, &cb, ontop_callback2);
+    t_threadFiber->ctx_ = p.fctx;
 }
 
 void Fiber::yield() {

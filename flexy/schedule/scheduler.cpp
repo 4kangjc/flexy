@@ -11,7 +11,7 @@ Scheduler::Scheduler(size_t threads, bool use_caller, std::string_view name) : n
     FLEXY_ASSERT(threads > 0);
 
     if (use_caller) {
-        // Fiber::GetThis();
+        Fiber::GetThis();
         --threads;
 
         FLEXY_ASSERT(t_scheduler == nullptr);
@@ -102,9 +102,9 @@ void Scheduler::run() {
     FLEXY_LOG_DEBUG(g_logger) << name_ << " run";
     set_hook_enable(true);                          // 启用hook
     setThis();
-    // if (GetThreadId() != rootThreadId_) {                   // 非主线程
+    if (GetThreadId() != rootThreadId_) {                   // 非主线程
         Fiber::GetThis();
-    // }
+    }
     auto idle_fiber(fiber_make_shared([this]() { idle_(); } ));
     // auto idle_fiber(std::make_shared<Fiber>(std::bind(&Scheduler::idle, this)));
     Fiber::ptr cb_fiber;
