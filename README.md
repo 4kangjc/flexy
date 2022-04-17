@@ -17,7 +17,7 @@
 `ragel version 6.10`  
 
 * 编译依赖   
-`sudo pacman -S boost yaml-cpp jsoncpp fmt ragel mbedtls mysql sqlite ttb`  
+`sudo pacman -S boost yaml-cpp jsoncpp fmt ragel mbedtls mysql sqlite tbb`  
 
 * 编译安装
 ```shell
