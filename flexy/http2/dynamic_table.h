@@ -9,7 +9,7 @@ namespace flexy::http2 {
 class DynamicTable {
 public:
     DynamicTable();
-    int32_t updata(std::string_view name, std::string_view value);
+    int32_t update(std::string_view name, std::string_view value);
     int32_t findIndex(std::string_view name) const;
     std::pair<int32_t, bool> findPair(std::string_view name, std::string_view value);
     std::pair<std::string_view, std::string_view> getPair(uint32_t idx) const;

@@ -108,7 +108,7 @@ std::pair<int32_t, bool> DynamicTable::GetStaticHeadersPair(std::string_view nam
 
 DynamicTable::DynamicTable() : maxDataSize_(4096), dataSize_(0) { }
 
-int32_t DynamicTable::updata(std::string_view name, std::string_view val) {
+int32_t DynamicTable::update(std::string_view name, std::string_view val) {
     int len = name.length() + val.length() + 32;                // why add 32 ?
     int idx = 0;
     while (dataSize_ + len > maxDataSize_ && !datas_.empty()) {
