@@ -8,10 +8,10 @@ class SockStream : public Stream {
 public:
     SockStream(const Socket::ptr& sock, bool owner);
     ~SockStream();
-    /*virtual*/ int read(void* buffer, size_t length) override;
-    
-    /*virtual*/ int write(const void* buffer, size_t length) override;
-
+    /*virtual*/ ssize_t read(void* buffer, size_t length) override;
+                ssize_t read(const ByteArray::ptr& ba, size_t length) override;
+    /*virtual*/ ssize_t write(const void* buffer, size_t length) override;
+                ssize_t write(const ByteArray::ptr& ba, size_t length)  override;
     virtual void close() override;
 
     auto& getSocket() const { return sock_; }

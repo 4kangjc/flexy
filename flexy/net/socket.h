@@ -63,19 +63,19 @@ public:
     bool listen(int backlog = SOMAXCONN);
     bool close();
 
-    int send(const void* buffer, size_t length, int flags = 0);
-    int send(std::string_view s, int flags = 0);
-    int send(const iovec* buffer, size_t length, int flags = 0);
-    int sendTo(const void* buffer, size_t length, const Address::ptr& to, int flags = 0);
-    int sendTo(std::string_view s, const Address::ptr& to, int flags = 0);
-    int sendTo(const iovec* buffer,  size_t length, const Address::ptr& to, int flags = 0);
+    ssize_t send(const void* buffer, size_t length, int flags = 0);
+    ssize_t send(std::string_view s, int flags = 0);
+    ssize_t send(const iovec* buffer, size_t length, int flags = 0);
+    ssize_t sendTo(const void* buffer, size_t length, const Address::ptr& to, int flags = 0);
+    ssize_t sendTo(std::string_view s, const Address::ptr& to, int flags = 0);
+    ssize_t sendTo(const iovec* buffer,  size_t length, const Address::ptr& to, int flags = 0);
 
-    int recv(void* buffer, size_t length, int flags = 0);
-    int recv(std::string& s, int flags = 0);
-    int recv(iovec* buffer, size_t length, int flags = 0);
-    int recvFrom(void* buffer, size_t length, Address::ptr& from, int flags = 0);
-    int recvFrom(std::string& s, Address::ptr& from, int flags = 0);
-    int recvFrom(iovec* buffer, size_t length, Address::ptr& from, int flags = 0);
+    ssize_t recv(void* buffer, size_t length, int flags = 0);
+    ssize_t recv(std::string& s, int flags = 0);
+    ssize_t recv(iovec* buffer, size_t length, int flags = 0);
+    ssize_t recvFrom(void* buffer, size_t length, Address::ptr& from, int flags = 0);
+    ssize_t recvFrom(std::string& s, Address::ptr& from, int flags = 0);
+    ssize_t recvFrom(iovec* buffer, size_t length, Address::ptr& from, int flags = 0);
 
     Address::ptr getRemoteAddress();
     Address::ptr getLocalAddress();
@@ -96,11 +96,11 @@ public:
     bool cancelWrite();
     bool cancelAccept();
     bool cancelAll();
-private:
+protected:
     void initSock();
     void newSock();
     bool init(int sock);
-private:
+protected:
     int sock_;
     int family_;
     int type_;

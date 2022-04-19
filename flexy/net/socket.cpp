@@ -211,15 +211,15 @@ bool Socket::close() {
     return false;
 }
 
-int Socket::send(const void* buffer, size_t length, int flags) {
+ssize_t Socket::send(const void* buffer, size_t length, int flags) {
     if (isConnected_) {
         return ::send(sock_, buffer, length, flags);
     }
     return -1;
 }
 
-int Socket::send(std::string_view s, int flags) {
-    int rt = send(s.data(), s.size(), flags);
+ssize_t Socket::send(std::string_view s, int flags) {
+    ssize_t rt = send(s.data(), s.size(), flags);
     if (rt < 0) {
         FLEXY_LOG_INFO(g_logger) << "sock = " << sock_ << " send error,"
         " errrno = " << errno << ", errstr = " << strerror(errno);
@@ -227,7 +227,7 @@ int Socket::send(std::string_view s, int flags) {
     return rt;
 }
 
-int Socket::send(const iovec* buffer, size_t length, int flags) {
+ssize_t Socket::send(const iovec* buffer, size_t length, int flags) {
     if (isConnected_) {
         msghdr msg;
         memset(&msg, 0, sizeof(msg));
@@ -238,18 +238,18 @@ int Socket::send(const iovec* buffer, size_t length, int flags) {
     return -1;
 }
  
-int Socket::sendTo(const void* buffer, size_t length, const Address::ptr& to, int flags) {
+ssize_t Socket::sendTo(const void* buffer, size_t length, const Address::ptr& to, int flags) {
     if (isConnected_) {
         return ::sendto(sock_, buffer, length, flags, to->getAddr(), to->getAddrLen());
     }
     return -1;
 }
 
-int Socket::sendTo(std::string_view s, const Address::ptr& to, int flags) {
+ssize_t Socket::sendTo(std::string_view s, const Address::ptr& to, int flags) {
     return sendTo(s.data(), s.size(), to, flags);
 }
 
-int Socket::sendTo(const iovec* buffer,  size_t length, const Address::ptr& to, int flags) {
+ssize_t Socket::sendTo(const iovec* buffer,  size_t length, const Address::ptr& to, int flags) {
     if (isConnected_) {
         msghdr msg;
         memset(&msg, 0, sizeof(msg));
@@ -262,15 +262,15 @@ int Socket::sendTo(const iovec* buffer,  size_t length, const Address::ptr& to, 
     return -1;
 }
 
-int Socket::recv(void* buffer, size_t length, int flags) {
+ssize_t Socket::recv(void* buffer, size_t length, int flags) {
     if (isConnected_) {
         return ::recv(sock_, buffer, length, flags);
     }
     return -1;
 }
 
-int Socket::recv(std::string& s, int flags) {
-    int rt = recv(s.data(), s.size(), flags);
+ssize_t Socket::recv(std::string& s, int flags) {
+    ssize_t rt = recv(s.data(), s.size(), flags);
     if (rt < 0) {
         FLEXY_LOG_INFO(g_logger) << "sock = " << sock_ << " recv error,"
         " errrno = " << errno << ", errstr = " << strerror(errno);
@@ -280,7 +280,7 @@ int Socket::recv(std::string& s, int flags) {
     return rt;
 }
 
-int Socket::recv(iovec* buffer, size_t length, int flags) {
+ssize_t Socket::recv(iovec* buffer, size_t length, int flags) {
     if (isConnected_) {
         msghdr msg;
         memset(&msg, 0, sizeof(msg));
@@ -291,7 +291,7 @@ int Socket::recv(iovec* buffer, size_t length, int flags) {
     return -1;
 }
 
-int Socket::recvFrom(void* buffer, size_t length, Address::ptr& from, int flags) {
+ssize_t Socket::recvFrom(void* buffer, size_t length, Address::ptr& from, int flags) {
     if (isConnected_) {
         socklen_t len = from->getAddrLen();
         return ::recvfrom(sock_, buffer, length, flags, from->getAddr(), &len);
@@ -299,11 +299,11 @@ int Socket::recvFrom(void* buffer, size_t length, Address::ptr& from, int flags)
     return -1;
 }
 
-int Socket::recvFrom(std::string& s, Address::ptr& from, int flags) {
+ssize_t Socket::recvFrom(std::string& s, Address::ptr& from, int flags) {
     return recvFrom(s.data(), s.size(), from, flags);
 }
 
-int Socket::recvFrom(iovec* buffer, size_t length, Address::ptr& from, int flags) {
+ssize_t Socket::recvFrom(iovec* buffer, size_t length, Address::ptr& from, int flags) {
     if (isConnected_) {
         msghdr msg;
         memset(&msg, 0, sizeof(msg));
