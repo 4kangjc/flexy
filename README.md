@@ -138,10 +138,10 @@ int main(int argc, char** argv) {
 ```
 
 ## TODO
-- http2
-- tls
-- rpc
-- gdb调试协程插件
+- [http2](https://github.com/4kangjc/flexy/tree/dev/flexy/http2) 
+- tls **[mbedtls/openssl]**
+- rpc **[protobuf/json]**
+- [gdb调试协程插件](https://github.com/Tencent/flare/blob/master/flare/doc/gdb-plugin.md)
 
 
 ## 致谢
