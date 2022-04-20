@@ -1,9 +1,9 @@
 #pragma once
 
 #include "flexy/util/noncopyable.h"
-#include "flexy/thread/fibersem.h"
 #include "flexy/util/log.h"
 #include "iomanager.h"
+#include "semaphore.h"
 #include <map>
 
 namespace flexy {
@@ -54,7 +54,7 @@ private:
     uint32_t batchSize_;
     bool finish_;
     Scheduler* scheduler_;
-    FiberSemaphore sem_;
+    fiber::Semaphore sem_;
 };
 
 

@@ -14,7 +14,7 @@ public:
 };
 
 
-flexy::FiberSemaphore fsem;
+flexy::fiber::Semaphore fsem;
 
 void test_sem1() {
     FLEXY_LOG_INFO(g_logger) << "test1 wait";

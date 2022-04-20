@@ -3,7 +3,7 @@ project(flexy)
 
 include (cmake/utils.cmake)
 
-set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O3 -ggdb -std=c++17 -Wall -Wno-deprecated -Werror -Wno-unused-function -Wno-builtin-macro-redefined -Wno-deprecated-declarations")
+set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O0 -ggdb -std=c++17 -Wall -Wno-deprecated -Werror -Wno-unused-function -Wno-builtin-macro-redefined -Wno-deprecated-declarations")
 
 include_directories(./)
 
@@ -34,7 +34,7 @@ set(LIB_SRC
     flexy/env/env.cpp
     flexy/env/daemon.cpp
     flexy/env/application.cpp
-    flexy/thread/fibersem.cpp
+    flexy/schedule/semaphore.cpp 
     flexy/schedule/async_io.cpp
     flexy/db/mysql.cpp
     flexy/db/sqlite3.cpp
@@ -45,7 +45,15 @@ set(LIB_SRC
     flexy/http/ws_servlet.cpp
     flexy/http/ws_server.cpp
     flexy/http2/dynamic_table.cpp
-    flexy/thread/fiber_mutex.cpp
+    flexy/schedule/mutex.cpp 
+    flexy/net/bytearray.cpp
+    flexy/http2/huffman.cpp
+    flexy/http2/frame.cpp
+    flexy/http2/hpack.cpp
+    # flexy/http2/stream.cpp 
+    # flexy/http2/http2_stream.cpp 
+    # flexy/http2/http2_server.cpp
+    # flexy/schedule/condition_variable.cpp
 )
 
 ragelmaker(flexy/http/http11_parser.rl LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/flexy/http)
@@ -126,6 +134,9 @@ flexy_add_executable(test_this_fiber "tests/test_this_fiber.cc" "${LIBS}")
 flexy_add_executable(echo_server "examples/echo_server.cc" "${LIBS}")
 flexy_add_executable(chat_room "examples/chat_room.cc" "${LIBS}")
 flexy_add_executable(http_server "examples/http_server.cc" "${LIBS}")
+
+flexy_add_executable(fiber "examples/fiber.cc" "${LIBS}")
+
 endif(TESTS)
 
 

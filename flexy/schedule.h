@@ -8,3 +8,5 @@
 #include "schedule/scheduler.h"
 #include "schedule/timer.h"
 #include "schedule/this_fiber.h"
+#include "schedule/mutex.h"
+#include "schedule/semaphore.h"

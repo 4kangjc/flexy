@@ -3,7 +3,7 @@
 #include "socket_stream.h"
 #include "flexy/net/socket.h"
 #include "flexy/schedule/iomanager.h"
-#include "flexy/thread/fibersem.h"
+#include "flexy/schedule/semaphore.h"
 #include <memory>
 #include <functional>
 #include <deque>
@@ -92,6 +92,7 @@ protected:
     virtual void startWrite();
     virtual void onTimeOut(const Ctx::ptr& ctx);
     virtual Ctx::ptr doRecv() = 0;
+    virtual void onClose() { }
 
     Ctx::ptr getCtx(uint32_t sn);
     Ctx::ptr getAndDelCtx(uint32_t sn);
@@ -121,8 +122,8 @@ protected:
     bool waitFiber();
 
 protected:
-    FiberSemaphore sem_;
-    FiberSemaphore waitSem_;
+    fiber::Semaphore sem_;
+    fiber::Semaphore waitSem_;
     rw_mutex queueMutex_;
     std::deque<SendCtx::ptr> queue_;
     rw_mutex mutex_;
@@ -130,6 +131,7 @@ protected:
 
     uint32_t sn_;
     bool autoConnect_;
+    // uint16_t tryConnectCount_;
     Timer::ptr timer_;
     IOManager* iomanager_;
     IOManager* worker_;

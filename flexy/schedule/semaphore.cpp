@@ -1,14 +1,14 @@
-#include "fibersem.h"
+#include "semaphore.h"
 #include "flexy/schedule/scheduler.h"
 #include "flexy/util/macro.h"
 
-namespace flexy {
+namespace flexy::fiber {
 
-FiberSemaphore::~FiberSemaphore() {
+Semaphore::~Semaphore() {
     FLEXY_ASSERT(waiters_.empty());
 }
 
-bool FiberSemaphore::tryWait() {
+bool Semaphore::tryWait() {
     FLEXY_ASSERT(Scheduler::GetThis());
     {
         LOCK_GUARD(mutex_);
@@ -20,7 +20,7 @@ bool FiberSemaphore::tryWait() {
     }
 }
 
-void FiberSemaphore::wait() {
+void Semaphore::wait() {
     FLEXY_ASSERT(Scheduler::GetThis());
     {
         LOCK_GUARD(mutex_);
@@ -33,7 +33,7 @@ void FiberSemaphore::wait() {
     Fiber::Yield();
 }
 
-void FiberSemaphore::post() {
+void Semaphore::post() {
     LOCK_GUARD(mutex_);
     if (!waiters_.empty()) {
         auto&& [scheduler, fiber] = std::move(waiters_.front());    // reference

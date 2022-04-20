@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fibersem.h"
+#include "flexy/schedule/semaphore.h"
 
 namespace flexy {
 
@@ -39,7 +39,7 @@ public:
         return datas_.empty();
     }
 private:
-    FiberSemaphore sem_;
+    fiber::Semaphore sem_;
     mutable Spinlock mutex_;
     std::deque<data_type> datas_;
 };

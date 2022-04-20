@@ -1,4 +1,4 @@
-#include <flexy/thread/fiber_mutex.h>
+#include <flexy/schedule/mutex.h>
 #include <flexy/schedule/iomanager.h>
 #include <flexy/util/log.h>
 
@@ -6,7 +6,7 @@ static auto& g_logger = FLEXY_LOG_ROOT();
 
 int sum;
 
-flexy::FiberMutex mutex;
+flexy::fiber::mutex mutex;
 // flexy::NullMutex mutex;
 // flexy::mutex mutex;
 

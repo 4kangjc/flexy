@@ -2,7 +2,7 @@
 
 #include "flexy/util/noncopyable.h"
 #include "flexy/schedule/fiber.h"
-#include "mutex.h"
+#include "flexy/thread/mutex.h"
 
 #include <queue>
 
@@ -10,11 +10,16 @@ namespace flexy {
 
 class Scheduler;
 
-class FiberSemaphore : noncopyable {
+} // namespace flexy
+
+namespace flexy::fiber {
+
+// fiber semaphore
+class Semaphore : noncopyable {
 public:
-    FiberSemaphore(size_t initial_councurrency = 0)
+    Semaphore(size_t initial_councurrency = 0)
     : concurrency_(initial_councurrency) {}
-    ~FiberSemaphore();
+    ~Semaphore();
 
     bool tryWait();
     void wait();
@@ -25,4 +30,4 @@ private:
     std::queue<std::pair<Scheduler*, Fiber::ptr>> waiters_;
 };
 
-}  // namespace flexy
+}  // namespace flexy fiber

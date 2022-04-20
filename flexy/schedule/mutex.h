@@ -2,7 +2,7 @@
 
 #include "flexy/util/noncopyable.h"
 #include "flexy/schedule/fiber.h"
-#include "mutex.h"
+#include "flexy/thread/mutex.h"
 #include <deque>
 #include <atomic>
 
@@ -10,10 +10,15 @@ namespace flexy {
 
 class Scheduler;
 
-class FiberMutex : noncopyable {
+} // namespace flexy
+
+namespace flexy::fiber {
+
+// Analogous to `std::mutex`, but it's for fiber.
+class mutex : noncopyable {
 public:
-    FiberMutex() = default;
-    ~FiberMutex();
+    mutex() = default;
+    ~mutex();
     void lock();
     void unlock();
 private:
@@ -22,4 +27,5 @@ private:
     std::deque<std::pair<Scheduler*, Fiber::ptr>> waiters_;
 };
 
-} // namespace flexy
+
+} // namespace flexy fiber

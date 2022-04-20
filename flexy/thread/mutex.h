@@ -20,6 +20,9 @@ using lock_guard = std::lock_guard<T>;
 template <typename T>
 using unique_lock = std::unique_lock<T>;
 
+template <typename... T>
+using scoped_lock = std::scoped_lock<T...>;
+
 template <typename T>
 using ReadLock = std::shared_lock<T>;
 template <typename T>

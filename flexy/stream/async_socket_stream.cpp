@@ -9,9 +9,8 @@ namespace flexy {
 static auto g_logger = FLEXY_LOG_NAME("system");
 
 AsyncSockStream::Ctx::Ctx() : sn(0), timeout(0), result(0),
-                                timed(false), scheduler(nullptr) {
-
-}
+                              timed(false), scheduler(nullptr) 
+{ }
 
 void AsyncSockStream::Ctx::doRsp() {
     Scheduler* scd = scheduler;
@@ -34,9 +33,8 @@ void AsyncSockStream::Ctx::doRsp() {
 
 AsyncSockStream::AsyncSockStream(const Socket::ptr& sock, bool owner) 
     : SockStream(sock, owner), waitSem_(2), sn_(0), autoConnect_(false), 
-      iomanager_(nullptr), worker_(nullptr) {
-
-}
+      /*tryConnectCount_(0),*/ iomanager_(nullptr), worker_(nullptr)
+{ }
 
 bool AsyncSockStream::start() {
     if (!iomanager_) {
@@ -147,6 +145,7 @@ void AsyncSockStream::startWrite() {
 }
 
 void AsyncSockStream::onTimeOut(const Ctx::ptr& ctx) {
+    FLEXY_LOG_DEBUG(g_logger) << "onTimeOut";
     {
         WRITELOCK(mutex_);
         ctxs_.erase(ctx->sn);
@@ -196,6 +195,7 @@ bool AsyncSockStream::innerClose() {
     if (isConnected() && disconnectCb_) {
         disconnectCb_(shared_from_this());
     }
+    onClose();
     SockStream::close();
     sem_.post();
     decltype(ctxs_) ctxs;
