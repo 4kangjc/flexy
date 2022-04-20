@@ -50,7 +50,7 @@ public:
 
     template <class... _Args, typename = std::enable_if_t<std::is_invocable_v<_Args&&...>>>
     void yield_callback(_Args&&... __args) { 
-        return yield_callback(__task(std::forward<_Args>(__args)...)); 
+        return yield_callback(detail::__task(std::forward<_Args>(__args)...)); 
     }
 
     void yield();                                               // 让出执行权

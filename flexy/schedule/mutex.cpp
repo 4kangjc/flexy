@@ -4,14 +4,13 @@
 
 namespace flexy::fiber {
 
-using namespace flexy;
-
 mutex::~mutex() {
     FLEXY_ASSERT(locked_ == false);
 }
 
 void mutex::lock() {
     FLEXY_ASSERT(Scheduler::GetThis());
+    FLEXY_ASSERT2(Fiber::GetFiberId() != 0, "Main Fiber cannot wait");
     {
         LOCK_GUARD(mutex_);
         if (locked_) {

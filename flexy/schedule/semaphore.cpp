@@ -22,6 +22,7 @@ bool Semaphore::tryWait() {
 
 void Semaphore::wait() {
     FLEXY_ASSERT(Scheduler::GetThis());
+    FLEXY_ASSERT2(Fiber::GetFiberId() != 0, "Main Fiber cannot wait");
     {
         LOCK_GUARD(mutex_);
         if (concurrency_ > 0u) {

@@ -10,3 +10,4 @@
 #include "schedule/this_fiber.h"
 #include "schedule/mutex.h"
 #include "schedule/semaphore.h"
+#include "schedule/condition_variable.h"
