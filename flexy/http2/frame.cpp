@@ -185,7 +185,7 @@ bool RstStreamFrame::readFrom(const ByteArray::ptr &ba, const FrameHeader &heade
     return false;
 }
 
-static std::array<std::string, 6> s_settings_string = {
+static constexpr std::array<std::string_view, 6> s_settings_string = {
         "",
         "HEADER_TABLE_SIZE",
         "MAX_CONCURRENT_STREAMS",
@@ -194,7 +194,7 @@ static std::array<std::string, 6> s_settings_string = {
         "MAX_HEADER_LIST_SIZE"
 };
 
-std::string SettingsFrame::SettingsToString(Settings s) {
+std::string_view SettingsFrame::SettingsToString(Settings s) {
     auto idx = static_cast<uint32_t>(s);
     if (idx <= 0 || idx > s_settings_string.size()) {
         return fmt::format("UNKNOWN({})", idx);
@@ -388,7 +388,7 @@ bool WindowUpdateFrame::readFrom(const ByteArray::ptr &ba, const FrameHeader &he
     return false;
 }
 
-static const std::array<std::string, 8> s_frame_types = {
+static constexpr std::array<std::string_view, 8> s_frame_types = {
         "DATA",
         "HEADERS",
         "RST_STREAM",
@@ -399,7 +399,7 @@ static const std::array<std::string, 8> s_frame_types = {
         "CONTINUATION"
 };
 
-std::string FrameTypeToString(FrameType type) {
+std::string_view FrameTypeToString(FrameType type) {
     auto v = static_cast<uint8_t>(type);
     if (v > 9) {
         return fmt::format("UNKNOWN({})", v);

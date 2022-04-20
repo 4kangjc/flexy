@@ -20,12 +20,12 @@ enum class IndexType {
     WITH_INDEXING_NEW_NAME          = 2,            // Name 和 Value 都需要编码传递，并同时新增到动态表中
     WITHOUT_INDEXING_INDEXED_NAME   = 3,            // Name 在索引表(包括静态表和动态表)中，Value 需要编码传递，并不新增到动态表中
     WITHOUT_INDEXING_NEW_NAME       = 4,            // Name 和 Value 需要编码传递，并不新增到动态表中
-    NEVER_INDEXED_INDEXED_NAME    = 5,              // Name 在索引表(包括静态表和动态表)中，Value 需要编码传递，并永远不新增到动态表中
-    NEVER_INDEXED_NEW_NAME        = 6,              // Name 和 Value 需要编码传递，并永远不新增到动态表中
+    NEVER_INDEXED_INDEXED_NAME      = 5,            // Name 在索引表(包括静态表和动态表)中，Value 需要编码传递，并永远不新增到动态表中
+    NEVER_INDEXED_NEW_NAME          = 6,            // Name 和 Value 需要编码传递，并永远不新增到动态表中
     ERROR                           = 7
 };
 
-std::string IndexTypeToString(IndexType type);
+std::string_view IndexTypeToString(IndexType type);
 
 struct StringHeader {
     union {

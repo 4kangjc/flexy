@@ -256,7 +256,7 @@ struct SettingsFrame : public IFrame {
         MAX_HEADER_LIST_SIZE        = 0x6
     };
 
-    static std::string SettingsToString(Settings s);
+    static std::string_view SettingsToString(Settings s);
 
     [[nodiscard]] std::string toString() const override;
     bool writeTo(const ByteArray::ptr& ba, const FrameHeader& header) const override;
@@ -311,7 +311,7 @@ struct PingFrame : public IFrame {
         uint64_t uint64 = 0;
     };
 
-    std::string toString() const override;
+    [[nodiscard]] std::string toString() const override;
     bool writeTo(const ByteArray::ptr& ba, const FrameHeader& header) const override;
     bool readFrom(const ByteArray::ptr& ba, const FrameHeader& header) override;
 };
@@ -338,7 +338,7 @@ struct GoAwayFrame : public IFrame {
     uint32_t error_code = 0;
     std::string data;
     
-    std::string toString() const override;
+    [[nodiscard]] std::string toString() const override;
     bool writeTo(const ByteArray::ptr& ba, const FrameHeader& header) const override;
     bool readFrom(const ByteArray::ptr& ba, const FrameHeader& header) override;
 };
@@ -373,7 +373,7 @@ public:
     size_t serializeTo(Stream* stream, const Frame::ptr& frame);
 };
 
-std::string FrameTypeToString(FrameType type);
+std::string_view FrameTypeToString(FrameType type);
 std::string FrameFlagDataToString(FrameFlagData flag);
 std::string FrameFlagHeadersToString(FrameFlagHeaders flag);
 std::string FrameFlagSettingsToString(FrameFlagSettings flag);

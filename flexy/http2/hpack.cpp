@@ -6,7 +6,7 @@ namespace flexy::http2 {
 
 static auto g_logger = FLEXY_LOG_NAME("system");
 
-static const std::array<std::string, 8> s_index_type_strings = {
+static constexpr std::array<std::string_view, 8> s_index_type_strings = {
         "INDEXED",
         "WITH_INDEXING_INDEXED_NAME",
         "WITH_INDEXING_NEW_NAME",
@@ -17,7 +17,7 @@ static const std::array<std::string, 8> s_index_type_strings = {
         "ERROR"
 };
 
-std::string IndexTypeToSring(IndexType type) {
+std::string_view IndexTypeToSring(IndexType type) {
     auto v = static_cast<uint8_t>(type);
     if (v < s_index_type_strings.size()) {
         return s_index_type_strings[v];
