@@ -196,8 +196,9 @@ static constexpr std::array<std::string_view, 6> s_settings_string = {
 
 std::string_view SettingsFrame::SettingsToString(Settings s) {
     auto idx = static_cast<uint32_t>(s);
-    if (idx <= 0 || idx > s_settings_string.size()) {
-        return fmt::format("UNKNOWN({})", idx);
+    if (idx > s_settings_string.size()) {
+        // TODO log
+        return "UNKNOWN";
     }
     return s_settings_string[idx];
 }
@@ -402,7 +403,8 @@ static constexpr std::array<std::string_view, 8> s_frame_types = {
 std::string_view FrameTypeToString(FrameType type) {
     auto v = static_cast<uint8_t>(type);
     if (v > 9) {
-        return fmt::format("UNKNOWN({})", v);
+        // TODO log v
+        return "UNKNOWN";
     }
     return s_frame_types[v];
 }

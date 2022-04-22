@@ -22,7 +22,8 @@ std::string_view IndexTypeToSring(IndexType type) {
     if (v < s_index_type_strings.size()) {
         return s_index_type_strings[v];
     }
-    return fmt::format("UNKNOWN({})", v);
+    // TODO log v
+    return "UNKNOWN({})";
 }
 
 std::string HeaderField::toString() const {
