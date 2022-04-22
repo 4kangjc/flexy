@@ -41,7 +41,7 @@ const char* HttpStatusToString(HttpStatus s) {
 
 HttpRequest::HttpRequest(uint8_t version, bool close) :
     method_(HttpMethod::GET), version_(version), close_(false),
-    websocket_(false), parseParmFlag_(0), path_("/") {
+    parseParmFlag_(0), path_("/") {
 
 }
 
@@ -130,19 +130,12 @@ std::ostream& HttpRequest::dump(std::ostream& os) const {
        << " HTTP/" << (uint32_t)(version_ >> 4) << "."
        << (uint32_t)(version_ & 0x0f) << "\r\n";
 
-    if (!websocket_) {
-        os << "Connection: " << (close_ ? "close" : "keep-alive")
-        << "\r\n";
-        for (auto& [x, y] : headers_) {
-            if (strncasecmp(x.c_str(), "connection", 10) == 0) {
-                continue;
-            }
-            os << x << ": " << y << "\r\n";
-        }
-    } else {
-        for (auto& [x, y] : headers_) {
-            os << x << ": " << y << "\r\n";
-        }
+    if (close_) {
+        headers_["connection"] = "close";
+    }
+
+    for (auto& [x, y] : headers_) {
+        os << x << ": " << y << "\r\n";
     }
 
     if (!body_.empty()) {
@@ -158,19 +151,17 @@ std::ostream& HttpRequest::dump(std::ostream& os) const {
 void HttpRequest::init() {
     std::string conn = getHeader("connection");
     if (!conn.empty()) {
-        if (strncasecmp(conn.c_str(), "keep-alive", 10) == 0) {
-            close_ = false;
-        } else {
+        if (strncasecmp(conn.c_str(), "close", 5) == 0) {
             close_ = true;
+        } else {
+            close_ = false;
         }
     }
 }
 
 HttpResponse::HttpResponse(uint8_t version, bool close)
-: status_(HttpStatus::OK), version_(version), close_(close),
-  websocket_(false) {
-
-}
+    : status_(HttpStatus::OK), version_(version), close_(close)
+{ }
 
 std::string HttpResponse::getHeader(const std::string &key,
                                     const std::string &def) const {
@@ -194,19 +185,12 @@ std::ostream& HttpResponse::dump(std::ostream &os) const {
        << (reason_.empty() ? HttpStatusToString(status_) : reason_)
        << "\r\n";
 
-    if (!websocket_) {
-        for (auto& [x, y] : headers_) {
-            if (strncasecmp(x.c_str(), "connection", 10) == 0) {
-                continue;
-            }
-            os << x << ": " << y << "\r\n";
-        }
-        os << "connection: " << (close_ ? "close" : "keep-alive")
-        << "\r\n";
-    } else {
-        for (auto& [x, y] : headers_) {
-            os << x << ": " << y << "\r\n";
-        }
+    if (close_) {
+        headers_["connection"] = "close";
+    }
+
+    for (auto& [x, y] : headers_) {
+        os << x << ": " << y << "\r\n";
     }
 
     if (!body_.empty()) {

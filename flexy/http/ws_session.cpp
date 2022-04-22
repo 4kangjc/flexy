@@ -41,11 +41,11 @@ HttpRequest::ptr WSSession::handleShake() {
 
         std::string v = key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
         v = base64encode(sha1sum(v));
-        req->setWebsocket(true);
+        // req->setWebsocket(true);
 
         auto rsp = req->createResponse();
         rsp->setStatus(HttpStatus::SWITCHING_PROTOCOLS);
-        rsp->setWebsocket(true);
+        // rsp->setWebsocket(true);
         rsp->setReason("Web Socket Protocol HandleShake");
         rsp->setHeader("Upgrade", "websocket");
         rsp->setHeader("Connection", "Upgrade");

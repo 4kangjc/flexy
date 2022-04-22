@@ -189,9 +189,6 @@ public:
     bool isClose() const { return close_; }
     void setClose(bool v) { close_ = v; }
 
-    void setWebsocket(bool v) { websocket_ = v; }
-    bool isWebsocket() { return websocket_; } 
-
     std::string getHeader(const std::string& key, const std::string& def = "") const;
     void setHeader(const std::string& key, const std::string& val);
     void delHeader(const std::string& key);
@@ -216,11 +213,10 @@ private:
     HttpStatus status_;                     // 响应状态码
     uint8_t version_;                       // 版本
     bool close_;                            // 是否自动关闭
-    bool websocket_;                        // 是否为websocket
 
     std::string body_;                      // 响应消息体
     std::string reason_;                    // 响应原因
-    MapType headers_;                       // 响应头部报文
+    mutable MapType headers_;               // 响应头部报文
 };
 
 // Htpp请求报文
@@ -255,9 +251,6 @@ public:
 
     bool isClose() const { return close_; }
     void setClose(bool v) { close_ = v; } 
-
-    void setWebsocket(bool v) { websocket_ = v; }
-    bool isWebsocket() { return websocket_; } 
 
     void setHeaders(const MapType& v) { headers_ = v; }
     void setParams(const MapType& v) { params_ = v; }
@@ -321,7 +314,6 @@ private:
     HttpMethod method_;                     // Http方法
     uint8_t version_;                       // Http 版本
     bool close_;                            // 是否自动关闭
-    bool websocket_;                        // 是否为websocket
 
     uint8_t parseParmFlag_;                 // 
 
@@ -330,7 +322,7 @@ private:
     std::string fragment_;                  // 请求fragment
     std::string body_;                      // 请求消息体
 
-    MapType headers_;                       // 请求头部 Map
+    mutable MapType headers_;               // 请求头部 Map
     MapType params_;                        // 请求参数 Map
     MapType cookies_;                       // 请求 Cookie Map
 };
