@@ -45,6 +45,10 @@ HttpRequest::HttpRequest(uint8_t version, bool close) :
 
 }
 
+std::string HttpRequest::getUri() {
+    return path_ + (query_.empty() ? "" : "?" + query_) + (fragment_.empty() ? "" : "#" + fragment_);
+}
+
 std::string HttpRequest::getHeader(const std::string& key,
                                           const std::string& def) const {
     auto it = headers_.find(key);
@@ -61,6 +65,29 @@ std::string HttpRequest::getCookie(const std::string& key,
                                           const std::string& def) const {
     auto it = cookies_.find(key);
     return it == cookies_.end() ? def : it->second;
+}
+
+void HttpRequest::setUri(std::string_view uri) {
+    auto pos = uri.find('?');
+    if (pos == std::string::npos) {
+        auto pos2 = uri.find('#');
+        if (pos2 == std::string_view::npos) {
+            path_ = uri;
+        } else {
+            path_ = uri.substr(0, pos2);
+            fragment_ = uri.substr(pos2 + 1);
+        }
+    } else {
+        path_ = uri.substr(0, pos);
+
+        auto pos2 = uri.find('#', pos + 1);
+        if (pos2 == std::string_view::npos) {
+            query_ = uri.substr(pos + 1);
+        } else {
+            query_ = uri.substr(pos + 1, pos2 - pos - 1);
+            fragment_ = uri.substr(pos2 + 1);
+        }
+    }
 }
 
 void HttpRequest::setHeader(const std::string& key,

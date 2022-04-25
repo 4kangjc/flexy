@@ -232,10 +232,12 @@ public:
     }
 
     HttpMethod getMehod() const { return method_; }
-    uint8_t getVesion() const { return version_; }
+    uint8_t getVersion() const { return version_; }
     auto& getPath() const { return path_; }
     auto& getQuery() const { return query_; }
     auto& getBody() const { return body_; }
+    std::string getUri();
+    uint32_t getStreamId() { return streamId_; }
 
     auto& getHeaders() const { return headers_; }
     auto& getParams() const { return params_; }
@@ -248,6 +250,8 @@ public:
     void setQuery(std::string_view v) { query_ = v; }
     void setFragment(std::string_view v) { fragment_ = v; }
     void setBody(std::string_view v) { body_ = v; }
+    void setUri(std::string_view v);
+    void setStreamId(uint32_t v) { streamId_ = v; }
 
     bool isClose() const { return close_; }
     void setClose(bool v) { close_ = v; } 
@@ -271,6 +275,12 @@ public:
     bool hasHeader(const std::string& key, std::string* val = nullptr);
     bool hasParam (const std::string& key, std::string* val = nullptr);
     bool hasCookie(const std::string& key, std::string* val = nullptr);
+
+    template <typename T>
+    std::pair<typename MapType::iterator, bool> 
+    try_emplaceHeader(const std::string& key, T&& val) {
+        return headers_.try_emplace(key, std::forward<T>(val));
+    }
 
     template <typename T>
     bool checkGetHeaderAs(const std::string& key, T& val, const T& def = T()) {
@@ -316,6 +326,8 @@ private:
     bool close_;                            // 是否自动关闭
 
     uint8_t parseParmFlag_;                 // 
+
+    uint32_t streamId_ = 0;                 // http2 流id
 
     std::string path_;                      // 请求路径
     std::string query_;                     // 请求参数
