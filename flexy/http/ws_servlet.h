@@ -12,7 +12,7 @@ public:
     WSServlet(const std::string& name) : Servlet(name) {}
     virtual ~WSServlet() {}
     virtual int32_t handle(const HttpRequest::ptr& request, const HttpResponse::ptr& response, 
-                           const HttpSession::ptr& session) override { return 0; }
+                           const SockStream::ptr& session) override { return 0; }
     virtual int32_t onConnect(const HttpRequest::ptr& header, const WSSession::ptr& session) = 0;
     virtual int32_t onClose(const HttpRequest::ptr& header, const WSSession::ptr& session) = 0;
     virtual int32_t handle(const HttpRequest::ptr& header, const WSFrameMessage::ptr& msg,
