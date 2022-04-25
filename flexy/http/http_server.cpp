@@ -18,7 +18,7 @@ void HttpServer::handleClient(const Socket::ptr& client) {
             << *client;
             break;
         }
-        auto rsp = std::make_unique<HttpResponse>(req->getVesion(),
+        auto rsp = std::make_unique<HttpResponse>(req->getVersion(),
                                                   req->isClose() || !isKeepalive_);
         dispatch_->handle(req, rsp, session);
         session->sendResponse(rsp);
