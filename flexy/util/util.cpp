@@ -164,4 +164,49 @@ std::string BacktraceToString(int size, int skip, const std::string& prefix) {
     return ss.str();
 }
 
+static constexpr std::array<char, 256> kLowerChars = []() {
+    std::array<char, 256> cs{};
+    for (size_t c = 0; c != 256; ++c) {
+        if (c >= 'A' && c <= 'Z') {
+            cs[c] = c - 'A' + 'a';
+        } else {
+            cs[c] = c;
+        }
+    }
+    return cs;
+}();
+
+static constexpr std::array<char, 256> kUpperChars = []() {
+    std::array<char, 256> cs{};
+    for (size_t c = 0; c != 256; ++c) {
+        if (c >= 'a' && c <= 'z') {
+            cs[c] = c - 'a' + 'A';
+        } else {
+            cs[c] = c;
+        }
+    }
+    return cs;
+}();
+
+char ToLower(char c) { return kLowerChars[c]; }
+char ToUpper(char c) { return kUpperChars[c]; }
+
+std::string ToLower(std::string_view s) {
+    std::string ret;
+    ret.reserve(s.size());
+    for (char c : s) {
+        ret.push_back(ToLower(c));
+    }
+    return ret;
 }
+
+std::string ToUpper(std::string_view s) {
+    std::string ret;
+    ret.reserve(s.size());
+    for (char c : s) {
+        ret.push_back(ToUpper(c));
+    }
+    return ret;
+}
+
+} // namespace flexy

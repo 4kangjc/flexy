@@ -83,4 +83,35 @@ void Backtrace(std::vector<std::string>& bt, int size = 64, int skip = 1);
 //获得函数调用堆栈信息字符串
 std::string BacktraceToString(int size = 64, int skip = 2, const std::string& prefix = "");
 
+// TODO locale
+// 大小写转换
+char ToLower(char c);
+char ToUpper(char c);
+
+template <bool copy = true>
+std::conditional_t<copy, std::string, void> ToLower(std::conditional_t<copy, const std::string*, std::string*> s) {
+    if constexpr (copy) {
+        std::string ret(*s);
+        std::transform(ret.begin(), ret.end(), ret.begin(), ::tolower);
+        return ret;
+    } else {
+        std::transform(s->begin(), s->end(), s->begin(), ::tolower);
+    }
+}
+
+template <bool copy = true>
+std::conditional_t<copy, std::string, void> ToUpper(std::conditional_t<copy, const std::string*, std::string*> s) {
+    if constexpr (copy) {
+        std::string ret(*s);
+        std::transform(ret.begin(), ret.end(), ret.begin(), ::toupper);
+        return ret;
+    } else {
+        std::transform(s->begin(), s->end(), s->begin(), ::toupper);
+    }
+}
+
+std::string ToLower(std::string_view s);
+
+std::string ToUpper(std::string_view s);
+
 }
