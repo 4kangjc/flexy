@@ -209,4 +209,54 @@ std::string ToUpper(std::string_view s) {
     return ret;
 }
 
+std::string_view Trim(std::string_view str, std::string_view delimit) {
+    auto begin = str.find_first_not_of(delimit);
+    if (begin == std::string_view::npos) {
+        return "";
+    }
+    auto end = str.find_last_not_of(delimit);
+    return str.substr(begin, end - begin + 1);
+}
+
+std::string_view TrimLeft(std::string_view str, std::string_view delimit) {
+    auto begin = str.find_first_not_of(delimit);
+    if (begin == std::string_view::npos) {
+        return "";
+    }
+    return str.substr(begin);
+}
+
+std::string_view TrimRight(std::string_view str, std::string_view delimit) {
+    auto end = str.find_last_not_of(delimit);
+    if (end == std::string_view::npos) {
+        return "";
+    }
+    return str.substr(0, end);
+}
+
+std::vector<std::string_view> Split(std::string_view str, std::string_view delim, bool keep_empty) {
+    std::vector<std::string_view> splited;
+    if (str.empty()) {
+        return splited;
+    }
+    auto current = str;
+    while (true) {
+        auto pos = current.find(delim);
+        if (pos != 0 || keep_empty) {
+            splited.push_back(current.substr(0, pos));
+        }  
+        if (pos == std::string_view::npos) {
+            break;
+        }
+        current = current.substr(pos + current.size());
+        if (current.empty()) {
+            if (keep_empty) {
+                splited.push_back("");
+            }
+            break;
+        }
+    }
+    return splited;
+}
+
 } // namespace flexy

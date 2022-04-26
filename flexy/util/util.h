@@ -114,4 +114,13 @@ std::string ToLower(std::string_view s);
 
 std::string ToUpper(std::string_view s);
 
+std::string_view Trim(std::string_view str, std::string_view delimit = "\t\r\n");
+std::string_view TrimLeft(std::string_view str, std::string_view delimit = "\t\r\n");
+std::string_view TrimRight(std::string_view str, std::string_view delimit = "\t\r\n");
+std::vector<std::string_view> Split(std::string_view s, std::string_view delim, bool keep_empty = false);
+
+inline std::vector<std::string_view> Split(std::string_view s, char delim, bool keep_empty = false) {
+    return Split(s, std::string_view(&delim, 1), keep_empty);
+}
+
 }
