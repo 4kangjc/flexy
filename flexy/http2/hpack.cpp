@@ -12,8 +12,8 @@ static constexpr std::array<std::string_view, 8> s_index_type_strings = {
         "WITH_INDEXING_NEW_NAME",
         "WITHOUT_INDEXING_INDEXED_NAME",
         "WITHOUT_INDEXING_NEW_NAME",
-        "NERVER_INDEXED_INDEXED_NAME",
-        "NERVER_INDEXED_NEW_NAME",
+        "NEVER_INDEXED_INDEXED_NAME",
+        "NEVER_INDEXED_NEW_NAME",
         "ERROR"
 };
 

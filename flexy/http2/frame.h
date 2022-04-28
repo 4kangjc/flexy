@@ -248,12 +248,12 @@ struct SettingsItem {
 struct SettingsFrame : public IFrame {
     using ptr = std::shared_ptr<SettingsFrame>;
     enum class Settings {
-        HEADER_TABLE_SIZE           = 0x1,
-        ENABLE_PUSH                 = 0x2,
-        MAX_CONCURRENT_STREAMS      = 0x3,
-        INITIAL_WINDOW_SIZE         = 0x4,
-        MAX_FRAME_SIZE              = 0x5,
-        MAX_HEADER_LIST_SIZE        = 0x6
+        HEADER_TABLE_SIZE           = 0x1,      // 允许发送方以八位字节通知远程端点用于解码头块的头压缩表的最大大小
+        ENABLE_PUSH                 = 0x2,      // 此设置可用于禁用服务器推送
+        MAX_CONCURRENT_STREAMS      = 0x3,      // 表示发送方允许的最大并发流数
+        INITIAL_WINDOW_SIZE         = 0x4,      // 表示发送方的初始窗口大小
+        MAX_FRAME_SIZE              = 0x5,      // 表示发送方愿意接收的最大帧有效负载的大小
+        MAX_HEADER_LIST_SIZE        = 0x6       // 此通知设置以八位字节的形式通知对端，发送方准备接受的头列表的最大大小
     };
 
     static std::string_view SettingsToString(Settings s);
