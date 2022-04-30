@@ -34,6 +34,12 @@ void test_unique(std::unique_ptr<int>&& uptr) {
     FLEXY_LOG_DEBUG(g_logger) << "unique_ptr value = " << *uptr;
 }
 
+struct NonCopyable {
+ 	void operator()() {}
+    NonCopyable() = default;
+	NonCopyable(NonCopyable&&) = default;
+};
+
 int main() {
     task t1(print, "hello task");
     task t2(print, "hello task again");
@@ -55,4 +61,9 @@ int main() {
     std::unique_ptr<int> uptr(new int(2));
     task t7(test_unique, std::move(uptr));
     t7();
+    NonCopyable non;
+    task t8(std::move(non));  // ok
+    // task t8(std::ref(non));   // ok
+    // task t8(non);               // compile fail
+    t8();
 }
