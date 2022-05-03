@@ -166,15 +166,9 @@ public:
     template <typename _Fn, typename = std::enable_if_t<std::is_invocable_v<_Fn&&> 
             && !is_task_v<_Fn> && std::is_copy_constructible_v<_Fn&&>>>
     __task_template(_Fn&& func) {
-        if constexpr (std::is_rvalue_reference_v<_Fn&&>) {
-            proxy_t = [fn = std::move(func)](void* null) {
-                fn();
-            };
-        } else {
-            proxy_t = [fn = func](void* null) mutable {
-                fn();
-            };
-        }
+        proxy_t = [fn = std::forward<_Fn>(func)](void* null) mutable {
+            fn();
+        };
     }
 
     __task_template(__task_template&&) noexcept = default;

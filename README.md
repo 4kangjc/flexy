@@ -27,7 +27,14 @@ mkdir build && cd build && cmake ..
 make -j
 ```
 
-#示例代码[协程]
+```shell 
+# 测试
+# sudo pacman -S gtest  
+cmake -DTESTS=on ..
+make -j
+```
+
+## 示例代码[协程]
 ```cpp
 #include <flexy/flexy.h>
 
@@ -142,6 +149,7 @@ int main(int argc, char** argv) {
 - tls **[mbedtls/openssl]**
 - rpc **[protobuf/json]**
 - [gdb调试协程插件](https://github.com/Tencent/flare/blob/master/flare/doc/gdb-plugin.md)
+- [http3]
 
 
 ## 致谢
