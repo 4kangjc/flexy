@@ -2,12 +2,14 @@
 
 #include <functional>
 #include <memory>
+#include "function.h"
 
 namespace flexy::detail {
 
 class __task_function;
 class __task_virtual;
 class __task_template;
+class __task_Function;
 
 template <class T, typename = void>
 struct is_task {
@@ -26,6 +28,11 @@ struct is_task<__task_virtual> {
 
 template <>
 struct is_task<__task_template> {
+    static constexpr bool value = true;
+};
+
+template <>
+struct is_task<__task_Function> {
     static constexpr bool value = true;
 };
 
@@ -191,8 +198,30 @@ private:
 };
 
 
+class __task_Function : public Function<void()> {
+private:
+    using callback_t = Function<void()>;
+public:
+    template <typename _Fn, typename... _Args, typename = std::enable_if_t<std::is_invocable_v<_Fn&&, _Args&&...>>>
+    __task_Function(_Fn&& func, _Args&&... args) : callback_t(
+        [
+            f = std::forward<_Fn>(func), t = std::tuple<typename std::decay_t<_Args>...>(std::forward<_Args>(args)...)
+        ]() mutable {
+            std::apply(std::move(f), std::move(t));
+        }
+    ) { }
+
+    template <typename _Fn, typename = std::enable_if_t<std::is_invocable_v<_Fn&&> && !is_task_v<_Fn>>>
+    __task_Function(_Fn&& func) : callback_t(std::forward<_Fn>(func)) 
+    { }
+
+    __task_Function(std::nullptr_t = nullptr) noexcept : callback_t() {}
+};
+
+
 // using __task = __task_function;          // 缺点是 std::function must be CopyConstructible
 // using __task = __task_virtual;              // 缺点是 使用了虚函数,可能会性能会稍微下降
 using __task = __task_template;
+// using __task = __task_Function;          // 没有提供拷贝构造和拷贝赋值
 
 } // namespace flexy::detail

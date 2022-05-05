@@ -83,6 +83,11 @@ public:
     }
 
     constexpr explicit operator bool() const { return !!ops_; }
+
+    void swap(Function& __x) {
+        std::swap(object_, __x.object_);
+        std::swap(ops_, __x.ops_);
+    }
 private:
     static constexpr std::size_t kMaximumOptimizableSize = 3 * sizeof(void*);
 
