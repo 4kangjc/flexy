@@ -80,7 +80,7 @@ struct Pii {
     int hash_func() {
         return std::hash<int>()(a) ^ std::hash<int>()(b);
     }
-    int sum(int c = 0) {
+    int sum(int c = 0) const {
         return a + b + c;
     }
 };
@@ -129,6 +129,26 @@ TEST(Function, Bind) {
     
     std::function<int(int)> f2(std::bind(&Pii::sum, &pii, std::placeholders::_1));
     ASSERT_EQ(f2(0), 5);
+}
+
+TEST(Function, Swap) {
+    flexy::Function f1(product);
+    ASSERT_EQ(f1(2, 5), 10);
+    flexy::Function([](int a, int b) {
+        return a + b;
+    }).swap(f1);
+    ASSERT_EQ(f1(2, 5), 7);
+
+    flexy::Function f2(&minus);
+    ASSERT_EQ(f2(3, 2), 1);
+    Pii pii{4, 5};
+    flexy::Function f3([pii](int a, int b){
+        return pii.sum(a) + b;
+    });
+    ASSERT_EQ(f3(1, 0), 10);
+    f3.swap(f2);
+    ASSERT_EQ(f3(3, 2), 1);
+    ASSERT_EQ(f2(1, 0), 10);
 }
 
 // flare test
