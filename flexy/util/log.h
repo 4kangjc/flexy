@@ -4,7 +4,13 @@
 #include "singleton.h"
 #include "util.h"
 #include <sstream>
+
+#if __cplusplus > 201703L && __has_include(<format>)
+#include <format>
+#else
 #include <fmt/format.h>
+#endif
+
 #include <unordered_set>
 #include <unordered_map>
 #include <vector>
@@ -65,8 +71,12 @@ public:
     const auto& getThreadName() const { return thread_name_; }
 
     template <typename... Args>
-    void format(const char* fmt, Args&&... args) {
+    void format(fmt::format_string<Args...> fmt, Args&&... args) {
+#if __cplusplus > 201703L && __has_include(<format>)
+        ss << std::format(fmt, std::forward<Args>(args)...);
+#else
         ss_ << fmt::format(fmt, std::forward<Args>(args)...);
+#endif
     }
 private:
     const char* filename_ = nullptr;                // 文件名
@@ -258,4 +268,4 @@ using LoggerMgr = Singleton<LoggerManager>;
 #define FLEXY_LOG_ROOT()        flexy::LoggerMgr::GetInstance().getRoot()
 #define FLEXY_LOG_NAME(name)    flexy::LoggerMgr::GetInstance().getLogger(name)
 
-} // namespace flexy
+} // namespace flexy 
