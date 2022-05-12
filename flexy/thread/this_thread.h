@@ -25,7 +25,7 @@ inline void sleep_for(const std::chrono::duration<_Rep, _Period>& __rtime) {
 template <typename _Clock, typename _Duration>
 inline void sleep_until(const std::chrono::time_point<_Clock, _Duration>& __atime) {
 #if __cplusplus > 201703L
-	static_assert(chrono::is_clock_v<_Clock>);
+	static_assert(std::chrono::is_clock_v<_Clock>);
 #endif
     auto __now = _Clock::now();
     if (_Clock::is_steady) {

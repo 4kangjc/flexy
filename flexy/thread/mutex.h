@@ -7,7 +7,11 @@
 #include <atomic>
 #include <tbb/spin_rw_mutex.h>
 
+#if __cpp_deduction_guides >= 201606
 #define LOCK_GUARD(x) std::lock_guard lk(x)
+#else
+#define LOCK_GUARD(x) std::lock_guard<std::decay_t<decltype(x)>> lk(x)
+#endif
 
 namespace flexy {
 
@@ -30,8 +34,19 @@ using WriteLock = std::lock_guard<T>;            // 不支持手动 unlock
 template <typename T>
 using WriteLock2 = std::unique_lock<T>;          // 可手动 unlock
 
-#define READLOCK(x)   ReadLock   lk(x)          // cpp17 类模板实参推导 (CTAD)
+#if __cplusplus > 201703L
+#define READLOCK(x)   ReadLock   lk(x)          // cpp20 类别名模板实参推导
 #define WRITELOCK(x)  WriteLock  lk(x)
+#define WRITELOCK2(x) WriteLock2 lk(x)
+#elif __cpp_deduction_guides >= 201606
+#define READLOCK(x)   std::shared_lock  lk(x)   // cpp17 类模板实参推导 (CTAD)
+#define WRITELOCK(x)  std::lock_guard   lk(x)
+#define WRITELOCK2(x) std::unique_lock  lk(x)
+#else
+#define READLOCK(x)   ReadLock<std::decay_t<decltype(x)>>   lk(x)
+#define WRITELOCK(x)  WriteLock<std::decay_t<decltype(x)>>  lk(x)
+#define WRITELOCK2(x) WriteLock2<std::decay_t<decltype(x)>> lk(x)
+#endif
 
 // TODO: boost::upgrade_lock 可从读锁直接升级为写锁
 

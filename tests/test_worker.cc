@@ -36,9 +36,15 @@ void test_work_group() {
     wg->schedule([](){
         FLEXY_LOG_INFO(g_logger) << "Hello worker!";
     });
+#if __cplusplus > 201703L
+    // wg->schedule([] <class... Args> (fmt::format_string<Args...> fmt, Args&&... args) {
+        // FLEXY_LOG_FMT_INFO(g_logger, fmt, std::forward<Args>(args)...);
+    // }, "{} {} {}", 1, 2, 3);
+#else
     wg->schedule([](const char* fmt, auto&&... args) {
         FLEXY_LOG_FMT_INFO(g_logger, fmt, std::forward<decltype(args)>(args)...);
     }, "{} {} {}", 1, 2, 3);
+#endif
 
     wg->schedule([]() {
         

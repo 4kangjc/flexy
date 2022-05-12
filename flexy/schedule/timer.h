@@ -40,16 +40,16 @@ public:
     template <typename... Args>
     Timer::ptr addTimer(uint64_t ms, Args&&... args) {
         Timer::ptr timer(new Timer(ms, detail::__task(std::forward<Args>(args)...), false, this));
-        unique_lock<decltype(mutex_)> lock(mutex_);
-        addTimer(timer, lock);
+        WRITELOCK2(mutex_);
+        addTimer(timer, lk);
         return timer;
     }
     // 添加循环定时器
     template <typename... Args>
     Timer::ptr addRecTimer(uint64_t ms, Args&&... args) {
         Timer::ptr timer(new Timer(ms, detail::__task(std::forward<Args>(args)...), true, this));
-        unique_lock<decltype(mutex_)> lock(mutex_);
-        addTimer(timer, lock);
+        WRITELOCK2(mutex_);
+        addTimer(timer, lk);
         return timer;
     }
     // 添加条件定时器
