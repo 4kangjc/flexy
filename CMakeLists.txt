@@ -53,7 +53,7 @@ set(LIB_SRC
     # flexy/http2/stream.cpp 
     # flexy/http2/http2_stream.cpp 
     # flexy/http2/http2_server.cpp
-    # flexy/schedule/condition_variable.cpp
+    flexy/schedule/condition_variable.cpp
 )
 
 ragelmaker(flexy/http/http11_parser.rl LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/flexy/http)
@@ -72,7 +72,7 @@ set(LIBS
     mbedtls
 )
 
-option(YAML "Config by Json" ON)
+option(YAML "Config by Yaml" ON)
 option(JSON "Config by Json" OFF)
 option(BUILD_SHARED_LIBS "Build flexy as a shared lib" ON)
 option(BUILD_STATIC_LIBS "Build flext as a static lib" OFF)
@@ -96,12 +96,15 @@ redefine_file_macro(flexy)
 option(TESTS "flexy tests execute" OFF)
 
 if(TESTS)
+
+set (TEST_LIBS ${LIBS} gtest)
+
 flexy_add_executable(test_thread "tests/test_thread.cc" "${LIBS}")
 flexy_add_executable(test_log "tests/test_logger.cc" "${LIBS}")
 flexy_add_executable(test_file "tests/test_file.cc" "${LIBS}")
 flexy_add_executable(test_fiber "tests/test_fiber.cc" "${LIBS}")
 flexy_add_executable(test_scheduler "tests/test_scheduler.cc" "${LIBS}")
-flexy_add_executable(test_task "tests/test_task.cc" "${LIBS}")
+flexy_add_executable(test_task "tests/test_task.cc" "${TEST_LIBS}")
 flexy_add_executable(test_config "tests/test_config.cc" "${LIBS}")
 flexy_add_executable(test_timer "tests/test_timer.cc" "${LIBS}")
 flexy_add_executable(test_iomanager "tests/test_iomanager.cc" "${LIBS}")
@@ -130,10 +133,14 @@ flexy_add_executable(test_ws_server "tests/test_ws_server.cc" "${LIBS}")
 
 flexy_add_executable(test_fiber_mutex "tests/test_fiber_mutex.cc" "${LIBS}")
 flexy_add_executable(test_this_fiber "tests/test_this_fiber.cc" "${LIBS}")
+flexy_add_executable(test_fiber_condition_variable "tests/test_fiber_condition_variable.cc" "${LIBS}")
+
+flexy_add_executable(test_function "tests/test_function.cc" "${TEST_LIBS}")
 
 flexy_add_executable(echo_server "examples/echo_server.cc" "${LIBS}")
 flexy_add_executable(chat_room "examples/chat_room.cc" "${LIBS}")
 flexy_add_executable(http_server "examples/http_server.cc" "${LIBS}")
+# flexy_add_executable(http2_server "examples/http2_server.cc" "${LIBS}")
 
 flexy_add_executable(fiber "examples/fiber.cc" "${LIBS}")
 

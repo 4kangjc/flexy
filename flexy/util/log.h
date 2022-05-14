@@ -73,7 +73,7 @@ public:
     template <typename... Args>
     void format(fmt::format_string<Args...> fmt, Args&&... args) {
 #if __cplusplus > 201703L && __has_include(<format>)
-        ss << std::format(fmt, std::forward<Args>(args)...);
+        ss_ << std::format(fmt, std::forward<Args>(args)...);
 #else
         ss_ << fmt::format(fmt, std::forward<Args>(args)...);
 #endif

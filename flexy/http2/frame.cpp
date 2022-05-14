@@ -7,7 +7,7 @@ static auto g_logger = FLEXY_LOG_NAME("system");
 
 std::string FrameHeader::toString() const {
     return fmt::format("[FrameHeader length = {} type = {} flags = {} r = {} identifier = {}]",
-                       FrameTypeToString((FrameType)type),
+                       +length, FrameTypeToString((FrameType)type),
                        FrameFlagToString(type, flags), (int)r, identifier);
 }
 
