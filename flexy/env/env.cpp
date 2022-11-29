@@ -18,7 +18,7 @@ bool Env::init(int argc, char** argv) {
     // exe_ = fs::current_path()/program_;      // 环境变量时不对
 
     char path[1024] = {0};
-    readlink("/proc/self/exe", path, sizeof(path));
+    [[maybe_unused]] auto res = readlink("/proc/self/exe", path, sizeof(path));
     exe_ = path;
 
     auto pos = exe_.find_last_of("/") + 1;
