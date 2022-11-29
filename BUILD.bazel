@@ -1,0 +1,40 @@
+config_setting(
+    name = "flexy_config_with_json",
+    define_values = {"FLEXY_JSON": "true"},
+    visibility = ["//visibility:public"],
+)
+
+FLEXY_COPTS = [
+    "-rdynamic",
+    "-ggdb",
+    "-std=c++17",
+    "-Wall",
+    "-Werror",
+    "-Wno-deprecated",
+    "-Wno-unused-function",
+    "-Wno-builtin-macro-redefined",
+    "-Wno-deprecated-declarations",
+]
+
+cc_library(
+    name = "flexy",
+    srcs = glob(["flexy/**/*.cpp"]),
+    hdrs = glob(["flexy/**/*.h"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "@com_github_jsoncpp//:jsoncpp",
+        "@com_github_fmt//:fmt",
+        "@com_github_jbeder_yaml_cpp//:yaml-cpp",
+        "@boringssl//:ssl",
+        "@boringssl//:crypto",
+    ],
+    linkopts = [
+        "-lpthread", 
+        "-lboost_context"
+    ],
+    copts = FLEXY_COPTS,
+    defines = select({
+        "flexy_config_with_json": ["FLEXY_JSON"],
+        "//conditions:default": ["FLEXY_YAML"],
+    }),
+)

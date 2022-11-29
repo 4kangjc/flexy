@@ -9,7 +9,7 @@
 /.idea/*
 
 #忽略ragel编译出来的文件
-*.rl.cpp
+# *.rl.cpp
 #忽略二进制文件
 /bin/*
 
@@ -21,3 +21,5 @@
 #忽略动态库和静态库
 *.so
 *.a
+# Bazel
+bazel-*
