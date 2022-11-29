@@ -16,7 +16,7 @@ int main() {
     s_logger->addAppender(StdOut);
     FLEXY_LOG_FMT_WARN(s_logger, "add appender");
 
-    auto server = std::make_shared<flexy::ServerLogAppender>("121.41.169.58:2099");
-    g_logger->addAppender(server);
-    FLEXY_LOG_FMT_INFO(g_logger, "hello flexy server log");
+    // auto server = std::make_shared<flexy::ServerLogAppender>("121.41.169.58:2099");
+    // g_logger->addAppender(server);
+    // FLEXY_LOG_FMT_INFO(g_logger, "hello flexy server log");
 }

@@ -52,3 +52,12 @@ function(flexy_add_executable targetname srcs libs)
     redefine_file_macro(${targetname})
     target_link_libraries(${targetname} ${libs})    
 endfunction()
+
+function(flexy_test_executable targetname srcs libs)
+    add_executable(${targetname} ${srcs})
+    # add_dependencies(${targetname} ${depends})
+    redefine_file_macro(${targetname})
+    target_link_libraries(${targetname} ${libs})
+    add_test(NAME run_${targetname} COMMAND ${targetname})
+endfunction()
+
