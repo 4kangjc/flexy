@@ -1,0 +1,39 @@
+workspace(name = "com_github_flexy")
+
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "com_github_jsoncpp",
+    sha256 = "a074e1b38083484e8e07789fd683599d19da8bb960959c83751cd0284bdf2043",
+    strip_prefix = "jsoncpp-1.9.5",
+    urls = ["https://github.com/open-source-parsers/jsoncpp/archive/refs/tags/1.9.5.zip"],
+)
+
+http_archive(
+    name = "com_github_fmt",
+    sha256 = "e05c91d12165a06ba07e8006a2ffb6121abe73eb6987bd6121a8eafe8d49bac1",
+    strip_prefix = "fmt-8.1.0",
+    urls = ["https://github.com/fmtlib/fmt/archive/refs/tags/8.1.0.zip"],
+    build_file = "//bazel:fmt.BUILD",
+)
+
+http_archive(
+    name = "com_github_jbeder_yaml_cpp",
+    sha256 = "4d5e664a7fb2d7445fc548cc8c0e1aa7b1a496540eb382d137e2cc263e6d3ef5",
+    strip_prefix = "yaml-cpp-yaml-cpp-0.7.0",
+    urls = ["https://github.com/jbeder/yaml-cpp/archive/refs/tags/yaml-cpp-0.7.0.zip"],
+)
+
+http_archive(
+    name = "boringssl",
+    sha256 = "5d299325d1db8b2f2db3d927c7bc1f9fcbd05a3f9b5c8239fa527c09bf97f995",  # Last updated 2022-10-19
+    strip_prefix = "boringssl-0acfcff4be10514aacb98eb8ab27bb60136d131b",
+    urls = ["https://github.com/google/boringssl/archive/0acfcff4be10514aacb98eb8ab27bb60136d131b.tar.gz"],
+)
+
+http_archive(
+    name = "com_google_googletest",  # 2021-07-09
+    sha256 = "353571c2440176ded91c2de6d6cd88ddd41401d14692ec1f99e35d013feda55a",
+    strip_prefix = "googletest-release-1.11.0",
+    urls = ["https://github.com/google/googletest/archive/refs/tags/release-1.11.0.zip"],
+)

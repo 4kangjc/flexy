@@ -73,16 +73,16 @@ set(LIBS
     crypto
 )
 
-option(YAML "Config by Yaml" ON)
-option(JSON "Config by Json" OFF)
+option(FLEXY_YAML "Config by Yaml" ON)
+option(FLEXY_JSON "Config by Json" OFF)
 option(BUILD_SHARED_LIBS "Build flexy as a shared lib" ON)
 option(BUILD_STATIC_LIBS "Build flext as a static lib" OFF)
 
-if(JSON)
+if(FLEXY_JSON)
     add_definitions(-DFLEXY_JSON)
-elseif(YAML)
+elseif(FLEXY_YAML)
     add_definitions(-DFLEXY_YAML)
-endif(JSON)
+endif(FLEXY_JSON)
 
 if (BUILD_STATIC_LIBS)
 add_library(flexy STATIC ${LIB_SRC})
