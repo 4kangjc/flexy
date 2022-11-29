@@ -5,7 +5,6 @@
 #include <mutex>
 #include <shared_mutex>
 #include <atomic>
-#include <tbb/spin_rw_mutex.h>
 
 #if __cpp_deduction_guides >= 201606
 #define LOCK_GUARD(x) std::lock_guard lk(x)
@@ -16,7 +15,7 @@
 namespace flexy {
 
 using rw_mutex = std::shared_mutex;
-using spin_rw_mutex = tbb::spin_rw_mutex;
+using spin_rw_mutex = rw_mutex;
 
 template <typename T>
 using lock_guard = std::lock_guard<T>;

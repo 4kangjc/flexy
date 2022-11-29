@@ -159,7 +159,7 @@ private:
         return &ops;
     }
 
-    mutable std::aligned_storage_t<kMaximumOptimizableSize, 1> object_;
+    mutable std::aligned_storage_t<kMaximumOptimizableSize, 1> object_{};
     const TypeOps* ops_ = nullptr;
 };
 

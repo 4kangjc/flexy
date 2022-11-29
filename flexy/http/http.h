@@ -2,6 +2,7 @@
 #include <map>
 #include <sstream>
 #include <cstring>
+#include <memory>
 #include <boost/lexical_cast.hpp>
 
 namespace flexy::http {

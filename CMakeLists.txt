@@ -69,7 +69,8 @@ set(LIBS
     dl
     mysqlclient
     sqlite3
-    mbedtls
+    ssl
+    crypto
 )
 
 option(YAML "Config by Yaml" ON)

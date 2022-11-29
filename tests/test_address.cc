@@ -43,7 +43,7 @@ void test_iface() {
     auto opt = flexy::Address::GetInterfaceAddress();
     FLEXY_ASSERT(opt);
     bool flag = false;
-    const char* sv;
+    const char* sv = nullptr;
     for (auto& [x, y] : *opt) {
         if (!flag) {
             sv = x.c_str();
