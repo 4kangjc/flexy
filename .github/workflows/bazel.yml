@@ -1,0 +1,50 @@
+name: Bazel
+
+on:
+  push:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build_on_20_04:
+    strategy:
+      matrix:
+        gcc_version: [8, 9]
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: deps
+      run: |
+           sudo apt install -y gcc-${{matrix.gcc_version}} g++-${{matrix.gcc_version}}
+           sudo apt install libboost-all-dev -y
+    - name: Build
+      working-directory: ${{github.workspace}}
+      run: bazel build --action_env=CXX=g++-${{matrix.gcc_version}} --action_env=CC=gcc-${{matrix.gcc_version}} ...
+
+    - name: Test
+      working-directory: ${{github.workspace}}
+      run: bazel build --action_env=CXX=g++-${{matrix.gcc_version}} --action_env=CC=gcc-${{matrix.gcc_version}} --test_output=errors ...
+
+  build_on_22_04:
+    strategy:
+      matrix:
+        gcc_version: [10, 11, 12]
+    runs-on: ubuntu-22.04
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: deps
+      run: |
+           sudo apt install -y gcc-${{matrix.gcc_version}} g++-${{matrix.gcc_version}}
+           sudo apt install libboost-all-dev -y
+           sudo apt install -y ragel
+    - name: Build
+      working-directory: ${{github.workspace}}
+      run: bazel build --action_env=CXX=g++-${{matrix.gcc_version}} --action_env=CC=gcc-${{matrix.gcc_version}} ...
+
+    - name: Test
+      working-directory: ${{github.workspace}}
+      run: bazel build --action_env=CXX=g++-${{matrix.gcc_version}} --action_env=CC=gcc-${{matrix.gcc_version}} --test_output=errors ...
