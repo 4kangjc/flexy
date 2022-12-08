@@ -12,8 +12,8 @@ static auto g_logger = FLEXY_LOG_NAME("system");
 static std::atomic<uint64_t> s_fiber_id {0};            // 分配协程id
 static std::atomic<uint64_t> s_fiber_count {0};         // 记录正在运行的协程数量
 
-static thread_local Fiber* t_fiber = nullptr;               // run fiber
-static thread_local Fiber::ptr t_threadFiber = nullptr;     // main fiber
+static thread_local Fiber* t_current_fiber = nullptr;       // run fiber
+static thread_local Fiber::ptr t_main_fiber = nullptr;     // main fiber
 
 static auto g_fiber_stack_size = Config::Lookup("fiber.stack_size", 128u * 1024u, "fiber stack size");
 
@@ -66,7 +66,7 @@ Fiber::~Fiber() {
     } else {
         FLEXY_ASSERT2(state_ == EXEC, "m_state = " << state_);   // 主协程一定在运行
 
-        Fiber* cur = t_fiber;
+        Fiber* cur = t_current_fiber;
         FLEXY_ASSERT(cur == this);                                // 主协程最后析构，此时运行的协程一定是主协程
         SetThis(nullptr);
     }
@@ -85,68 +85,44 @@ void Fiber::reset(detail::__task&& cb) {
 
 void Fiber::resume() {
     FLEXY_ASSERT(state_ == READY);
-    SetThis(this);                         
+    auto caller = t_current_fiber;
+    t_current_fiber = this;             
     state_ = EXEC;
-    
-    t_threadFiber->state_ = READY;
 
-    ctx_ = jump_fcontext(ctx_, nullptr).fctx;
-}
+    auto [ctx, self] = jump_fcontext(ctx_, caller);
 
-transfer_t ontop_callback(transfer_t from) {
-    Fiber* fiber = (Fiber*)(from.data);
-    fiber->state_ = Fiber::READY;
-    
-    return from;
-}
-
-transfer_t ontop_callback2(transfer_t from) {
-    auto* task = (detail::__task*)(from.data);
-    t_fiber->state_ = Fiber::READY;
-    Fiber::SetThis(t_threadFiber.get());
-    t_fiber->state_ = Fiber::EXEC;
-
-    task->operator()();
-
-    return from;
-}
-
-void Fiber::yield_callback(detail::__task&& cb) {
-    FLEXY_ASSERT(state_ != READY);
-    auto p = ontop_fcontext(t_threadFiber->ctx_, &cb, ontop_callback2);
-    t_threadFiber->ctx_ = p.fctx;
+    ctx_ = ctx;
+    static_cast<Fiber*>(self)->state_ = READY;
+    t_current_fiber = caller;
 }
 
 void Fiber::yield() {
-    FLEXY_ASSERT(state_ != READY);
-    
-    SetThis(t_threadFiber.get());
-    t_threadFiber->state_ = EXEC;
-    // auto p = jump_fcontext(t_threadFiber->ctx_, nullptr);
-    auto p = ontop_fcontext(t_threadFiber->ctx_, this, ontop_callback);
-    t_threadFiber->ctx_ = p.fctx;
+    t_main_fiber->resume();
 }
 
-void Fiber::_M_return() const {
-    FLEXY_ASSERT2(state_ == Fiber::TERM, "state = " << state_);
-    SetThis(t_threadFiber.get());
-    t_threadFiber->state_ = EXEC;
-    // t_threadFiber->ctx_ = jump_fcontext(t_threadFiber->ctx_, nullptr).fctx;
-    jump_fcontext(t_threadFiber->ctx_, nullptr);
-}
+// void Fiber::yield_callback(detail::__task&& cb) {
+//     FLEXY_ASSERT(state_ == EXEC);
+//     // FLEXY_ASSERT()
+//     t_current_fiber = t_main_fiber.get();
+//     t_main_fiber->state_ = EXEC;
+
+//     // auto [ctx, self] = ontop_fcontext(t_main_fiber->ctx_, , );
+
+
+// }
 
 void Fiber::SetThis(Fiber* f) {
-    t_fiber = f;
+    t_current_fiber = f;
 }
 
 Fiber::ptr Fiber::GetThis() {
-    if (t_fiber) {
-        return t_fiber->shared_from_this();
+    if (t_current_fiber) {
+        return t_current_fiber->shared_from_this();
     }
     Fiber::ptr main_fiber(new Fiber);
-    FLEXY_ASSERT(t_fiber == main_fiber.get());
-    t_threadFiber = std::move(main_fiber);
-    return t_fiber->shared_from_this();
+    FLEXY_ASSERT(t_current_fiber == main_fiber.get());
+    t_main_fiber = std::move(main_fiber);
+    return t_current_fiber->shared_from_this();
 } 
 
 
@@ -158,8 +134,8 @@ void Fiber::MainFunc(transfer_t t) {
     auto&& cur = GetThis();
     FLEXY_ASSERT(cur);
 
-   
-    t_threadFiber->ctx_ = t.fctx;
+    t_main_fiber->ctx_ = t.fctx;
+    static_cast<Fiber*>(t.data)->state_ = READY;
 
     try {
         cur->cb_();
@@ -177,15 +153,14 @@ void Fiber::MainFunc(transfer_t t) {
 
     auto raw_ptr = cur.get();
     cur = nullptr;
-    // raw_ptr->yield();
-    raw_ptr->_M_return();
+    raw_ptr->yield();
 
     FLEXY_ASSERT2(false, "never reach fiber id = " + std::to_string(raw_ptr->getId()));
 }
 
 uint64_t Fiber::GetFiberId() {
-    if (t_fiber) {
-        return t_fiber->getId();
+    if (t_current_fiber) {
+        return t_current_fiber->getId();
     }
     return 0;
 }

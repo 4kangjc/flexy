@@ -53,7 +53,7 @@ set(LIB_SRC
     # flexy/http2/stream.cpp 
     # flexy/http2/http2_stream.cpp 
     # flexy/http2/http2_server.cpp
-    flexy/schedule/condition_variable.cpp
+    # flexy/schedule/condition_variable.cpp
 )
 
 ragelmaker(flexy/http/http11_parser.rl LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/flexy/http)
@@ -131,7 +131,7 @@ flexy_test_executable(test_hash_util "tests/test_hash_util.cc" "${LIBS}")
 flexy_add_executable(test_ws_server "tests/test_ws_server.cc" "${LIBS}")
 flexy_test_executable(test_fiber_mutex "tests/test_fiber_mutex.cc" "${LIBS}")
 flexy_test_executable(test_this_fiber "tests/test_this_fiber.cc" "${LIBS}")
-flexy_test_executable(test_fiber_condition_variable "tests/test_fiber_condition_variable.cc" "${LIBS}")
+# flexy_test_executable(test_fiber_condition_variable "tests/test_fiber_condition_variable.cc" "${LIBS}")
 flexy_test_executable(test_function "tests/test_function.cc" "${GTEST_LIBS}")
 
 endif(FLEXY_TESTS)

@@ -8,11 +8,6 @@ namespace flexy::this_fiber {
 inline void yield() { return Fiber::GetThis()->yield(); }
 inline uint64_t get_id() noexcept { return Fiber::GetThis()->getId(); }
 
-template <typename... _Args, typename = std::enable_if_t<std::is_invocable_v<_Args&&...>>>
-inline void yield_callback(_Args&&... __args) { 
-    return Fiber::GetThis()->yield_callback(std::forward<_Args>(__args)...); 
-}
-
 template <class Rep, class Period>
 inline void sleep_for(const std::chrono::duration<Rep, Period>& sleep_duration) {
     auto iom = flexy::IOManager::GetThis();
