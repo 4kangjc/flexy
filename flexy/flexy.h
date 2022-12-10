@@ -1,5 +1,6 @@
 #pragma once
 
+#include "db.h"
 #include "env.h"
 #include "http.h"
 #include "net.h"
@@ -7,4 +8,3 @@
 #include "stream.h"
 #include "thread.h"
 #include "util.h"
-#include "db.h"

@@ -38,10 +38,11 @@ public:
         LOCK_GUARD(mutex_);
         return datas_.empty();
     }
+
 private:
     fiber::Semaphore sem_;
     mutable Spinlock mutex_;
     std::deque<data_type> datas_;
 };
 
-} // namespace flexy
+}  // namespace flexy

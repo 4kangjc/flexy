@@ -55,7 +55,7 @@ public:
 class IStmt {
 public:
     typedef std::shared_ptr<IStmt> ptr;
-    virtual ~IStmt(){}
+    virtual ~IStmt() {}
     virtual int bindInt8(int idx, int8_t value) = 0;
     virtual int bindUint8(int idx, uint8_t value) = 0;
     virtual int bindInt16(int idx, int16_t value) = 0;
@@ -84,7 +84,7 @@ public:
 class ITransaction : public ISQLUpdate {
 public:
     using ptr = std::shared_ptr<ITransaction>;
-    virtual ~ITransaction() {};
+    virtual ~ITransaction(){};
     virtual bool begin() = 0;
     virtual bool commit() = 0;
     virtual bool rollback() = 0;
@@ -106,5 +106,4 @@ struct Blob {
     int len;
 };
 
-}
-
+}  // namespace flexy

@@ -1,5 +1,5 @@
-#include <flexy/schedule/mutex.h>
 #include <flexy/schedule/iomanager.h>
+#include <flexy/schedule/mutex.h>
 #include <flexy/util/log.h>
 
 static auto& g_logger = FLEXY_LOG_ROOT();
@@ -9,7 +9,6 @@ int sum;
 flexy::fiber::mutex mutex;
 // flexy::NullMutex mutex;
 // flexy::mutex mutex;
-
 
 void add() {
     LOCK_GUARD(mutex);

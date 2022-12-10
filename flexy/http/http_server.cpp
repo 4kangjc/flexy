@@ -6,7 +6,6 @@ namespace flexy::http {
 
 static auto g_logger = FLEXY_LOG_NAME("system");
 
-
 void HttpServer::handleClient(const Socket::ptr& client) {
     // HttpSession::ptr session(new HttpSession(client));
     auto session = std::make_shared<HttpSession>(client);
@@ -18,19 +17,20 @@ void HttpServer::handleClient(const Socket::ptr& client) {
             << *client;
             break;
         }
-        auto rsp = std::make_unique<HttpResponse>(req->getVersion(),
-                                                  req->isClose() || !isKeepalive_);
+        auto rsp = std::make_unique<HttpResponse>(
+            req->getVersion(), req->isClose() || !isKeepalive_);
         dispatch_->handle(req, rsp, session);
         session->sendResponse(rsp);
     } while (isKeepalive_);
-    
+
     session->close();
 }
 
-HttpServer::HttpServer(bool keepalive, IOManager* worker,
-                       IOManager* io_worker, IOManager* accept_worker) :
-        TcpServer(worker, io_worker, accept_worker), isKeepalive_(keepalive),
-        dispatch_(std::make_shared<ServletDispatch>()) {
+HttpServer::HttpServer(bool keepalive, IOManager* worker, IOManager* io_worker,
+                       IOManager* accept_worker)
+    : TcpServer(worker, io_worker, accept_worker),
+      isKeepalive_(keepalive),
+      dispatch_(std::make_shared<ServletDispatch>()) {
     type_ = "http";
 }
 

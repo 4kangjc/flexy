@@ -1,7 +1,7 @@
 #pragma once
 
-#include <unistd.h>
 #include <stdint.h>
+#include <unistd.h>
 #include <functional>
 #include "flexy/util/singleton.h"
 
@@ -20,7 +20,8 @@ struct ProcessInfo {
 
 using ProcessInfoMrg = Singleton<ProcessInfo>;
 
-int start_daemon(int argc, char** argv, std::function
-            <int(int argc, char** argv)> main_cb, bool is_daemon);
+int start_daemon(int argc, char** argv,
+                 std::function<int(int argc, char** argv)> main_cb,
+                 bool is_daemon);
 
-}   // namespace flexy
+}  // namespace flexy

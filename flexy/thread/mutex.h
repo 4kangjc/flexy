@@ -29,21 +29,21 @@ using scoped_lock = std::scoped_lock<T...>;
 template <typename T>
 using ReadLock = std::shared_lock<T>;
 template <typename T>
-using WriteLock = std::lock_guard<T>;            // 不支持手动 unlock
+using WriteLock = std::lock_guard<T>;  // 不支持手动 unlock
 template <typename T>
-using WriteLock2 = std::unique_lock<T>;          // 可手动 unlock
+using WriteLock2 = std::unique_lock<T>;  // 可手动 unlock
 
 #if __cplusplus > 201703L
-#define READLOCK(x)   ReadLock   lk(x)          // cpp20 类别名模板实参推导
-#define WRITELOCK(x)  WriteLock  lk(x)
+#define READLOCK(x) ReadLock lk(x)  // cpp20 类别名模板实参推导
+#define WRITELOCK(x) WriteLock lk(x)
 #define WRITELOCK2(x) WriteLock2 lk(x)
 #elif __cpp_deduction_guides >= 201606
-#define READLOCK(x)   std::shared_lock  lk(x)   // cpp17 类模板实参推导 (CTAD)
-#define WRITELOCK(x)  std::lock_guard   lk(x)
-#define WRITELOCK2(x) std::unique_lock  lk(x)
+#define READLOCK(x) std::shared_lock lk(x)  // cpp17 类模板实参推导 (CTAD)
+#define WRITELOCK(x) std::lock_guard lk(x)
+#define WRITELOCK2(x) std::unique_lock lk(x)
 #else
-#define READLOCK(x)   ReadLock<std::decay_t<decltype(x)>>   lk(x)
-#define WRITELOCK(x)  WriteLock<std::decay_t<decltype(x)>>  lk(x)
+#define READLOCK(x) ReadLock<std::decay_t<decltype(x)>> lk(x)
+#define WRITELOCK(x) WriteLock<std::decay_t<decltype(x)>> lk(x)
 #define WRITELOCK2(x) WriteLock2<std::decay_t<decltype(x)>> lk(x)
 #endif
 
@@ -82,14 +82,13 @@ public:
     CASlock() = default;
     ~CASlock() = default;
     void lock() {
-        while (m_mutex.test_and_set(std::memory_order_acquire));
+        while (m_mutex.test_and_set(std::memory_order_acquire))
+            ;
     }
-    void unlock() {
-        m_mutex.clear(std::memory_order_release);
-    }
+    void unlock() { m_mutex.clear(std::memory_order_release); }
+
 private:
     std::atomic_flag m_mutex = ATOMIC_FLAG_INIT;
 };
 
-
-}
+}  // namespace flexy

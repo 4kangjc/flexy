@@ -6,9 +6,10 @@ using namespace std::chrono_literals;
 static auto& g_logger = FLEXY_LOG_ROOT();
 
 void test_this_fiber() {
-    FLEXY_LOG_INFO(g_logger) << "hello this fiber, id = " << this_fiber::get_id();
+    FLEXY_LOG_INFO(g_logger)
+        << "hello this fiber, id = " << this_fiber::get_id();
     // IOManager::GetThis()->async(Fiber::GetThis());
-    // this_fiber::yield();    
+    // this_fiber::yield();
     FLEXY_LOG_DEBUG(g_logger) << "begin sleep";
 
     this_fiber::sleep_for(2000ms);

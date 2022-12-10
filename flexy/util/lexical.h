@@ -481,7 +481,7 @@ static bool JsonToYaml(const Json::Value& jnode, YAML::Node& ynode) {
                 } else {
                     return false;
                 }
-            } 
+            }
         } else {
             ynode = jnode.asString();
         }
@@ -490,7 +490,6 @@ static bool JsonToYaml(const Json::Value& jnode, YAML::Node& ynode) {
     }
     return true;
 }
-
 }
 
 template <typename T>

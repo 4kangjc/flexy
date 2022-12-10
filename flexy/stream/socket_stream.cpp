@@ -27,7 +27,7 @@ ssize_t SockStream::read(void* buffer, size_t length) {
     return sock_->recv(buffer, length);
 }
 
-ssize_t SockStream::read(const ByteArray::ptr &ba, size_t length) {
+ssize_t SockStream::read(const ByteArray::ptr& ba, size_t length) {
     if (!isConnected()) {
         return -1;
     }
@@ -47,7 +47,7 @@ ssize_t SockStream::write(const void* buffer, size_t length) {
     return sock_->send(buffer, length);
 }
 
-ssize_t SockStream::write(const ByteArray::ptr &ba, size_t length) {
+ssize_t SockStream::write(const ByteArray::ptr& ba, size_t length) {
     if (!isConnected()) {
         return -1;
     }

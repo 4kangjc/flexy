@@ -46,7 +46,8 @@ HttpRequest::HttpRequest(uint8_t version, bool close) :
 }
 
 std::string HttpRequest::getUri() {
-    return path_ + (query_.empty() ? "" : "?" + query_) + (fragment_.empty() ? "" : "#" + fragment_);
+    return path_ + (query_.empty() ? "" : "?" + query_) +
+           (fragment_.empty() ? "" : "#" + fragment_);
 }
 
 std::string HttpRequest::getHeader(const std::string& key,
@@ -166,8 +167,7 @@ std::ostream& HttpRequest::dump(std::ostream& os) const {
     }
 
     if (!body_.empty()) {
-        os << "Content-length " << body_.size() << "\r\n\r\n"
-           << body_;
+        os << "Content-length " << body_.size() << "\r\n\r\n" << body_;
     } else {
         os << "\r\n";
     }
@@ -187,8 +187,7 @@ void HttpRequest::init() {
 }
 
 HttpResponse::HttpResponse(uint8_t version, bool close)
-    : status_(HttpStatus::OK), version_(version), close_(close)
-{ }
+    : status_(HttpStatus::OK), version_(version), close_(close) {}
 
 std::string HttpResponse::getHeader(const std::string &key,
                                     const std::string &def) const {

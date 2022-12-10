@@ -1,10 +1,11 @@
-#include <iostream>
 #include <flexy/db/mysql.h>
 #include <flexy/flexy.h>
+#include <iostream>
 
 static auto&& g_logger = FLEXY_LOG_ROOT();
 
-static auto s_mysql_confif = flexy::Config::Lookup("mysql", std::map<std::string, std::string>(), "mysql config");
+static auto s_mysql_confif = flexy::Config::Lookup(
+    "mysql", std::map<std::string, std::string>(), "mysql config");
 
 void printData(const flexy::ISQLData::ptr& res) {
     if (!res) {
@@ -19,10 +20,11 @@ void printData(const flexy::ISQLData::ptr& res) {
     std::cout << std::endl;
     while (res->next()) {
         // for (int j = 0; j < col; ++j) {
-            // std::cout << res->getString(j) << "\t"; 
+        // std::cout << res->getString(j) << "\t";
         // }
         // std::cout << std::endl;
-        std::cout << res->getInt32(0) << "\t" << res->getTimeStr(1) << std::endl;
+        std::cout << res->getInt32(0) << "\t" << res->getTimeStr(1)
+                  << std::endl;
     }
     std::cout << "---------------------------------------------\n";
 }
@@ -36,15 +38,17 @@ void run() {
             std::cout << "connect fail" << std::endl;
             return;
         }
-        
-        int rt = mysql->execute("update user set update_time = %s where id = 1", "'2012-01-31 14:34:17'");
+
+        int rt = mysql->execute("update user set update_time = %s where id = 1",
+                                "'2012-01-31 14:34:17'");
         FLEXY_ASSERT(rt == 0);
-        rt = mysql->execute("insert into user (update_time) values ('%s')", flexy::TimeToStr().c_str());
+        rt = mysql->execute("insert into user (update_time) values ('%s')",
+                            flexy::TimeToStr().c_str());
         FLEXY_ASSERT(rt == 0);
-        // auto stmt = flexy::MySQLStmt::Create(mysql, "update user set update_time = ? where id = 1");
-        // stmt->bindString(1, "2021-12-29 10:10:10");
-        // int rt = stmt->execute();
-        // std::cout << "rt = " << rt << std::endl;
+        // auto stmt = flexy::MySQLStmt::Create(mysql, "update user set
+        // update_time = ? where id = 1"); stmt->bindString(1, "2021-12-29
+        // 10:10:10"); int rt = stmt->execute(); std::cout << "rt = " << rt <<
+        // std::endl;
 
         auto&& res = mysql->query("select * from user");
         printData(res);
@@ -56,7 +60,9 @@ void run() {
 void test_mysql_mgr() {
     auto& mgr = flexy::MySQLMgr::GetInstance();
     flexy::Config::LoadFromConDir("conf/");
-    FLEXY_ASSERT(mgr.execStmt("test_0", "update user set update_time = ? where id = 2", flexy::TimeToStr()) == 0);
+    FLEXY_ASSERT(mgr.execStmt("test_0",
+                              "update user set update_time = ? where id = 2",
+                              flexy::TimeToStr()) == 0);
     auto res = mgr.queryStmt("test_0", "select * from user");
     printData(res);
 }
@@ -69,4 +75,4 @@ int main(int argc, char** argv) {
     // go run;
 
     return 0;
-} 
+}

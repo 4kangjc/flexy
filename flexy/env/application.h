@@ -16,15 +16,18 @@ public:
     std::vector<std::shared_ptr<T>> getServer() const;
 
     auto listAllServer() const { return servers_; }
+
 private:
     int main(int argc, char** argv);
     void run_fiber();
+
 private:
     int argc_ = 0;
     char** argv_ = nullptr;
     // std::vector<http::HttpServer::ptr> httpservers_;
     std::unordered_map<std::string, std::vector<TcpServer::ptr>> servers_;
     inline static Application* s_instance = nullptr;
+
 public:
     std::function<void()> serverReady = nullptr;
     std::function<void()> serverUp = nullptr;
@@ -32,7 +35,7 @@ public:
 
 template <class T>
 std::vector<std::shared_ptr<T>> Application::getServer() const {
-#define XX(type) \
+#define XX(type)                                                     \
     if (auto it = servers_.find(#type); it != servers_.end()) {      \
         std::vector<std::shared_ptr<T>> servers;                     \
         servers.reserve(it->second.size());                          \
@@ -55,4 +58,4 @@ std::vector<std::shared_ptr<T>> Application::getServer() const {
 #undef XX
 }
 
-} // namespace flexy
+}  // namespace flexy

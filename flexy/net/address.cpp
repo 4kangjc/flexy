@@ -394,7 +394,8 @@ std::ostream& IPv6Address::insert(std::ostream& os) const {
 
 IPAddress::ptr IPv6Address::broadcastAddress(uint32_t prefix_len) {
     sockaddr_in6 baddr(addr_);
-    baddr.sin6_addr.s6_addr[prefix_len / 8] |= CreateMask<uint8_t>(prefix_len % 8);
+    baddr.sin6_addr.s6_addr[prefix_len / 8] |=
+        CreateMask<uint8_t>(prefix_len % 8);
     for (int i = prefix_len / 8; i < 16; ++i) {
         baddr.sin6_addr.s6_addr[i] = 0xff;
     }
@@ -404,7 +405,8 @@ IPAddress::ptr IPv6Address::broadcastAddress(uint32_t prefix_len) {
 
 IPAddress::ptr IPv6Address::networkAddress(uint32_t prefix_len) {
     sockaddr_in6 baddr(addr_);
-    baddr.sin6_addr.s6_addr[prefix_len / 8] &= ~CreateMask<uint8_t>(prefix_len % 8);
+    baddr.sin6_addr.s6_addr[prefix_len / 8] &=
+        ~CreateMask<uint8_t>(prefix_len % 8);
     for (int i = prefix_len / 8 + 1; i < 16; ++i) {
         baddr.sin6_addr.s6_addr[i] = 0x00;
     }
@@ -415,7 +417,8 @@ IPAddress::ptr IPv6Address::subnetMask(uint32_t prefix_len) {
     sockaddr_in6 subnet;
     bzero(&subnet, sizeof(subnet));
     subnet.sin6_family = AF_INET6;
-    subnet.sin6_addr.s6_addr[prefix_len / 8] = ~CreateMask<uint8_t>(prefix_len % 8);
+    subnet.sin6_addr.s6_addr[prefix_len / 8] =
+        ~CreateMask<uint8_t>(prefix_len % 8);
     for (uint32_t i = 0; i < prefix_len / 8; ++i) {
         subnet.sin6_addr.s6_addr[i] = 0xff;
     }

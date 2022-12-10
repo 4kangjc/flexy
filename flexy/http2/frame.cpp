@@ -6,12 +6,13 @@ namespace flexy::http2 {
 static auto g_logger = FLEXY_LOG_NAME("system");
 
 std::string FrameHeader::toString() const {
-    return fmt::format("[FrameHeader length = {} type = {} flags = {} r = {} identifier = {}]",
-                       +length, FrameTypeToString((FrameType)type),
-                       FrameFlagToString(type, flags), (int)r, identifier);
+    return fmt::format(
+        "[FrameHeader length = {} type = {} flags = {} r = {} identifier = {}]",
+        +length, FrameTypeToString((FrameType)type),
+        FrameFlagToString(type, flags), (int)r, identifier);
 }
 
-bool FrameHeader::writeTo(const ByteArray::ptr& ba) const {
+bool FrameHeader::writeTo(const ByteArray::ptr &ba) const {
     try {
         ba->writeFuint32(len_type);
         ba->writeFuint8(flags);
@@ -23,11 +24,11 @@ bool FrameHeader::writeTo(const ByteArray::ptr& ba) const {
     return false;
 }
 
-bool FrameHeader::readFrom(const ByteArray::ptr& ba) {
+bool FrameHeader::readFrom(const ByteArray::ptr &ba) {
     try {
         len_type = ba->readFuint32();
         flags = ba->readFuint8();
-        r_id = ba->readFuint32();   
+        r_id = ba->readFuint32();
         return true;
     } catch (...) {
         FLEXY_LOG_WARN(g_logger) << "read FrameHeader fail" << toString();
@@ -41,13 +42,15 @@ std::string Frame::toString() const {
 
 std::string DataFrame::toString() const {
     if (pad) {
-        return fmt::format("[DataFrame pad = {} data.size = {}]", pad, data.size());
+        return fmt::format("[DataFrame pad = {} data.size = {}]", pad,
+                           data.size());
     } else {
         return fmt::format("[DataFrame data.size = {}]", data.size());
     }
 }
 
-bool DataFrame::writeTo(const ByteArray::ptr& ba, const FrameHeader& header) const {
+bool DataFrame::writeTo(const ByteArray::ptr &ba,
+                        const FrameHeader &header) const {
     try {
         if (header.flags & static_cast<uint8_t>(FrameFlagData::PADDED)) {
             ba->writeFuint8(pad);
@@ -63,11 +66,12 @@ bool DataFrame::writeTo(const ByteArray::ptr& ba, const FrameHeader& header) con
     return false;
 }
 
-bool DataFrame::readFrom(const ByteArray::ptr& ba, const FrameHeader& header) {
+bool DataFrame::readFrom(const ByteArray::ptr &ba, const FrameHeader &header) {
     try {
         if (header.flags & static_cast<uint8_t>(FrameFlagData::PADDED)) {
             pad = ba->readFuint8();
-            data.resize(header.length - pad - 1);       // 减掉padding的长度和pad的长度
+            data.resize(header.length - pad -
+                        1);  // 减掉padding的长度和pad的长度
             ba->read(data.data(), data.size());
             padding.resize(pad);
             ba->read(padding.data(), pad);
@@ -83,11 +87,13 @@ bool DataFrame::readFrom(const ByteArray::ptr& ba, const FrameHeader& header) {
 }
 
 std::string PriorityFrame::toString() const {
-    return fmt::format("[PriorityFrame exclusive = {} stream_dep = {} wight = {}]",
-                        exclusive, stream_dep, weight);
+    return fmt::format(
+        "[PriorityFrame exclusive = {} stream_dep = {} wight = {}]", exclusive,
+        stream_dep, weight);
 }
 
-bool PriorityFrame::writeTo(const ByteArray::ptr& ba, const FrameHeader& header) const {
+bool PriorityFrame::writeTo(const ByteArray::ptr &ba,
+                            const FrameHeader &header) const {
     try {
         ba->writeFuint32(e_stream_dep);
         ba->writeFuint8(weight);
@@ -98,11 +104,12 @@ bool PriorityFrame::writeTo(const ByteArray::ptr& ba, const FrameHeader& header)
     return false;
 }
 
-bool PriorityFrame::readFrom(const ByteArray::ptr& ba, const FrameHeader& header) {
+bool PriorityFrame::readFrom(const ByteArray::ptr &ba,
+                             const FrameHeader &header) {
     try {
-       e_stream_dep = ba->readFuint32();
-       weight = ba->readFuint8();
-       return true;
+        e_stream_dep = ba->readFuint32();
+        weight = ba->readFuint8();
+        return true;
     } catch (...) {
         FLEXY_LOG_WARN(g_logger) << "read PriorityFrame fail, " << toString();
     }
@@ -110,10 +117,12 @@ bool PriorityFrame::readFrom(const ByteArray::ptr& ba, const FrameHeader& header
 }
 
 std::string HeadersFrame::toString() const {
-    return fmt::format("[HeadersFrame pad = {} data.size = {}]", pad, data.size());
+    return fmt::format("[HeadersFrame pad = {} data.size = {}]", pad,
+                       data.size());
 }
 
-bool HeadersFrame::writeTo(const ByteArray::ptr &ba, const FrameHeader &header) const {
+bool HeadersFrame::writeTo(const ByteArray::ptr &ba,
+                           const FrameHeader &header) const {
     try {
         if (header.flags & static_cast<uint8_t>(FrameFlagHeaders::PADDED)) {
             ba->writeFuint8(pad);
@@ -135,7 +144,8 @@ bool HeadersFrame::writeTo(const ByteArray::ptr &ba, const FrameHeader &header) 
     return false;
 }
 
-bool HeadersFrame::readFrom(const ByteArray::ptr &ba, const FrameHeader &header) {
+bool HeadersFrame::readFrom(const ByteArray::ptr &ba,
+                            const FrameHeader &header) {
     try {
         int len = header.length;
         if (header.flags & static_cast<uint8_t>(FrameFlagHeaders::PADDED)) {
@@ -165,7 +175,8 @@ std::string RstStreamFrame::toString() const {
     return fmt::format("[RstStream error_code = {}]", error_code);
 }
 
-bool RstStreamFrame::writeTo(const ByteArray::ptr &ba, const FrameHeader &header) const {
+bool RstStreamFrame::writeTo(const ByteArray::ptr &ba,
+                             const FrameHeader &header) const {
     try {
         ba->writeFuint32(error_code);
         return true;
@@ -175,7 +186,8 @@ bool RstStreamFrame::writeTo(const ByteArray::ptr &ba, const FrameHeader &header
     return false;
 }
 
-bool RstStreamFrame::readFrom(const ByteArray::ptr &ba, const FrameHeader &header) {
+bool RstStreamFrame::readFrom(const ByteArray::ptr &ba,
+                              const FrameHeader &header) {
     try {
         error_code = ba->readFuint32();
         return true;
@@ -186,13 +198,12 @@ bool RstStreamFrame::readFrom(const ByteArray::ptr &ba, const FrameHeader &heade
 }
 
 static constexpr std::array<std::string_view, 6> s_settings_string = {
-        "",
-        "HEADER_TABLE_SIZE",
-        "MAX_CONCURRENT_STREAMS",
-        "INITIAL_WINDOW_SIZE",
-        "MAX_FRAME_SIZE",
-        "MAX_HEADER_LIST_SIZE"
-};
+    "",
+    "HEADER_TABLE_SIZE",
+    "MAX_CONCURRENT_STREAMS",
+    "INITIAL_WINDOW_SIZE",
+    "MAX_FRAME_SIZE",
+    "MAX_HEADER_LIST_SIZE"};
 
 std::string_view SettingsFrame::SettingsToString(Settings s) {
     auto idx = static_cast<uint32_t>(s);
@@ -204,9 +215,10 @@ std::string_view SettingsFrame::SettingsToString(Settings s) {
 }
 
 std::string SettingsItem::toString() const {
-    return fmt::format("[SettingsFrame identifier = {} value = {}]",
-                       SettingsFrame::SettingsToString((SettingsFrame::Settings)identifier),
-                       value);
+    return fmt::format(
+        "[SettingsFrame identifier = {} value = {}]",
+        SettingsFrame::SettingsToString((SettingsFrame::Settings)identifier),
+        value);
 }
 
 bool SettingsItem::writeTo(const ByteArray::ptr &ba) const {
@@ -221,9 +233,10 @@ bool SettingsItem::readFrom(const ByteArray::ptr &ba) {
     return true;
 }
 
-bool SettingsFrame::writeTo(const ByteArray::ptr &ba, const FrameHeader &header) const {
+bool SettingsFrame::writeTo(const ByteArray::ptr &ba,
+                            const FrameHeader &header) const {
     try {
-        for (const auto& i : items) {
+        for (const auto &i : items) {
             i.writeTo(ba);
         }
         return true;
@@ -233,11 +246,12 @@ bool SettingsFrame::writeTo(const ByteArray::ptr &ba, const FrameHeader &header)
     return false;
 }
 
-bool SettingsFrame::readFrom(const ByteArray::ptr &ba, const FrameHeader &header) {
+bool SettingsFrame::readFrom(const ByteArray::ptr &ba,
+                             const FrameHeader &header) {
     try {
         uint32_t size = header.length / sizeof(SettingsItem);
         items.resize(size);
-        for (uint32_t i = 0; i < size; ++i ){
+        for (uint32_t i = 0; i < size; ++i) {
             items[i].readFrom(ba);
         }
         return true;
@@ -248,25 +262,28 @@ bool SettingsFrame::readFrom(const ByteArray::ptr &ba, const FrameHeader &header
 }
 
 std::string SettingsFrame::toString() const {
-    return fmt::format("[SettingsFrame size = {} items = [{}]]", items.size(), [this](){
-        std::string ret;
-        ret.reserve(50 * items.size());      // 粗略估计大小
-        for (const auto& i : items) {
-            ret += i.toString();
-        }
-        return ret;
-    }());
+    return fmt::format("[SettingsFrame size = {} items = [{}]]", items.size(),
+                       [this]() {
+                           std::string ret;
+                           ret.reserve(50 * items.size());  // 粗略估计大小
+                           for (const auto &i : items) {
+                               ret += i.toString();
+                           }
+                           return ret;
+                       }());
 }
 
 std::string PushPromisedFrame::toString() const {
     if (pad) {
-        return fmt::format("[PushPromisedFrame pad = {} data.size = {}]", pad, data.size());
+        return fmt::format("[PushPromisedFrame pad = {} data.size = {}]", pad,
+                           data.size());
     } else {
         return fmt::format("[PushPromisedFrame data.size = {}]", data.size());
     }
 }
 
-bool PushPromisedFrame::writeTo(const ByteArray::ptr &ba, const FrameHeader &header) const {
+bool PushPromisedFrame::writeTo(const ByteArray::ptr &ba,
+                                const FrameHeader &header) const {
     try {
         if (header.flags & static_cast<uint8_t>(FrameFlagPromise::PADDED)) {
             ba->writeFuint8(pad);
@@ -279,12 +296,14 @@ bool PushPromisedFrame::writeTo(const ByteArray::ptr &ba, const FrameHeader &hea
         }
         return true;
     } catch (...) {
-        FLEXY_LOG_WARN(g_logger) << "write PushPromiseFrame fail, " << toString();
+        FLEXY_LOG_WARN(g_logger)
+            << "write PushPromiseFrame fail, " << toString();
     }
     return false;
 }
 
-bool PushPromisedFrame::readFrom(const ByteArray::ptr &ba, const FrameHeader &header) {
+bool PushPromisedFrame::readFrom(const ByteArray::ptr &ba,
+                                 const FrameHeader &header) {
     try {
         if (header.flags & static_cast<uint8_t>(FrameFlagPromise::PADDED)) {
             pad = ba->readFuint8();
@@ -300,17 +319,18 @@ bool PushPromisedFrame::readFrom(const ByteArray::ptr &ba, const FrameHeader &he
         }
         return true;
     } catch (...) {
-        FLEXY_LOG_WARN(g_logger) << "read PushPromiseFrame fail, " << toString();
+        FLEXY_LOG_WARN(g_logger)
+            << "read PushPromiseFrame fail, " << toString();
     }
     return false;
 }
-
 
 std::string PingFrame::toString() const {
     return fmt::format("[PingFrame uint64 = {}]", uint64);
 }
 
-bool PingFrame::writeTo(const ByteArray::ptr &ba, const FrameHeader &header) const {
+bool PingFrame::writeTo(const ByteArray::ptr &ba,
+                        const FrameHeader &header) const {
     try {
         ba->write(data, 8);
         return true;
@@ -319,7 +339,6 @@ bool PingFrame::writeTo(const ByteArray::ptr &ba, const FrameHeader &header) con
     }
     return false;
 }
-
 
 bool PingFrame::readFrom(const ByteArray::ptr &ba, const FrameHeader &header) {
     try {
@@ -332,11 +351,14 @@ bool PingFrame::readFrom(const ByteArray::ptr &ba, const FrameHeader &header) {
 }
 
 std::string GoAwayFrame::toString() const {
-    return fmt::format("[GoAwayFrame r = {} last_stream_id = {} error_code = {} debug.size = {}",
-                       r, last_stream_id, error_code, data.size());
+    return fmt::format(
+        "[GoAwayFrame r = {} last_stream_id = {} error_code = {} debug.size = "
+        "{}",
+        r, last_stream_id, error_code, data.size());
 }
 
-bool GoAwayFrame::readFrom(const ByteArray::ptr &ba, const FrameHeader &header) {
+bool GoAwayFrame::readFrom(const ByteArray::ptr &ba,
+                           const FrameHeader &header) {
     try {
         r_last_stream_id = ba->readFint32();
         error_code = ba->readFuint32();
@@ -351,7 +373,8 @@ bool GoAwayFrame::readFrom(const ByteArray::ptr &ba, const FrameHeader &header) 
     return false;
 }
 
-bool GoAwayFrame::writeTo(const ByteArray::ptr &ba, const FrameHeader &header) const {
+bool GoAwayFrame::writeTo(const ByteArray::ptr &ba,
+                          const FrameHeader &header) const {
     try {
         ba->writeFuint32(r_last_stream_id);
         ba->writeFuint32(error_code);
@@ -366,39 +389,37 @@ bool GoAwayFrame::writeTo(const ByteArray::ptr &ba, const FrameHeader &header) c
 }
 
 std::string WindowUpdateFrame::toString() const {
-    return fmt::format("[WindowUpdateFrame r = {} increment = {}]", r, increment);
+    return fmt::format("[WindowUpdateFrame r = {} increment = {}]", r,
+                       increment);
 }
 
-bool WindowUpdateFrame::writeTo(const ByteArray::ptr &ba, const FrameHeader &header) const {
+bool WindowUpdateFrame::writeTo(const ByteArray::ptr &ba,
+                                const FrameHeader &header) const {
     try {
         ba->writeFuint32(r_increment);
         return true;
     } catch (...) {
-        FLEXY_LOG_WARN(g_logger) << "write WindowUpdateFrame fail, " << toString();
+        FLEXY_LOG_WARN(g_logger)
+            << "write WindowUpdateFrame fail, " << toString();
     }
     return false;
 }
 
-bool WindowUpdateFrame::readFrom(const ByteArray::ptr &ba, const FrameHeader &header) {
+bool WindowUpdateFrame::readFrom(const ByteArray::ptr &ba,
+                                 const FrameHeader &header) {
     try {
         r_increment = ba->readFuint32();
         return true;
     } catch (...) {
-        FLEXY_LOG_WARN(g_logger) << "read WindowUpdateFrame fail, " << toString();
+        FLEXY_LOG_WARN(g_logger)
+            << "read WindowUpdateFrame fail, " << toString();
     }
     return false;
 }
 
 static constexpr std::array<std::string_view, 8> s_frame_types = {
-        "DATA",
-        "HEADERS",
-        "RST_STREAM",
-        "SETTINGS",
-        "PUSH_PROMISE",
-        "GOAWAY",
-        "WINDOW_UPDATE",
-        "CONTINUATION"
-};
+    "DATA",         "HEADERS", "RST_STREAM",    "SETTINGS",
+    "PUSH_PROMISE", "GOAWAY",  "WINDOW_UPDATE", "CONTINUATION"};
 
 std::string_view FrameTypeToString(FrameType type) {
     auto v = static_cast<uint8_t>(type);
@@ -417,23 +438,23 @@ std::string FrameFlagDataToString(FrameFlagData flag) {
     std::string ret;
 
     while (x != 0) {
-        switch (x & (-x)) {         // lowbit 获取二进制最右边的1
+        switch (x & (-x)) {  // lowbit 获取二进制最右边的1
             case 0x1:
                 ret += "END_STREAM|";
                 break;
             case 0x8:
                 ret += "PADDED|";
                 break;
-            default: 
+            default:
                 return fmt::format("UNKOWN({})", x);
         }
-        x &= (x - 1);           // 去除二进制最右边的1
+        x &= (x - 1);  // 去除二进制最右边的1
     }
-    
+
     if (ret.empty()) {
         return "0";
     }
-    ret.pop_back();     // pop '|'
+    ret.pop_back();  // pop '|'
     return ret;
 }
 
@@ -445,7 +466,7 @@ std::string FrameFlagHeadersToString(FrameFlagHeaders flag) {
     std::string ret;
 
     while (x != 0) {
-        switch (x & (-x)) {         // lowbit 获取二进制最右边的1
+        switch (x & (-x)) {  // lowbit 获取二进制最右边的1
             case 0x1:
                 ret += "END_STREAM|";
                 break;
@@ -457,16 +478,16 @@ std::string FrameFlagHeadersToString(FrameFlagHeaders flag) {
                 break;
             case 0x20:
                 ret += "PRIORITY|";
-            default: 
+            default:
                 return fmt::format("UNKOWN({})", x);
         }
-        x &= (x - 1);           // 去除二进制最右边的1
+        x &= (x - 1);  // 去除二进制最右边的1
     }
-    
+
     if (ret.empty()) {
         return "0";
     }
-    ret.pop_back();     // pop '|'
+    ret.pop_back();  // pop '|'
     return ret;
 }
 
@@ -511,23 +532,23 @@ std::string FrameFlagPromiseToString(FrameFlagPromise flag) {
     std::string ret;
 
     while (x != 0) {
-        switch (x & (-x)) {         // lowbit 获取二进制最右边的1
+        switch (x & (-x)) {  // lowbit 获取二进制最右边的1
             case 0x1:
                 ret += "END_STREAM|";
                 break;
             case 0x8:
                 ret += "PADDED|";
                 break;
-            default: 
+            default:
                 return fmt::format("UNKOWN({})", x);
         }
-        x &= (x - 1);           // 去除二进制最右边的1
+        x &= (x - 1);  // 去除二进制最右边的1
     }
-    
+
     if (ret.empty()) {
         return "0";
     }
-    ret.pop_back();     // pop '|'
+    ret.pop_back();  // pop '|'
     return ret;
 }
 
@@ -560,7 +581,8 @@ Frame::ptr FrameCodec::parseFrom(Stream *stream) {
         auto ba = std::make_shared<ByteArray>();
         auto rt = stream->readFixSize(ba, FrameHeader::SIZE);
         if (rt <= 0) {
-            FLEXY_LOG_INFO(g_logger) << "recv frame header fail, rt = " << rt << " " << strerror(errno);
+            FLEXY_LOG_INFO(g_logger) << "recv frame header fail, rt = " << rt
+                                     << " " << strerror(errno);
             return nullptr;
         }
         ba->setPosition(0);
@@ -572,7 +594,8 @@ Frame::ptr FrameCodec::parseFrom(Stream *stream) {
             ba->setPosition(0);
             auto r = stream->readFixSize(ba, frame->header.length);
             if (r <= 0) {
-                FLEXY_LOG_INFO(g_logger) << "recv frame body fail, rt = " << r << " " << strerror(errno);
+                FLEXY_LOG_INFO(g_logger) << "recv frame body fail, rt = " << r
+                                         << " " << strerror(errno);
                 return nullptr;
             }
             ba->setPosition(0);
@@ -656,13 +679,15 @@ Frame::ptr FrameCodec::parseFrom(Stream *stream) {
                 break;
             }
             default: {
-                FLEXY_LOG_WARN(g_logger) << "invalid FrameType: " << (uint32_t)frame->header.type;
+                FLEXY_LOG_WARN(g_logger)
+                    << "invalid FrameType: " << (uint32_t)frame->header.type;
                 break;
             }
         }
         return frame;
-    } catch (std::exception& e) {
-        FLEXY_LOG_ERROR(g_logger) << "FrameCodec parseFrom except: " << e.what();
+    } catch (std::exception &e) {
+        FLEXY_LOG_ERROR(g_logger)
+            << "FrameCodec parseFrom except: " << e.what();
     } catch (...) {
         FLEXY_LOG_ERROR(g_logger) << "FrameCodec parseFrom except";
     }
@@ -675,23 +700,24 @@ size_t FrameCodec::serializeTo(Stream *stream, const Frame::ptr &frame) {
     frame->header.writeTo(ba);
     if (frame->data) {
         if (!frame->data->writeTo(ba, frame->header)) {
-            FLEXY_LOG_ERROR(g_logger) << "FrameCodec serializeTo fail, type = "
-            << FrameTypeToString((FrameType)frame->header.type);
+            FLEXY_LOG_ERROR(g_logger)
+                << "FrameCodec serializeTo fail, type = "
+                << FrameTypeToString((FrameType)frame->header.type);
             return -1;
         }
-       int pos = ba->getPosition();
+        int pos = ba->getPosition();
         ba->setPosition(0);
         frame->header.length = pos - FrameHeader::SIZE;
-        frame->header.writeTo(ba);              // 覆盖掉之前写入的`FrameHeader`
+        frame->header.writeTo(ba);  // 覆盖掉之前写入的`FrameHeader`
     }
     ba->setPosition(0);
     auto rt = stream->writeFixSize(ba, ba->getReadSize());
     if (rt <= 0) {
         FLEXY_LOG_ERROR(g_logger) << "FrameCodec serializeTo fail, rt = " << rt
-        << " errno = " << errno;
+                                  << " errno = " << errno;
         return -2;
     }
     return ba->getSize();
 }
 
-} // namespace flexy http2
+}  // namespace flexy::http2

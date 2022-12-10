@@ -19,7 +19,8 @@ bool Timer::Comparator::operator()(const Timer::ptr& lhs, const Timer::ptr& rhs)
     return lhs.get() < rhs.get(); 
 }
 
-Timer::Timer(uint64_t ms, detail::__task&& cb, bool recurring, TimerManager* manager) 
+Timer::Timer(uint64_t ms, detail::__task&& cb, bool recurring,
+             TimerManager* manager)
     : recurring_(recurring), ms_(ms), cb_(std::move(cb)), manager_(manager) {
     next_ = GetTimeMs() + ms_;
 }
@@ -93,7 +94,8 @@ void TimerManager::addTimer(Timer::ptr&& val, unique_lock<mutex>& lock) {
     }
 }
 
-void TimerManager::OnTimer(std::weak_ptr<void()> weak_cond, detail::__task&& cb) {
+void TimerManager::OnTimer(std::weak_ptr<void()> weak_cond,
+                           detail::__task&& cb) {
     auto tmp = weak_cond.lock();
     if (tmp) {
         cb();
@@ -158,5 +160,4 @@ std::vector<detail::__task> TimerManager::listExpiriedTimer() {
     }  
     return cbs;
 }
-
 }

@@ -1,25 +1,27 @@
 #include "sqlite3.h"
-#include "flexy/util/log.h"
-#include "flexy/util/config.h"
 #include "flexy/env/env.h"
+#include "flexy/util/config.h"
+#include "flexy/util/log.h"
 
 namespace flexy {
 
 static auto g_logger = FLEXY_LOG_NAME("system");
 
-static auto g_sqlite3_dbs = Config::Lookup("sqlite3.dbs", std::map<std::string, 
-                            std::map< std::string, std::string>>(), "sqlite3 dbs");
+static auto g_sqlite3_dbs = Config::Lookup(
+    "sqlite3.dbs", std::map<std::string, std::map<std::string, std::string>>(),
+    "sqlite3 dbs");
 
 SQLite3::ptr SQLite3::Create(const std::string &dbname, int flags) {
-    sqlite3* db;
+    sqlite3 *db;
     if (sqlite3_open_v2(dbname.c_str(), &db, flags, nullptr) == SQLITE_OK) {
-        return SQLite3::ptr (new SQLite3(db));
+        return SQLite3::ptr(new SQLite3(db));
     }
     return nullptr;
 }
 
 ITransaction::ptr SQLite3::openTransaction(bool auto_commit) {
-    ITransaction::ptr trans(new SQLite3Transaction(shared_from_this(), auto_commit));
+    ITransaction::ptr trans(
+        new SQLite3Transaction(shared_from_this(), auto_commit));
     if (trans->begin()) {
         return trans;
     }
@@ -61,9 +63,7 @@ ISQLData::ptr SQLite3::query(const std::string &sql) {
     return stmt ? stmt->query() : nullptr;
 }
 
-int64_t SQLite3::getLastInsertId() {
-    return sqlite3_last_insert_rowid(db_);
-}
+int64_t SQLite3::getLastInsertId() { return sqlite3_last_insert_rowid(db_); }
 
 int SQLite3::close() {
     int rc = SQLITE_OK;
@@ -76,22 +76,17 @@ int SQLite3::close() {
     return rc;
 }
 
-SQLite3Data::SQLite3Data(const std::shared_ptr<SQLite3Stmt> &stmt, int err, const char *errstr)
-        : errno_(err), first_(true), errstr_(errstr), stmt_(stmt) {
-}
+SQLite3Data::SQLite3Data(const std::shared_ptr<SQLite3Stmt> &stmt, int err,
+                         const char *errstr)
+    : errno_(err), first_(true), errstr_(errstr), stmt_(stmt) {}
 
-SQLite3Data::SQLite3Data(std::shared_ptr<SQLite3Stmt> &&stmt, int err, const char *errstr)
-    : errno_(err), first_(true), errstr_(errstr), stmt_(std::move(stmt)) {
+SQLite3Data::SQLite3Data(std::shared_ptr<SQLite3Stmt> &&stmt, int err,
+                         const char *errstr)
+    : errno_(err), first_(true), errstr_(errstr), stmt_(std::move(stmt)) {}
 
-}
+int SQLite3Data::getDataCount() { return -1; }
 
-int SQLite3Data::getDataCount() {
-    return -1;
-}
-
-int SQLite3Data::getColumnCount() {
-    return sqlite3_column_count(stmt_->stmt_);
-}
+int SQLite3Data::getColumnCount() { return sqlite3_column_count(stmt_->stmt_); }
 
 int SQLite3Data::getColumnBytes(int idx) {
     return sqlite3_column_bytes(stmt_->stmt_, idx);
@@ -102,61 +97,45 @@ int SQLite3Data::getColumnType(int idx) {
 }
 
 std::string SQLite3Data::getColumnName(int idx) {
-    const char* name = sqlite3_column_name(stmt_->stmt_, idx);
+    const char *name = sqlite3_column_name(stmt_->stmt_, idx);
     return name ? name : "";
 }
 
-bool SQLite3Data::isNull(int idx) {
-    return false;
-}
+bool SQLite3Data::isNull(int idx) { return false; }
 
-int8_t SQLite3Data::getInt8(int idx) {
-    return getInt32(idx);
-}
+int8_t SQLite3Data::getInt8(int idx) { return getInt32(idx); }
 
-uint8_t SQLite3Data::getUint8(int idx) {
-    return getInt32(idx);
-}
+uint8_t SQLite3Data::getUint8(int idx) { return getInt32(idx); }
 
-int16_t SQLite3Data::getInt16(int idx) {
-    return getInt32(idx);
-}
+int16_t SQLite3Data::getInt16(int idx) { return getInt32(idx); }
 
-uint16_t SQLite3Data::getUint16(int idx) {
-    return getInt32(idx);
-}
+uint16_t SQLite3Data::getUint16(int idx) { return getInt32(idx); }
 
 int32_t SQLite3Data::getInt32(int idx) {
     return sqlite3_column_int(stmt_->stmt_, idx);
 }
 
-uint32_t SQLite3Data::getUint32(int idx) {
-    return getInt32(idx);
-}
+uint32_t SQLite3Data::getUint32(int idx) { return getInt32(idx); }
 
 int64_t SQLite3Data::getInt64(int idx) {
     return sqlite3_column_int64(stmt_->stmt_, idx);
 }
 
-uint64_t SQLite3Data::getUint64(int idx) {
-    return getInt64(idx);
-}
+uint64_t SQLite3Data::getUint64(int idx) { return getInt64(idx); }
 
-float SQLite3Data::getFloat(int idx) {
-    return getDouble(idx);
-}
+float SQLite3Data::getFloat(int idx) { return getDouble(idx); }
 
 double SQLite3Data::getDouble(int idx) {
     return sqlite3_column_double(stmt_->stmt_, idx);
 }
 
 std::string SQLite3Data::getString(int idx) {
-    auto v = (const char*)sqlite3_column_text(stmt_->stmt_, idx);
+    auto v = (const char *)sqlite3_column_text(stmt_->stmt_, idx);
     return v ? std::string(v, getColumnBytes(idx)) : "";
 }
 
 std::string SQLite3Data::getBlob(int idx) {
-    auto v = (const char*) sqlite3_column_blob(stmt_->stmt_, idx);
+    auto v = (const char *)sqlite3_column_blob(stmt_->stmt_, idx);
     return v ? std::string(v, getColumnBytes(idx)) : " ";
 }
 
@@ -165,9 +144,7 @@ time_t SQLite3Data::getTime(int idx) {
     return StrToTime(str.c_str());
 }
 
-std::string SQLite3Data::getTimeStr(int idx) {
-    return getString(idx);
-}
+std::string SQLite3Data::getTimeStr(int idx) { return getString(idx); }
 
 bool SQLite3Data::next() {
     int rt = stmt_->step();
@@ -187,9 +164,7 @@ SQLite3Stmt::ptr SQLite3Stmt::Create(const SQLite3::ptr &db, const char *stmt) {
     return rt;
 }
 
-int64_t SQLite3Stmt::getLastInsertId() {
-    return db_->getLastInsertId();
-}
+int64_t SQLite3Stmt::getLastInsertId() { return db_->getLastInsertId(); }
 
 int SQLite3Stmt::bindInt8(int idx, int8_t value) {
     return bind(idx, (int32_t)value);
@@ -227,9 +202,7 @@ int SQLite3Stmt::bindFloat(int idx, float value) {
     return bind(idx, (double)value);
 }
 
-int SQLite3Stmt::bindDouble(int idx, double value) {
-    return bind(idx, value);
-}
+int SQLite3Stmt::bindDouble(int idx, double value) { return bind(idx, value); }
 
 int SQLite3Stmt::bindString(int idx, const char *value) {
     return bind(idx, value);
@@ -244,16 +217,14 @@ int SQLite3Stmt::bindBlob(int idx, const void *value, int64_t size) {
 }
 
 int SQLite3Stmt::bindBlob(int idx, const std::string &value) {
-    return bind(idx, (void*)value.c_str(), value.size());
+    return bind(idx, (void *)value.c_str(), value.size());
 }
 
 int SQLite3Stmt::bindTime(int idx, time_t value) {
     return bind(idx, TimeToStr(value));
 }
 
-int SQLite3Stmt::bindNull(int idx) {
-    return bind(idx);
-}
+int SQLite3Stmt::bindNull(int idx) { return bind(idx); }
 
 int SQLite3Stmt::bind(int idx, int32_t value) {
     return sqlite3_bind_int(stmt_, idx, value);
@@ -290,9 +261,7 @@ int SQLite3Stmt::bind(int idx, const std::string &value, Type type) {
                              type == COPY ? SQLITE_TRANSIENT : SQLITE_STATIC);
 }
 
-int SQLite3Stmt::bind(int idx) {
-    return sqlite3_bind_null(stmt_, idx);
-}
+int SQLite3Stmt::bind(int idx) { return sqlite3_bind_null(stmt_, idx); }
 
 int SQLite3Stmt::bind(const char *name, int32_t value) {
     int idx = sqlite3_bind_parameter_index(stmt_, name);
@@ -344,7 +313,8 @@ int SQLite3Stmt::prepare(const char *stmt) {
     if (rt != SQLITE_OK) {
         return rt;
     }
-    return sqlite3_prepare_v2(db_->getDB(), stmt, strlen(stmt), &stmt_, nullptr);
+    return sqlite3_prepare_v2(db_->getDB(), stmt, strlen(stmt), &stmt_,
+                              nullptr);
 }
 
 int SQLite3Stmt::finish() {
@@ -368,15 +338,13 @@ int SQLite3Stmt::execute() {
     return rt;
 }
 
-SQLite3Transaction::SQLite3Transaction(const SQLite3::ptr &db, bool auto_commit, Type type)
-    : db_(db), type_(type), status_(0), auto_commit_(auto_commit) {
+SQLite3Transaction::SQLite3Transaction(const SQLite3::ptr &db, bool auto_commit,
+                                       Type type)
+    : db_(db), type_(type), status_(0), auto_commit_(auto_commit) {}
 
-}
-
-SQLite3Transaction::SQLite3Transaction(SQLite3::ptr &&db, bool auto_commit, Type type)
-    : db_(std::move(db)), type_(type), status_(0), auto_commit_(auto_commit) {
-
-}
+SQLite3Transaction::SQLite3Transaction(SQLite3::ptr &&db, bool auto_commit,
+                                       Type type)
+    : db_(std::move(db)), type_(type), status_(0), auto_commit_(auto_commit) {}
 
 SQLite3Transaction::~SQLite3Transaction() noexcept {
     if (status_ == 1) {
@@ -387,7 +355,8 @@ SQLite3Transaction::~SQLite3Transaction() noexcept {
         }
 
         if (status_ == 1) {
-            FLEXY_LOG_ERROR(g_logger) << db_ << "auto_commit = " << auto_commit_ << " fail";
+            FLEXY_LOG_ERROR(g_logger)
+                << db_ << "auto_commit = " << auto_commit_ << " fail";
         }
     }
 }
@@ -404,13 +373,11 @@ int SQLite3Transaction::execute(const std::string &sql) {
     return db_->execute(sql);
 }
 
-int64_t SQLite3Transaction::getLastInsertId() {
-    return db_->getLastInsertId();
-}
+int64_t SQLite3Transaction::getLastInsertId() { return db_->getLastInsertId(); }
 
 bool SQLite3Transaction::begin() {
     if (status_ == 0) {
-        const char* sql = "BEGIN";
+        const char *sql = "BEGIN";
         if (type_ == IMMEDIATE) {
             sql = "BEGIN IMMEDIATE";
         } else if (type_ == EXCLUSIVE) {
@@ -448,14 +415,14 @@ bool SQLite3Transaction::rollback() {
 }
 
 SQLite3Manager::~SQLite3Manager() {
-    for (auto& [name, sqlite_deque] : conns_) {
+    for (auto &[name, sqlite_deque] : conns_) {
         for (auto ptr : sqlite_deque) {
             delete ptr;
         }
     }
 }
 
-SQLite3::ptr SQLite3Manager::get(const std::string& name) {
+SQLite3::ptr SQLite3Manager::get(const std::string &name) {
     unique_lock<decltype(mutex_)> lock(mutex_);
     if (auto it = conns_.find(name); it != conns_.end()) {
         if (it->second.size() - counts_[name] != 0) {
@@ -463,15 +430,16 @@ SQLite3::ptr SQLite3Manager::get(const std::string& name) {
                 it->second.pop_front();
                 counts_[name]--;
             }
-            SQLite3* rt = it->second.front();
+            SQLite3 *rt = it->second.front();
             it->second.pop_front();
             lock.unlock();
-            return SQLite3::ptr(rt, std::bind(&SQLite3Manager::freeSQLite3, this, 
-                                name, std::placeholders::_1));
+            return SQLite3::ptr(
+                rt, std::bind(&SQLite3Manager::freeSQLite3, this, name,
+                              std::placeholders::_1));
         }
     }
 
-    auto& config = g_sqlite3_dbs->getValue();
+    auto &config = g_sqlite3_dbs->getValue();
     std::map<std::string, std::string> args;
     if (auto it = config.find(name); it != config.end()) {
         args = it->second;
@@ -488,52 +456,57 @@ SQLite3::ptr SQLite3Manager::get(const std::string& name) {
 
     auto path = GetParamValue<std::string>(args, "path");
     if (path.empty()) {
-        FLEXY_LOG_ERROR(g_logger) << "open db name = " << name << " path is null";
+        FLEXY_LOG_ERROR(g_logger)
+            << "open db name = " << name << " path is null";
         return nullptr;
     }
 
     if (path.find(":") == path.npos) {
-        path = EnvMgr::GetInstance().getAbsolutePath(path);     // 需初始化env模块
+        path = EnvMgr::GetInstance().getAbsolutePath(path);  // 需初始化env模块
     }
 
-    sqlite3* db;
-    if (sqlite3_open_v2(path.c_str(), &db, SQLite3::CREATE | SQLite3::READWRITE, nullptr)) {
-        FLEXY_LOG_ERROR(g_logger) << "open db name = " << name << " path = " << path
-        << " fail";
+    sqlite3 *db;
+    if (sqlite3_open_v2(path.c_str(), &db, SQLite3::CREATE | SQLite3::READWRITE,
+                        nullptr)) {
+        FLEXY_LOG_ERROR(g_logger)
+            << "open db name = " << name << " path = " << path << " fail";
         return nullptr;
-    }   
+    }
 
-    SQLite3* rt = new SQLite3(db);
+    SQLite3 *rt = new SQLite3(db);
     auto sql = GetParamValue<std::string>(args, "sql");
     if (!sql.empty()) {
         if (rt->execute(sql)) {
-            FLEXY_LOG_ERROR(g_logger) << "execute sql = " << sql << " errno = "
-            << rt->getErrno() << " errstr = " << rt->getErrStr();
+            FLEXY_LOG_ERROR(g_logger)
+                << "execute sql = " << sql << " errno = " << rt->getErrno()
+                << " errstr = " << rt->getErrStr();
         }
     }
 
     rt->lastUsedTime_ = time(0);
-    return SQLite3::ptr(rt, std::bind(&SQLite3Manager::freeSQLite3, this, 
-                        name, std::placeholders::_1));
+    return SQLite3::ptr(rt, std::bind(&SQLite3Manager::freeSQLite3, this, name,
+                                      std::placeholders::_1));
 }
 
-void SQLite3Manager::registerSQLite3(const std::string& name, const std::map<std::string, std::string>& params) {
+void SQLite3Manager::registerSQLite3(
+    const std::string &name, const std::map<std::string, std::string> &params) {
     LOCK_GUARD(mutex_);
     dbDefines_[name] = params;
 }
 
-void SQLite3Manager::registerSQLite3(const std::string& name, std::map<std::string, std::string>&& params) {
+void SQLite3Manager::registerSQLite3(
+    const std::string &name, std::map<std::string, std::string> &&params) {
     LOCK_GUARD(mutex_);
     dbDefines_[name] = std::move(params);
 }
 
 void SQLite3Manager::checkConnection(uint64_t sec) {
     uint64_t now = time(0);
-    std::vector<SQLite3*> conns;
+    std::vector<SQLite3 *> conns;
     {
         LOCK_GUARD(mutex_);
-        for (auto& [name, sqlite_deque] : conns_) {
-            for (auto& ptr : sqlite_deque) {
+        for (auto &[name, sqlite_deque] : conns_) {
+            for (auto &ptr : sqlite_deque) {
                 if (now - ptr->lastUsedTime_ >= sec) {
                     conns.push_back(ptr);
                     ptr = nullptr;
@@ -548,8 +521,7 @@ void SQLite3Manager::checkConnection(uint64_t sec) {
     }
 }
 
-
-int SQLite3Manager::execute(const std::string& name, const char* fmt, ...) {
+int SQLite3Manager::execute(const std::string &name, const char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
     int rt = execute(name, fmt, ap);
@@ -557,27 +529,29 @@ int SQLite3Manager::execute(const std::string& name, const char* fmt, ...) {
     return rt;
 }
 
-int SQLite3Manager::execute(const std::string& name, const char* fmt, va_list ap) {
+int SQLite3Manager::execute(const std::string &name, const char *fmt,
+                            va_list ap) {
     auto conn = get(name);
     if (!conn) {
         FLEXY_LOG_ERROR(g_logger) << "SQLite3Manager::execute, get(" << name
-        << ") fail, format = " << fmt;
+                                  << ") fail, format = " << fmt;
         return -1;
     }
     return conn->execute(fmt, ap);
 }
 
-int SQLite3Manager::execute(const std::string& name, const std::string& sql) {
+int SQLite3Manager::execute(const std::string &name, const std::string &sql) {
     auto conn = get(name);
     if (!conn) {
         FLEXY_LOG_ERROR(g_logger) << "SQLite3Manager::execute, get(" << name
-        << ") fail, sql = " << sql;
+                                  << ") fail, sql = " << sql;
         return -1;
     }
     return conn->execute(sql);
 }
 
-ISQLData::ptr SQLite3Manager::query(const std::string& name, const char* fmt, ...) {
+ISQLData::ptr SQLite3Manager::query(const std::string &name, const char *fmt,
+                                    ...) {
     va_list ap;
     va_start(ap, fmt);
     auto rt = query(name, fmt, ap);
@@ -585,39 +559,41 @@ ISQLData::ptr SQLite3Manager::query(const std::string& name, const char* fmt, ..
     return rt;
 }
 
-ISQLData::ptr SQLite3Manager::query(const std::string& name, const char* fmt, va_list ap) {
+ISQLData::ptr SQLite3Manager::query(const std::string &name, const char *fmt,
+                                    va_list ap) {
     auto conn = get(name);
     if (!conn) {
         FLEXY_LOG_ERROR(g_logger) << "SQLite3Manager::query, get(" << name
-        << ") fail, format = " << fmt;
+                                  << ") fail, format = " << fmt;
         return nullptr;
     }
     return conn->query(fmt, ap);
 }
 
-ISQLData::ptr SQLite3Manager::query(const std::string& name, const std::string& sql) {
+ISQLData::ptr SQLite3Manager::query(const std::string &name,
+                                    const std::string &sql) {
     auto conn = get(name);
     if (!conn) {
-        FLEXY_LOG_ERROR(g_logger) << "SQLite3Manager::query, get(" << name
-        << ") fail, sql = " << sql;
+        FLEXY_LOG_ERROR(g_logger)
+            << "SQLite3Manager::query, get(" << name << ") fail, sql = " << sql;
         return nullptr;
     }
     return conn->query(sql);
 }
 
-
-SQLite3Transaction::ptr SQLite3Manager::openTransaction(const std::string& name, bool auto_commit) {
+SQLite3Transaction::ptr SQLite3Manager::openTransaction(const std::string &name,
+                                                        bool auto_commit) {
     auto conn = get(name);
     if (!conn) {
-        FLEXY_LOG_ERROR(g_logger) << "SQLite3Manager::openTransaction, get(" << name
-        << ") fail";
+        FLEXY_LOG_ERROR(g_logger)
+            << "SQLite3Manager::openTransaction, get(" << name << ") fail";
         return nullptr;
     }
     SQLite3Transaction::ptr trans(new SQLite3Transaction(conn, auto_commit));
     return trans;
 }
 
-void SQLite3Manager::freeSQLite3(const std::string& name, SQLite3* m) {
+void SQLite3Manager::freeSQLite3(const std::string &name, SQLite3 *m) {
     if (m->db_) {
         LOCK_GUARD(mutex_);
         if (conns_[name].size() - counts_[name] < maxConn_) {
@@ -628,4 +604,4 @@ void SQLite3Manager::freeSQLite3(const std::string& name, SQLite3* m) {
     delete m;
 }
 
-}
+}  // namespace flexy

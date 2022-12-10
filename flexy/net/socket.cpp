@@ -237,8 +237,9 @@ ssize_t Socket::send(const iovec* buffer, size_t length, int flags) {
     }
     return -1;
 }
- 
-ssize_t Socket::sendTo(const void* buffer, size_t length, const Address::ptr& to, int flags) {
+
+ssize_t Socket::sendTo(const void* buffer, size_t length,
+                       const Address::ptr& to, int flags) {
     if (isConnected_) {
         return ::sendto(sock_, buffer, length, flags, to->getAddr(), to->getAddrLen());
     }
@@ -249,7 +250,8 @@ ssize_t Socket::sendTo(std::string_view s, const Address::ptr& to, int flags) {
     return sendTo(s.data(), s.size(), to, flags);
 }
 
-ssize_t Socket::sendTo(const iovec* buffer,  size_t length, const Address::ptr& to, int flags) {
+ssize_t Socket::sendTo(const iovec* buffer, size_t length,
+                       const Address::ptr& to, int flags) {
     if (isConnected_) {
         msghdr msg;
         memset(&msg, 0, sizeof(msg));
@@ -291,7 +293,8 @@ ssize_t Socket::recv(iovec* buffer, size_t length, int flags) {
     return -1;
 }
 
-ssize_t Socket::recvFrom(void* buffer, size_t length, Address::ptr& from, int flags) {
+ssize_t Socket::recvFrom(void* buffer, size_t length, Address::ptr& from,
+                         int flags) {
     if (isConnected_) {
         socklen_t len = from->getAddrLen();
         return ::recvfrom(sock_, buffer, length, flags, from->getAddr(), &len);
@@ -303,7 +306,8 @@ ssize_t Socket::recvFrom(std::string& s, Address::ptr& from, int flags) {
     return recvFrom(s.data(), s.size(), from, flags);
 }
 
-ssize_t Socket::recvFrom(iovec* buffer, size_t length, Address::ptr& from, int flags) {
+ssize_t Socket::recvFrom(iovec* buffer, size_t length, Address::ptr& from,
+                         int flags) {
     if (isConnected_) {
         msghdr msg;
         memset(&msg, 0, sizeof(msg));
@@ -315,7 +319,6 @@ ssize_t Socket::recvFrom(iovec* buffer, size_t length, Address::ptr& from, int f
     }
     return 0;
 }
-
 
 Address::ptr Socket::getRemoteAddress() {
     if (remoteAddress_) {

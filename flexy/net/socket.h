@@ -66,16 +66,20 @@ public:
     ssize_t send(const void* buffer, size_t length, int flags = 0);
     ssize_t send(std::string_view s, int flags = 0);
     ssize_t send(const iovec* buffer, size_t length, int flags = 0);
-    ssize_t sendTo(const void* buffer, size_t length, const Address::ptr& to, int flags = 0);
+    ssize_t sendTo(const void* buffer, size_t length, const Address::ptr& to,
+                   int flags = 0);
     ssize_t sendTo(std::string_view s, const Address::ptr& to, int flags = 0);
-    ssize_t sendTo(const iovec* buffer,  size_t length, const Address::ptr& to, int flags = 0);
+    ssize_t sendTo(const iovec* buffer, size_t length, const Address::ptr& to,
+                   int flags = 0);
 
     ssize_t recv(void* buffer, size_t length, int flags = 0);
     ssize_t recv(std::string& s, int flags = 0);
     ssize_t recv(iovec* buffer, size_t length, int flags = 0);
-    ssize_t recvFrom(void* buffer, size_t length, Address::ptr& from, int flags = 0);
+    ssize_t recvFrom(void* buffer, size_t length, Address::ptr& from,
+                     int flags = 0);
     ssize_t recvFrom(std::string& s, Address::ptr& from, int flags = 0);
-    ssize_t recvFrom(iovec* buffer, size_t length, Address::ptr& from, int flags = 0);
+    ssize_t recvFrom(iovec* buffer, size_t length, Address::ptr& from,
+                     int flags = 0);
 
     Address::ptr getRemoteAddress();
     Address::ptr getLocalAddress();
@@ -96,10 +100,12 @@ public:
     bool cancelWrite();
     bool cancelAccept();
     bool cancelAll();
+
 protected:
     void initSock();
     void newSock();
     bool init(int sock);
+
 protected:
     int sock_;
     int family_;

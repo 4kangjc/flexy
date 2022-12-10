@@ -10,9 +10,9 @@ public:
     SockStream(const Socket::ptr& sock, bool owner);
     ~SockStream();
     /*virtual*/ ssize_t read(void* buffer, size_t length) override;
-                ssize_t read(const ByteArray::ptr& ba, size_t length) override;
+    ssize_t read(const ByteArray::ptr& ba, size_t length) override;
     /*virtual*/ ssize_t write(const void* buffer, size_t length) override;
-                ssize_t write(const ByteArray::ptr& ba, size_t length)  override;
+    ssize_t write(const ByteArray::ptr& ba, size_t length) override;
     virtual void close() override;
 
     auto& getSocket() const { return sock_; }
@@ -32,6 +32,7 @@ public:
         auto remoteAddress = getRemoteAddress();
         return remoteAddress ? remoteAddress->toString() : "";
     }
+
 protected:
     Socket::ptr sock_;
     bool owner_;

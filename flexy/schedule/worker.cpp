@@ -3,8 +3,9 @@
 
 namespace flexy {
 
-static auto g_worker_config = Config::Lookup("workers", std::map<std::string, 
-                    std::map<std::string, std::string>>(), "worker config");
+static auto g_worker_config = Config::Lookup(
+    "workers", std::map<std::string, std::map<std::string, std::string>>(),
+    "worker config");
 
 void WorkerManager::add(const ptr<Scheduler>& s) {
     datas_[s->getName()].push_back(s);
@@ -20,19 +21,21 @@ std::shared_ptr<Scheduler> WorkerManager::get(const std::string& name) {
     return nullptr;
 }
 
-std::shared_ptr<IOManager> WorkerManager::getAsIOManager(const std::string& name) {
+std::shared_ptr<IOManager> WorkerManager::getAsIOManager(
+    const std::string& name) {
     return std::dynamic_pointer_cast<IOManager>(get(name));
 }
 
-bool WorkerManager::init(const std::map<std::string, std::map<std::string, std::string>>& v) {
+bool WorkerManager::init(
+    const std::map<std::string, std::map<std::string, std::string>>& v) {
     for (auto& [name, map] : v) {
         int32_t thread_num = GetParamValue(map, "thread_num", 1);
         int32_t worker_num = GetParamValue(map, "worker_num", 1);
 
         datas_[name].emplace_back(new IOManager(thread_num, false, name));
         for (int32_t i = 1; i < worker_num; ++i) {
-            datas_[name + "-" + std::to_string(i)].emplace_back(new IOManager(thread_num, false, 
-                   name + "-" + std::to_string(i)));
+            datas_[name + "-" + std::to_string(i)].emplace_back(new IOManager(
+                thread_num, false, name + "-" + std::to_string(i)));
         }
     }
     stop_ = datas_.empty();
@@ -50,7 +53,7 @@ void WorkerManager::stop() {
     }
     for (auto& [name, sch_vec] : datas_) {
         for (auto& sche : sch_vec) {
-            sche->async([](){});
+            sche->async([]() {});
             sche->stop();
         }
     }
@@ -58,9 +61,7 @@ void WorkerManager::stop() {
     stop_ = true;
 }
 
-uint32_t WorkerManager::getCount() {
-    return datas_.size();
-}
+uint32_t WorkerManager::getCount() { return datas_.size(); }
 
 std::ostream& WorkerManager::dump(std::ostream& os) {
     for (auto& [name, sch_vec] : datas_) {
@@ -71,4 +72,4 @@ std::ostream& WorkerManager::dump(std::ostream& os) {
     return os;
 }
 
-} // namespace flexy
+}  // namespace flexy

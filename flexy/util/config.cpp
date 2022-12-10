@@ -134,4 +134,4 @@ void Config::LoadFromConDir(std::string_view path) {
     LoadFromConDir<true>(path);
 }
 
-} // namespace flexy
+}  // namespace flexy

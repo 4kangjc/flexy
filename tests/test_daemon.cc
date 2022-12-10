@@ -1,6 +1,6 @@
 #include <flexy/env/daemon.h>
-#include <flexy/util/log.h>
 #include <flexy/schedule/iomanager.h>
+#include <flexy/util/log.h>
 
 static auto&& g_logger = FLEXY_LOG_ROOT();
 

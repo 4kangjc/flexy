@@ -1,19 +1,18 @@
 #pragma once
 
-
-#include <new>
 #include <functional>
+#include <new>
 #include <utility>
 
-#include "likely.h"
 #include "align.h"
+#include "likely.h"
 
 namespace flexy {
 
 template <class R>
 class Function;
 
-#if defined(__GNUC__) || defined(__clang__) 
+#if defined(__GNUC__) || defined(__clang__)
 template <class R, class... Args, bool kNoexcept>
 class alignas(max_align_v) Function<R(Args...) noexcept(kNoexcept)> {
 #else
@@ -24,8 +23,8 @@ class alignas(max_align_v) Function<R(Args...)> {
 
 public:
     template <class T>
-    static constexpr bool implictly_convertible_v = 
-        std::is_invocable_r_v<R, T, Args...> && 
+    static constexpr bool implictly_convertible_v =
+        std::is_invocable_r_v<R, T, Args...> &&
         !std::is_same_v<std::decay_t<T>, Function> &&
         (!kNoexcept || std::is_nothrow_invocable_v<T, Args...>);
 
@@ -77,7 +76,6 @@ public:
         }
     }
 
-
     R operator()(Args... args) const noexcept(kNoexcept) {
         return ops_->invoker(&object_, std::forward<Args>(args)...);
     }
@@ -88,13 +86,14 @@ public:
         std::swap(object_, __x.object_);
         std::swap(ops_, __x.ops_);
     }
+
 private:
     static constexpr std::size_t kMaximumOptimizableSize = 3 * sizeof(void*);
 
     struct TypeOps {
-        using Invoker = R (*) (void* object, Args&&... args);
-        using Relocator = void(*)(void* to, void* from);
-        using Destroyer = void(*)(void* object);
+        using Invoker = R (*)(void* object, Args&&... args);
+        using Relocator = void (*)(void* to, void* from);
+        using Destroyer = void (*)(void* object);
 
         Invoker invoker;
         Relocator relocator;
@@ -106,7 +105,8 @@ private:
         if constexpr (std::is_void_v<R>) {
             std::invoke(std::forward<T>(object), std::forward<Args>(args)...);
         } else {
-            return std::invoke(std::forward<T>(object), std::forward<Args>(args)...);
+            return std::invoke(std::forward<T>(object),
+                               std::forward<Args>(args)...);
         }
     }
 
@@ -115,25 +115,22 @@ private:
         using Decayed = std::decay_t<T>;
 
         static constexpr TypeOps ops = {
-            /* invoker */ 
+            /* invoker */
             [](void* object, Args&&... args) -> R {
-                return Invoke(*static_cast<Decayed*>(object), std::forward<Args>(args)...);
+                return Invoke(*static_cast<Decayed*>(object),
+                              std::forward<Args>(args)...);
             },
-            /* relocator */ 
+            /* relocator */
             [](void* to, void* from) {
                 new (to) Decayed(std::move(*static_cast<Decayed*>(from)));
                 static_cast<Decayed*>(from)->~Decayed();
             },
             /* destroyer */
-            [](void* object) {
-                static_cast<Decayed*>(object)->~Decayed();
-            }
-        };
+            [](void* object) { static_cast<Decayed*>(object)->~Decayed(); }};
 
         new (buffer) Decayed(std::forward<T>(object));
         return &ops;
     }
-
 
     template <class T>
     const TypeOps* ErasedCopyLarge(void* buffer, T&& object) {
@@ -143,17 +140,15 @@ private:
         static constexpr TypeOps ops = {
             // invoker
             [](void* object, Args&&... args) -> R {
-                return Invoke(**static_cast<Stored*>(object), std::forward<Args>(args)...);
+                return Invoke(**static_cast<Stored*>(object),
+                              std::forward<Args>(args)...);
             },
             // relocator
             [](void* to, void* from) {
                 new (to) Stored(*static_cast<Stored*>(from));
             },
             // destroyer
-            [](void* object) {
-                delete *static_cast<Stored*>(object);
-            }
-        };
+            [](void* object) { delete *static_cast<Stored*>(object); }};
 
         new (buffer) Stored(new Decayed(std::forward<T>(object)));
         return &ops;
@@ -171,38 +166,40 @@ struct FunctionTypeDeducer;
 template <class T>
 using FunctionSignature = typename FunctionTypeDeducer<T>::Type;
 
-}
+}  // namespace detail
 
 #if defined(__GUNC__) || defined(__clang__)
 template <class R, class... Args, bool kNoexcept>
-Function(R(*)(Args...) noexcept(kNoexcept)) -> Function<R(Args...) noexcept(kNoexcept)>;
+Function(R (*)(Args...) noexcept(kNoexcept))
+    -> Function<R(Args...) noexcept(kNoexcept)>;
 #else
 template <class R, class... Args>
-Function(R(*)(Args...)) -> Function<R(Args...)>;
+Function(R (*)(Args...)) -> Function<R(Args...)>;
 #endif
 
-template <class F, class Signature = detail::FunctionSignature<decltype(&F::operator())>>
+template <class F,
+          class Signature = detail::FunctionSignature<decltype(&F::operator())>>
 Function(F) -> Function<Signature>;
 
 // Comparison to `nullptr`.
 template <class T>
 bool operator==(const Function<T>& f, std::nullptr_t) {
-  return !f;
+    return !f;
 }
 
 template <class T>
 bool operator==(std::nullptr_t, const Function<T>& f) {
-  return !f;
+    return !f;
 }
 
 template <class T>
 bool operator!=(const Function<T>& f, std::nullptr_t) {
-  return !(f == nullptr);
+    return !(f == nullptr);
 }
 
 template <class T>
 bool operator!=(std::nullptr_t, const Function<T>& f) {
-  return !(nullptr == f);
+    return !(nullptr == f);
 }
 
 namespace detail {
@@ -211,48 +208,48 @@ namespace detail {
 
 template <class R, class Class, class... Args, bool kNoexcept>
 struct FunctionTypeDeducer<R (Class::*)(Args...) noexcept(kNoexcept)> {
-  using Type = R(Args...) noexcept(kNoexcept);
+    using Type = R(Args...) noexcept(kNoexcept);
 };
 
 template <class R, class Class, class... Args, bool kNoexcept>
 struct FunctionTypeDeducer<R (Class::*)(Args...)& noexcept(kNoexcept)> {
-  using Type = R(Args...) noexcept(kNoexcept);
+    using Type = R(Args...) noexcept(kNoexcept);
 };
 
 template <class R, class Class, class... Args, bool kNoexcept>
 struct FunctionTypeDeducer<R (Class::*)(Args...) const noexcept(kNoexcept)> {
-  using Type = R(Args...) noexcept(kNoexcept);
+    using Type = R(Args...) noexcept(kNoexcept);
 };
 
 template <class R, class Class, class... Args, bool kNoexcept>
 struct FunctionTypeDeducer<R (Class::*)(Args...) const& noexcept(kNoexcept)> {
-  using Type = R(Args...) noexcept(kNoexcept);
+    using Type = R(Args...) noexcept(kNoexcept);
 };
 
 #else
 
 template <class R, class Class, class... Args>
 struct FunctionTypeDeducer<R (Class::*)(Args...)> {
-  using Type = R(Args...);
+    using Type = R(Args...);
 };
 
 template <class R, class Class, class... Args>
 struct FunctionTypeDeducer<R (Class::*)(Args...)&> {
-  using Type = R(Args...);
+    using Type = R(Args...);
 };
 
 template <class R, class Class, class... Args>
 struct FunctionTypeDeducer<R (Class::*)(Args...) const> {
-  using Type = R(Args...);
+    using Type = R(Args...);
 };
 
 template <class R, class Class, class... Args>
 struct FunctionTypeDeducer<R (Class::*)(Args...) const&> {
-  using Type = R(Args...);
+    using Type = R(Args...);
 };
 
 #endif
 
-}
+}  // namespace detail
 
-}   // namespace flexy
+}  // namespace flexy

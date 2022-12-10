@@ -1,6 +1,6 @@
 #include <flexy/env/env.h>
-#include <flexy/util/log.h>
 #include <flexy/util/file.h>
+#include <flexy/util/log.h>
 #include <iostream>
 
 static auto&& g_logger = FLEXY_LOG_ROOT();
@@ -15,10 +15,15 @@ int main(int argc, char** argv) {
     }
     std::cout << "exe = " << flexy::EnvMgr::GetInstance().getExe() << std::endl;
     std::cout << "cwd = " << flexy::EnvMgr::GetInstance().getCwd() << std::endl;
-    std::cout << "path = " << flexy::EnvMgr::GetInstance().getEnv("PATH", "xxx") << std::endl;
-    std::cout << "test = " << flexy::EnvMgr::GetInstance().getEnv("test") << std::endl;
-    std::cout << "set env " << flexy::EnvMgr::GetInstance().setEnv("test", "yyy") << std::endl;
-    std::cout << "test = " << flexy::EnvMgr::GetInstance().getEnv("test") << std::endl;
+    std::cout << "path = " << flexy::EnvMgr::GetInstance().getEnv("PATH", "xxx")
+              << std::endl;
+    std::cout << "test = " << flexy::EnvMgr::GetInstance().getEnv("test")
+              << std::endl;
+    std::cout << "set env "
+              << flexy::EnvMgr::GetInstance().setEnv("test", "yyy")
+              << std::endl;
+    std::cout << "test = " << flexy::EnvMgr::GetInstance().getEnv("test")
+              << std::endl;
 
     if (flexy::EnvMgr::GetInstance().has("p")) {
         flexy::EnvMgr::GetInstance().printHelp();

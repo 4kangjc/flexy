@@ -92,8 +92,8 @@ std::string format(const char* fmt, ...) {
             if (iter == 0) {
                 continue;  // Try again with larger buffer
             } else {
-                //p = limit - 1;
-                // *p = '\0';
+                // p = limit - 1;
+                //  *p = '\0';
                 base[bufsize - 1] = '\0';
             }
         }
@@ -234,7 +234,8 @@ std::string_view TrimRight(std::string_view str, std::string_view delimit) {
     return str.substr(0, end);
 }
 
-std::vector<std::string_view> Split(std::string_view str, std::string_view delim, bool keep_empty) {
+std::vector<std::string_view> Split(std::string_view str,
+                                    std::string_view delim, bool keep_empty) {
     std::vector<std::string_view> splited;
     if (str.empty()) {
         return splited;
@@ -244,7 +245,7 @@ std::vector<std::string_view> Split(std::string_view str, std::string_view delim
         auto pos = current.find(delim);
         if (pos != 0 || keep_empty) {
             splited.push_back(current.substr(0, pos));
-        }  
+        }
         if (pos == std::string_view::npos) {
             break;
         }
@@ -259,4 +260,4 @@ std::vector<std::string_view> Split(std::string_view str, std::string_view delim
     return splited;
 }
 
-} // namespace flexy
+}  // namespace flexy

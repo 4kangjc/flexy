@@ -1,16 +1,16 @@
 #pragma once
 
-#include "flexy/util/noncopyable.h"
+#include <atomic>
+#include <deque>
 #include "flexy/schedule/fiber.h"
 #include "flexy/thread/mutex.h"
-#include <deque>
-#include <atomic>
+#include "flexy/util/noncopyable.h"
 
 namespace flexy {
 
 class Scheduler;
 
-} // namespace flexy
+}  // namespace flexy
 
 namespace flexy::fiber {
 
@@ -21,11 +21,11 @@ public:
     ~mutex();
     void lock();
     void unlock();
+
 private:
     bool locked_ = false;
     mutable Spinlock mutex_;
     std::deque<std::pair<Scheduler*, Fiber::ptr>> waiters_;
 };
 
-
-} // namespace flexy fiber
+}  // namespace flexy::fiber

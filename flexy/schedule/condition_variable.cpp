@@ -1,6 +1,6 @@
 #include "condition_variable.h"
-#include "scheduler.h"
 #include "flexy/util/macro.h"
+#include "scheduler.h"
 
 namespace flexy::fiber {
 
@@ -28,7 +28,6 @@ void condition_variable::notify_one() noexcept {
     waiter.first->async(std::move(waiter.second));
 }
 
-
 // 两段相同的代码 暂时没想到协程锁和条件表量有什么可以优化的地方
 void condition_variable::wait(unique_lock<mutex>& __lock) noexcept {
     FLEXY_ASSERT(Scheduler::GetThis());
@@ -39,9 +38,10 @@ void condition_variable::wait(unique_lock<mutex>& __lock) noexcept {
     }
     // __lock.unlock();
     // Fiber::Yield();
-    Fiber::GetThis()->yield_callback([&__lock](){           // 保证 yield 和 unlock的原子性 
-        __lock.unlock();
-    });
+    Fiber::GetThis()->yield_callback(
+        [&__lock]() {  // 保证 yield 和 unlock的原子性
+            __lock.unlock();
+        });
 
     __lock.lock();
 }
@@ -55,11 +55,12 @@ void condition_variable::wait(unique_lock<flexy::mutex>& __lock) noexcept {
     }
     // __lock.unlock();
     // Fiber::Yield();
-    Fiber::GetThis()->yield_callback([&__lock](){           // 保证 yield 和 unlock的原子性 
-        __lock.unlock();
-    });
+    Fiber::GetThis()->yield_callback(
+        [&__lock]() {  // 保证 yield 和 unlock的原子性
+            __lock.unlock();
+        });
 
     __lock.lock();
 }
 
-} // namespace flexy fiber
+}  // namespace flexy::fiber

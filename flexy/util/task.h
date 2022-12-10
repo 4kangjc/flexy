@@ -36,28 +36,26 @@ struct is_task<__task_Function> {
     static constexpr bool value = true;
 };
 
-
-
 template <class _Tp>
 constexpr bool is_task_v = is_task<std::decay_t<_Tp>>::value;
-
 
 class __task_function : public std::function<void()> {
 private:
     using callback_t = std::function<void()>;
-public:
-    template <typename _Fn, typename... _Args, 
-              typename = std::enable_if_t<std::is_invocable_v<_Fn&&, _Args&&...>>>
-    __task_function(_Fn&& func, _Args&&... args) 
-        : callback_t(std::bind(std::forward<_Fn>(func), std::forward<_Args>(args)...))
-    { }
 
-    template <typename _Fn, typename = std::enable_if_t<std::is_invocable_v<_Fn&&> && !is_task_v<_Fn>>>
-    __task_function(_Fn&& func) : callback_t(std::forward<_Fn>(func)) 
-    { }
+public:
+    template <
+        typename _Fn, typename... _Args,
+        typename = std::enable_if_t<std::is_invocable_v<_Fn&&, _Args&&...>>>
+    __task_function(_Fn&& func, _Args&&... args)
+        : callback_t(std::bind(std::forward<_Fn>(func),
+                               std::forward<_Args>(args)...)) {}
+
+    template <typename _Fn, typename = std::enable_if_t<
+                                std::is_invocable_v<_Fn&&> && !is_task_v<_Fn>>>
+    __task_function(_Fn&& func) : callback_t(std::forward<_Fn>(func)) {}
 
     __task_function(std::nullptr_t = nullptr) noexcept : callback_t() {}
-
 };
 
 template <typename _Tuple>
@@ -69,20 +67,17 @@ struct _Invoker {
 
     template <typename _Fn, typename... _Args>
     struct __result<std::tuple<_Fn, _Args...>>
-        : std::invoke_result<_Fn, _Args...>
-    {};
+        : std::invoke_result<_Fn, _Args...> {};
 
     template <size_t... _Ind>
-    typename __result<_Tuple>::type
-    _M_invoke(std::_Index_tuple<_Ind...>) {
-        return std::invoke(std::get<_Ind>(std::move(_M_t))...); 
+    typename __result<_Tuple>::type _M_invoke(std::_Index_tuple<_Ind...>) {
+        return std::invoke(std::get<_Ind>(std::move(_M_t))...);
     }
 
-    typename __result<_Tuple>::type
-    operator()() {
-        using _Indices = typename std::_Build_index_tuple<std::tuple_size_v<_Tuple>>::__type;
+    typename __result<_Tuple>::type operator()() {
+        using _Indices =
+            typename std::_Build_index_tuple<std::tuple_size_v<_Tuple>>::__type;
         return _M_invoke(_Indices());
-
     }
 };
 
@@ -98,22 +93,24 @@ public:
 
     using _Base_ptr = std::shared_ptr<_Base>;
 
-    template <typename _Fn, typename... _Args, 
-              typename = std::enable_if_t<std::is_invocable_v<_Fn&&, _Args&&...>>>
-    __task_virtual(_Fn&& func, _Args&&... args) 
-    { 
+    template <
+        typename _Fn, typename... _Args,
+        typename = std::enable_if_t<std::is_invocable_v<_Fn&&, _Args&&...>>>
+    __task_virtual(_Fn&& func, _Args&&... args) {
         using Wrapper = Call_wrapper<_Fn, _Args...>;
-        _base_ptr = std::make_shared<_Base_impl<Wrapper>>(std::forward<_Fn>(func), std::forward<_Args>(args)...);
+        _base_ptr = std::make_shared<_Base_impl<Wrapper>>(
+            std::forward<_Fn>(func), std::forward<_Args>(args)...);
     }
 
-    template <typename _Fn, typename = std::enable_if_t<std::is_invocable_v<_Fn&&> 
-                && !is_task_v<_Fn> && std::is_copy_constructible_v<_Fn&&>>>
+    template <typename _Fn, typename = std::enable_if_t<
+                                std::is_invocable_v<_Fn&&> && !is_task_v<_Fn> &&
+                                std::is_copy_constructible_v<_Fn&&>>>
     __task_virtual(_Fn&& func) {
         _base_ptr = std::make_shared<_Base_function>(std::forward<_Fn>(func));
     }
 
-    __task_virtual(__task_virtual&& ) noexcept = default;
-    __task_virtual(const __task_virtual& ) = default;
+    __task_virtual(__task_virtual&&) noexcept = default;
+    __task_virtual(const __task_virtual&) = default;
     __task_virtual(std::nullptr_t = nullptr) noexcept : _base_ptr() {}
     __task_virtual& operator=(__task_virtual&&) noexcept = default;
     __task_virtual& operator=(const __task_virtual&) = default;
@@ -122,14 +119,15 @@ public:
     explicit operator bool() { return _base_ptr.operator bool(); }
 
     void swap(__task_virtual& rhs) noexcept { _base_ptr.swap(rhs._base_ptr); }
+
 private:
     template <typename _Callable>
     struct _Base_impl : public _Base {
         _Callable _M_func;
 
         template <typename... _Args>
-        _Base_impl(_Args&&... __args) : _M_func{{std::forward<_Args>(__args)...}} 
-        { }
+        _Base_impl(_Args&&... __args)
+            : _M_func{{std::forward<_Args>(__args)...}} {}
 
         void _M_run() override { _M_func(); }
     };
@@ -138,8 +136,7 @@ private:
         std::function<void()> _M_func;
 
         template <typename _Fn>
-        _Base_function(_Fn&& func) : _M_func(func)
-        { }
+        _Base_function(_Fn&& func) : _M_func(func) {}
 
         void _M_run() override { _M_func(); }
     };
@@ -160,22 +157,22 @@ struct __task_template {
 public:
     using proxy_ptr = std::function<void(void*)>;
 
-    template <typename _Fn, typename... _Args, 
-              typename = std::enable_if_t<std::is_invocable_v<_Fn&&, _Args&&...>>>
-    __task_template(_Fn&& func, _Args&&... args) 
-    {
+    template <
+        typename _Fn, typename... _Args,
+        typename = std::enable_if_t<std::is_invocable_v<_Fn&&, _Args&&...>>>
+    __task_template(_Fn&& func, _Args&&... args) {
         using Wrapper = Call_wrapper<_Fn, _Args...>;
-        auto __vp = new Wrapper{{std::forward<_Fn>(func), std::forward<_Args>(args)...}};
+        auto __vp = new Wrapper{
+            {std::forward<_Fn>(func), std::forward<_Args>(args)...}};
         proxy_t = &__task_proxy<Wrapper>;
         vp.reset(__vp);
     }
 
-    template <typename _Fn, typename = std::enable_if_t<std::is_invocable_v<_Fn&&> 
-            && !is_task_v<_Fn> && std::is_copy_constructible_v<_Fn&&>>>
+    template <typename _Fn, typename = std::enable_if_t<
+                                std::is_invocable_v<_Fn&&> && !is_task_v<_Fn> &&
+                                std::is_copy_constructible_v<_Fn&&>>>
     __task_template(_Fn&& func) {
-        proxy_t = [fn = std::forward<_Fn>(func)](void* null) mutable {
-            fn();
-        };
+        proxy_t = [fn = std::forward<_Fn>(func)](void* null) mutable { fn(); };
     }
 
     __task_template(__task_template&&) noexcept = default;
@@ -191,37 +188,38 @@ public:
         proxy_t.swap(rhs.proxy_t);
         vp.swap(rhs.vp);
     }
-    
+
 private:
     proxy_ptr proxy_t;
     std::shared_ptr<void> vp;
 };
 
-
 class __task_Function : public Function<void()> {
 private:
     using callback_t = Function<void()>;
-public:
-    template <typename _Fn, typename... _Args, typename = std::enable_if_t<std::is_invocable_v<_Fn&&, _Args&&...>>>
-    __task_Function(_Fn&& func, _Args&&... args) : callback_t(
-        [
-            f = std::forward<_Fn>(func), t = std::tuple<typename std::decay_t<_Args>...>(std::forward<_Args>(args)...)
-        ]() mutable {
-            std::apply(std::move(f), std::move(t));
-        }
-    ) { }
 
-    template <typename _Fn, typename = std::enable_if_t<std::is_invocable_v<_Fn&&> && !is_task_v<_Fn>>>
-    __task_Function(_Fn&& func) : callback_t(std::forward<_Fn>(func)) 
-    { }
+public:
+    template <
+        typename _Fn, typename... _Args,
+        typename = std::enable_if_t<std::is_invocable_v<_Fn&&, _Args&&...>>>
+    __task_Function(_Fn&& func, _Args&&... args)
+        : callback_t([f = std::forward<_Fn>(func),
+                      t = std::tuple<typename std::decay_t<_Args>...>(
+                          std::forward<_Args>(args)...)]() mutable {
+              std::apply(std::move(f), std::move(t));
+          }) {}
+
+    template <typename _Fn, typename = std::enable_if_t<
+                                std::is_invocable_v<_Fn&&> && !is_task_v<_Fn>>>
+    __task_Function(_Fn&& func) : callback_t(std::forward<_Fn>(func)) {}
 
     __task_Function(std::nullptr_t = nullptr) noexcept : callback_t() {}
 };
 
-
-// using __task = __task_function;          // 缺点是 std::function must be CopyConstructible
-// using __task = __task_virtual;              // 缺点是 使用了虚函数,可能会性能会稍微下降
+// using __task = __task_function;          // 缺点是 std::function must be
+// CopyConstructible using __task = __task_virtual;              // 缺点是
+// 使用了虚函数,可能会性能会稍微下降
 using __task = __task_template;
 // using __task = __task_Function;          // 没有提供拷贝构造和拷贝赋值
 
-} // namespace flexy::detail
+}  // namespace flexy::detail

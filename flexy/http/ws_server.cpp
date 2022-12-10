@@ -5,10 +5,12 @@ namespace flexy::http {
 
 static auto g_logger = FLEXY_LOG_NAME("system");
 
-WSServer::WSServer(IOManager* worker, IOManager* io_worker, IOManager* accept_worker) 
-    : TcpServer(worker, io_worker, accept_worker), dispatch_(std::make_shared<WSServletDispatch>()) {
+WSServer::WSServer(IOManager* worker, IOManager* io_worker,
+                   IOManager* accept_worker)
+    : TcpServer(worker, io_worker, accept_worker),
+      dispatch_(std::make_shared<WSServletDispatch>()) {
     type_ = "websocket_server";
-}   
+}
 
 void WSServer::handleClient(const Socket::ptr& client) {
     FLEXY_LOG_DEBUG(g_logger) << *client;
@@ -48,4 +50,4 @@ void WSServer::handleClient(const Socket::ptr& client) {
     session->close();
 }
 
-} // namespace flexy::http
+}  // namespace flexy::http

@@ -1,16 +1,14 @@
 #include "async_socket_stream.h"
+#include "flexy/thread/atomic.h"
 #include "flexy/util/log.h"
 #include "flexy/util/macro.h"
-#include "flexy/thread/atomic.h"
-
 
 namespace flexy {
 
 static auto g_logger = FLEXY_LOG_NAME("system");
 
-AsyncSockStream::Ctx::Ctx() : sn(0), timeout(0), result(0),
-                              timed(false), scheduler(nullptr) 
-{ }
+AsyncSockStream::Ctx::Ctx()
+    : sn(0), timeout(0), result(0), timed(false), scheduler(nullptr) {}
 
 void AsyncSockStream::Ctx::doRsp() {
     Scheduler* scd = scheduler;
@@ -31,15 +29,18 @@ void AsyncSockStream::Ctx::doRsp() {
     scd->async(std::move(fiber));
 }
 
-AsyncSockStream::AsyncSockStream(const Socket::ptr& sock, bool owner) 
-    : SockStream(sock, owner), waitSem_(2), sn_(0), autoConnect_(false), 
-      /*tryConnectCount_(0),*/ iomanager_(nullptr), worker_(nullptr)
-{ }
+AsyncSockStream::AsyncSockStream(const Socket::ptr& sock, bool owner)
+    : SockStream(sock, owner),
+      waitSem_(2),
+      sn_(0),
+      autoConnect_(false),
+      /*tryConnectCount_(0),*/ iomanager_(nullptr),
+      worker_(nullptr) {}
 
 bool AsyncSockStream::start() {
     if (!iomanager_) {
         iomanager_ = IOManager::GetThis();
-    } 
+    }
     if (!worker_) {
         worker_ = IOManager::GetThis();
     }
@@ -65,7 +66,7 @@ bool AsyncSockStream::start() {
             innerClose();
             waitSem_.post();
             waitSem_.post();
-            goto error;   
+            goto error;
         }
     }
 
@@ -80,7 +81,8 @@ error:
             timer_ = nullptr;
         }
 
-        timer_ = iomanager_->addTimer(2 * 1000, &AsyncSockStream::start, shared_from_this());
+        timer_ = iomanager_->addTimer(2 * 1000, &AsyncSockStream::start,
+                                      shared_from_this());
     }
 
     return false;
@@ -222,12 +224,13 @@ bool AsyncSockStream::waitFiber() {
 
 void AsyncSockStream::close() {
     autoConnect_ = false;
-    SchedulerSwitcher ss(iomanager_);       // close函数切换到iomanager_协程调度器执行
+    SchedulerSwitcher ss(
+        iomanager_);  // close函数切换到iomanager_协程调度器执行
     if (timer_) {
         timer_->cancel();
         timer_ = nullptr;
     }
     SockStream::close();
 }
-    
-} // namespace flexy
+
+}  // namespace flexy

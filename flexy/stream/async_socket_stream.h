@@ -1,22 +1,24 @@
 #pragma once
 
-#include "socket_stream.h"
+#include <any>
+#include <deque>
+#include <functional>
+#include <memory>
+#include <unordered_map>
 #include "flexy/net/socket.h"
 #include "flexy/schedule/iomanager.h"
 #include "flexy/schedule/semaphore.h"
-#include <memory>
-#include <functional>
-#include <deque>
-#include <unordered_map>
-#include <any>
+#include "socket_stream.h"
 
 namespace flexy {
 
-class AsyncSockStream : public SockStream, public std::enable_shared_from_this<AsyncSockStream> {
+class AsyncSockStream : public SockStream,
+                        public std::enable_shared_from_this<AsyncSockStream> {
 public:
     using ptr = std::shared_ptr<AsyncSockStream>;
     using connect_callback = std::function<bool(const AsyncSockStream::ptr&)>;
-    using disconnect_callback = std::function<void(const AsyncSockStream::ptr&)>;
+    using disconnect_callback =
+        std::function<void(const AsyncSockStream::ptr&)>;
 
     AsyncSockStream(const Socket::ptr& sock, bool owner = true);
 
@@ -24,23 +26,19 @@ public:
     virtual void close() override;
 
 public:
-    enum Error {
-        OK = 0,
-        TIMEOUT = -1,
-        IO_ERROR = -2,
-        NOT_CONNECT = -3
-    };
+    enum Error { OK = 0, TIMEOUT = -1, IO_ERROR = -2, NOT_CONNECT = -3 };
+
 protected:
     struct SendCtx {
         using ptr = std::shared_ptr<SendCtx>;
-        virtual ~SendCtx() { }
+        virtual ~SendCtx() {}
         virtual bool doSend(const AsyncSockStream::ptr& stream) = 0;
     };
 
     struct Ctx : public SendCtx {
     public:
         using ptr = std::shared_ptr<Ctx>;
-        virtual ~Ctx() { }
+        virtual ~Ctx() {}
         Ctx();
 
         uint32_t sn;
@@ -71,20 +69,24 @@ public:
     void setConnectCb(const connect_callback& cb) { connectCb_ = cb; }
     void setConnectCb(connect_callback&& cb) { connectCb_ = std::move(cb); }
     void setDisconnectCb(const disconnect_callback& cb) { disconnectCb_ = cb; }
-    void setDisconnectCb(disconnect_callback&& cb) { disconnectCb_ = std::move(cb); }
+    void setDisconnectCb(disconnect_callback&& cb) {
+        disconnectCb_ = std::move(cb);
+    }
 
-    template<class T>
-    void setData(T&& v) { data_ = std::forward<T>(v); }
+    template <class T>
+    void setData(T&& v) {
+        data_ = std::forward<T>(v);
+    }
 
-    template<class T>
+    template <class T>
     T getData() const {
         try {
             return std::any_cast<T>(data_);
         } catch (...) {
-
         }
         return T();
     }
+
 protected:
     virtual void doRead();
     virtual void doWrite();
@@ -92,7 +94,7 @@ protected:
     virtual void startWrite();
     virtual void onTimeOut(const Ctx::ptr& ctx);
     virtual Ctx::ptr doRecv() = 0;
-    virtual void onClose() { }
+    virtual void onClose() {}
 
     Ctx::ptr getCtx(uint32_t sn);
     Ctx::ptr getAndDelCtx(uint32_t sn);
@@ -140,7 +142,6 @@ protected:
     disconnect_callback disconnectCb_;
 
     std::any data_;
-
 };
 
-} // namespace flexy
+}  // namespace flexy

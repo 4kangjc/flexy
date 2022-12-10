@@ -1,10 +1,10 @@
 #include "env.h"
-#include "flexy/util/log.h"
 #include "flexy/util/file.h"
+#include "flexy/util/log.h"
 // #include <filesystem>
-#include <iostream>
 #include <unistd.h>
 #include <iomanip>
+#include <iostream>
 
 // namespace fs = std::filesystem;
 
@@ -23,7 +23,7 @@ bool Env::init(int argc, char** argv) {
 
     auto pos = exe_.find_last_of("/") + 1;
     cwd_ = exe_.substr(0, pos);
-    
+
     const char* now_key = nullptr;
     for (int i = 1; i < argc; ++i) {
         if (argv[i][0] == '-') {
@@ -33,8 +33,8 @@ bool Env::init(int argc, char** argv) {
                 }
                 now_key = argv[i] + 1;
             } else {
-                FLEXY_LOG_ERROR(g_logger) << "invalid arg idx = " << i
-                << " val = " << argv[i];
+                FLEXY_LOG_ERROR(g_logger)
+                    << "invalid arg idx = " << i << " val = " << argv[i];
                 return false;
             }
         } else {
@@ -42,8 +42,8 @@ bool Env::init(int argc, char** argv) {
                 add(now_key, argv[i]);
                 now_key = nullptr;
             } else {
-                FLEXY_LOG_ERROR(g_logger) << "invalid arg idx = " << i
-                << " val = " << argv[i];
+                FLEXY_LOG_ERROR(g_logger)
+                    << "invalid arg idx = " << i << " val = " << argv[i];
                 return false;
             }
         }
@@ -71,7 +71,8 @@ void Env::del(const std::string& key) {
     args_.erase(key);
 }
 
-std::string Env::get(const std::string& key, const std::string& default_val) const {
+std::string Env::get(const std::string& key,
+                     const std::string& default_val) const {
     READLOCK(mutex_);
     auto it = args_.find(key);
     return it != args_.end() ? it->second : default_val;
@@ -103,7 +104,8 @@ bool Env::setEnv(const char* key, const char* val) {
     return !setenv(key, val, 1);
 }
 
-std::string Env::getEnv(const std::string& key, const std::string& default_value) const {
+std::string Env::getEnv(const std::string& key,
+                        const std::string& default_value) const {
     const char* v = getenv(key.c_str());
     if (v == nullptr) {
         return default_value;
@@ -111,7 +113,8 @@ std::string Env::getEnv(const std::string& key, const std::string& default_value
     return v;
 }
 
-std::string Env::getEnv(const char* key, const std::string& default_value) const {
+std::string Env::getEnv(const char* key,
+                        const std::string& default_value) const {
     const char* v = getenv(key);
     if (v == nullptr) {
         return default_value;
@@ -120,13 +123,13 @@ std::string Env::getEnv(const char* key, const std::string& default_value) const
 }
 
 std::string Env::getAbsolutePath(std::string_view path) const {
-    if(path.empty()) {
+    if (path.empty()) {
         return "/";
     }
-    if(path[0] == '/') {
+    if (path[0] == '/') {
         return std::string(path);
     }
     return cwd_ + std::string(path);
 }
 
-}
+}  // namespace flexy

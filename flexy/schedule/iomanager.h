@@ -34,12 +34,14 @@ public:
     // 注册读事件
     template <typename... Args>
     bool onRead(int fd, Args&&... args) {
-        return onEvent(fd, Event::READ, detail::__task(std::forward<Args>(args)...));
+        return onEvent(fd, Event::READ,
+                       detail::__task(std::forward<Args>(args)...));
     }
     // 注册写事件
     template <typename... Args>
     bool onWrite(int fd, Args&&... args) {
-        return onEvent(fd, Event::WRITE, detail::__task(std::forward<Args>(args)...)); 
+        return onEvent(fd, Event::WRITE,
+                       detail::__task(std::forward<Args>(args)...));
     }
     // 返回当前的IOManager
     static IOManager* GetThis();

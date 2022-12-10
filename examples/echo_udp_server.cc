@@ -19,12 +19,11 @@ void run() {
         int len = sock->recvFrom(buff, 1024, from);
         if (len > 0) {
             buff[len] = 0;
-            FLEXY_LOG_INFO(g_logger) << "recv: " << buff << " from: "
-            << *from;
+            FLEXY_LOG_INFO(g_logger) << "recv: " << buff << " from: " << *from;
             len = sock->sendTo(buff, len, from);
             if (len < 0) {
-                FLEXY_LOG_INFO(g_logger) << "send: " << buff << " to: "
-                << *from << " error = " << len;
+                FLEXY_LOG_INFO(g_logger) << "send: " << buff << " to: " << *from
+                                         << " error = " << len;
             }
         }
     }

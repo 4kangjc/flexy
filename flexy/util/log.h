@@ -78,6 +78,7 @@ public:
         ss_ << fmt::format(fmt, std::forward<Args>(args)...);
 #endif
     }
+
 private:
     const char* filename_ = nullptr;                // 文件名
     const char* funcname_ = nullptr;                // 函数名
@@ -268,4 +269,4 @@ using LoggerMgr = Singleton<LoggerManager>;
 #define FLEXY_LOG_ROOT()        flexy::LoggerMgr::GetInstance().getRoot()
 #define FLEXY_LOG_NAME(name)    flexy::LoggerMgr::GetInstance().getLogger(name)
 
-} // namespace flexy 
+}  // namespace flexy

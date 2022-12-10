@@ -2,10 +2,10 @@
 // #include "util.h"
 #include "log.h"
 
-#include <filesystem>
-#include <unistd.h>
-#include <string.h>
 #include <signal.h>
+#include <string.h>
+#include <unistd.h>
+#include <filesystem>
 
 namespace fs = std::filesystem;
 
@@ -153,9 +153,7 @@ uint64_t FS::LastWriteTime(std::string_view filename) {
     return std::chrono::duration_cast<std::chrono::microseconds>(ftime.time_since_epoch()).count();
 }
 
-
-} // namespace flexy
-
+}  // namespace flexy
 
 namespace flexy::filesystem {
 
@@ -170,7 +168,7 @@ std::string AbsolutePath(std::string_view filename) {
         if (count <= 0) {
             return "";
         }
-        auto p = fs::path(path).parent_path()/filename;
+        auto p = fs::path(path).parent_path() / filename;
         return p;
     }
     return fs::absolute(filename);
@@ -197,8 +195,8 @@ bool Mv(std::string_view from, std::string_view to) {
 }
 
 // 暂时不提供v, Env模块转换绝对路径
-void ListAllFile(std::vector<std::string>& files, std::string_view path, 
-                std::string_view subfix) {
+void ListAllFile(std::vector<std::string>& files, std::string_view path,
+                 std::string_view subfix) {
     fs::path dir(path);
     if (!fs::exists(dir)) {
         return;
@@ -213,7 +211,8 @@ void ListAllFile(std::vector<std::string>& files, std::string_view path,
             } else {
                 auto s = it.path().c_str();
                 auto len = strlen(s);
-                if (strncmp(s + len - subfix.size(), subfix.data(), subfix.size()) == 0) {
+                if (strncmp(s + len - subfix.size(), subfix.data(),
+                            subfix.size()) == 0) {
                     files.push_back(it.path());
                 }
             }
@@ -273,7 +272,7 @@ bool IsRunningPidfile(std::string_view pidfile) {
 
 template <bool v>
 bool OpenForWrite(std::ofstream& ofs, std::string_view filename,
-            std::ios_base::openmode mode) {
+                  std::ios_base::openmode mode) {
     if constexpr (v) {
         return FS::OpenForWrite(ofs, AbsolutePath(filename), mode);
     }
@@ -288,7 +287,7 @@ bool OpenForWrite(std::ofstream& ofs, std::string_view filename,
 
 template <bool v>
 bool OpenForRead(std::ifstream& ifs, std::string_view filename,
-            std::ios_base::openmode mode) {
+                 std::ios_base::openmode mode) {
     if constexpr (v) {
         return FS::OpenForRead(ifs, AbsolutePath(filename), mode);
     }
@@ -302,7 +301,9 @@ uint64_t LastWriteTime(std::string_view filename) {
         return FS::LastWriteTime(AbsolutePath(filename));
     }
     auto ftime = fs::last_write_time(filename);
-    return std::chrono::duration_cast<std::chrono::microseconds>(ftime.time_since_epoch()).count();
+    return std::chrono::duration_cast<std::chrono::microseconds>(
+               ftime.time_since_epoch())
+        .count();
 }
 
 namespace {
@@ -325,6 +326,6 @@ void __FILE__INIT__() {
     OpenForWrite<false>(ofs, "", std::ios::app);
 }
 
-}
+}  // namespace
 
-} // namespace flexy file system
+}  // namespace flexy::filesystem

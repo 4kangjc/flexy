@@ -7,7 +7,7 @@ void test() {
     std::string s1, s2;
     async_cin >> s1;
     async_cout << s1 << std::endl;
-    
+
     async_cin.Scan(s1, s2);
     async_cout.Print(s1, '\n', s2, '\n');
 }

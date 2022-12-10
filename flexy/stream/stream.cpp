@@ -11,8 +11,10 @@ ssize_t Stream::readFixSize(void* buffer, size_t length) {
     while (left > 0) {
         ssize_t len = read((char*)buffer + offset, left);
         if (len <= 0) {
-            FLEXY_LOG_FMT_ERROR(g_logger, "readFixSize fail length = {} len = {} errno = {} errstr = {}",
-                                length, len, errno, strerror(errno));
+            FLEXY_LOG_FMT_ERROR(
+                g_logger,
+                "readFixSize fail length = {} len = {} errno = {} errstr = {}",
+                length, len, errno, strerror(errno));
             return len;
         }
         offset += len;
@@ -26,8 +28,10 @@ ssize_t Stream::readFixSize(const ByteArray::ptr& ba, size_t length) {
     while (left > 0) {
         ssize_t len = read(ba, left);
         if (len <= 0) {
-            FLEXY_LOG_FMT_ERROR(g_logger, "readFixSize fail length = {} len = {} errno = {} errstr = {}",
-                                length, len, errno, strerror(errno));
+            FLEXY_LOG_FMT_ERROR(
+                g_logger,
+                "readFixSize fail length = {} len = {} errno = {} errstr = {}",
+                length, len, errno, strerror(errno));
             return len;
         }
         left -= len;
@@ -41,8 +45,10 @@ ssize_t Stream::writeFixSize(const void* buffer, size_t length) {
     while (left > 0) {
         ssize_t len = write((char*)buffer + offset, left);
         if (len <= 0) {
-            FLEXY_LOG_FMT_ERROR(g_logger, "writeFixSize fail length = {} len = {} errno = {} errstr = {}",
-                                length, len, errno, strerror(errno));
+            FLEXY_LOG_FMT_ERROR(
+                g_logger,
+                "writeFixSize fail length = {} len = {} errno = {} errstr = {}",
+                length, len, errno, strerror(errno));
             return len;
         }
         offset += len;
@@ -56,8 +62,10 @@ ssize_t Stream::writeFixSize(const ByteArray::ptr& ba, size_t length) {
     while (left > 0) {
         ssize_t len = read(ba, left);
         if (len <= 0) {
-            FLEXY_LOG_FMT_ERROR(g_logger, "writeFixSize fail length = {} len = {} errno = {} errstr = {}",
-                                length, len, errno, strerror(errno));
+            FLEXY_LOG_FMT_ERROR(
+                g_logger,
+                "writeFixSize fail length = {} len = {} errno = {} errstr = {}",
+                length, len, errno, strerror(errno));
             return len;
         }
         left -= len;

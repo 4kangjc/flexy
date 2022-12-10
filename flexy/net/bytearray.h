@@ -2,11 +2,11 @@
 
 #include <memory>
 // #include <sstream>
-#include <vector>
-#include <string>
 #include <stdint.h>
-#include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/types.h>
+#include <string>
+#include <vector>
 
 #include "edian.h"
 
@@ -19,7 +19,12 @@ public:
         Node(size_t s) : ptr(new char[s]), next(nullptr) {}
         Node() : ptr(nullptr), next(nullptr) {}
         ~Node() = default;
-        void free() { if (ptr) { delete[] ptr; ptr = nullptr; } }
+        void free() {
+            if (ptr) {
+                delete[] ptr;
+                ptr = nullptr;
+            }
+        }
 
         char* ptr;
         Node* next;
@@ -72,7 +77,7 @@ public:
     std::string readStringF32();
     std::string readStringF64();
     std::string readStringVint();
-    
+
     void clear();
     void write(const void* buf, size_t size);
     void read(void* read, size_t size);
@@ -88,28 +93,33 @@ public:
     size_t getReadSize() const { return m_size - m_position; }
 
     bool isLittleEndian() const { return m_endian == FLEXY_LITTLE_ENDIAN; }
-    void setLittleEndian(bool val) { m_endian = val ? FLEXY_LITTLE_ENDIAN : FLEXY_BIG_ENDIAN; }
+    void setLittleEndian(bool val) {
+        m_endian = val ? FLEXY_LITTLE_ENDIAN : FLEXY_BIG_ENDIAN;
+    }
 
     std::string toString() const;
     std::string toHexString() const;
 
     size_t getSize() const { return m_size; }
-    uint64_t getReadBuffers(std::vector<iovec>& buffers, uint64_t len = ~0ull) const;
-    uint64_t getReadBuffers(std::vector<iovec>& buffers, uint64_t len, uint64_t position) const;
+    uint64_t getReadBuffers(std::vector<iovec>& buffers,
+                            uint64_t len = ~0ull) const;
+    uint64_t getReadBuffers(std::vector<iovec>& buffers, uint64_t len,
+                            uint64_t position) const;
     uint64_t getWriteBuffers(std::vector<iovec>& buffers, uint64_t len);
+
 private:
     void addCapacity(size_t size);
     size_t getCapacity() const { return m_capacity - m_position; }
 
 private:
-    size_t m_baseSize;                          // 内存块的大小
-    size_t m_position;                          // 当前操作的位置
-    size_t m_capacity;                          // 当前的总容量
-    size_t m_size;                              // 当前的数据的大小
-    int8_t m_endian;                            // 字节序
-    Node* m_root;                               // 第一个内存指针
-    Node* m_cur;                                // 当前操作的内存指针
-    bool m_owner;                               // 是否是自己创建的内存
+    size_t m_baseSize;  // 内存块的大小
+    size_t m_position;  // 当前操作的位置
+    size_t m_capacity;  // 当前的总容量
+    size_t m_size;      // 当前的数据的大小
+    int8_t m_endian;    // 字节序
+    Node* m_root;       // 第一个内存指针
+    Node* m_cur;        // 当前操作的内存指针
+    bool m_owner;       // 是否是自己创建的内存
 };
 
-} // namespace sylar
+}  // namespace flexy

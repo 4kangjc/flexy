@@ -8,11 +8,8 @@ public:
         FLEXY_LOG_INFO(g_logger) << "work! " << i;
         return i;
     }
-    void operator()() {
-        FLEXY_LOG_INFO(g_logger) << "functor!";
-    }
+    void operator()() { FLEXY_LOG_INFO(g_logger) << "functor!"; }
 };
-
 
 flexy::fiber::Semaphore fsem;
 
@@ -29,25 +26,26 @@ void test_sem2() {
     FLEXY_LOG_INFO(g_logger) << "test2 finish post";
 }
 
-
 void test_work_group() {
     auto wg = flexy::WorkerGroup::Create(2);
     Work w;
-    wg->schedule([](){
-        FLEXY_LOG_INFO(g_logger) << "Hello worker!";
-    });
+    wg->schedule([]() { FLEXY_LOG_INFO(g_logger) << "Hello worker!"; });
 #if __cplusplus > 201703L
-    // wg->schedule([] <class... Args> (fmt::format_string<Args...> fmt, Args&&... args) {
-        // FLEXY_LOG_FMT_INFO(g_logger, fmt, std::forward<Args>(args)...);
+    // wg->schedule([] <class... Args> (fmt::format_string<Args...> fmt,
+    // Args&&... args) { FLEXY_LOG_FMT_INFO(g_logger, fmt,
+    // std::forward<Args>(args)...);
     // }, "{} {} {}", 1, 2, 3);
 #else
-    wg->schedule([](const char* fmt, auto&&... args) {
-        FLEXY_LOG_FMT_INFO(g_logger, fmt, std::forward<decltype(args)>(args)...);
-    }, "{} {} {}", 1, 2, 3);
+    wg->schedule(
+        [](const char* fmt, auto&&... args) {
+            FLEXY_LOG_FMT_INFO(g_logger, fmt,
+                               std::forward<decltype(args)>(args)...);
+        },
+        "{} {} {}", 1, 2, 3);
 #endif
 
     wg->schedule([]() {
-        
+
     });
     wg->schedule(&Work::print, &w, 1);
     wg->schedule(w);

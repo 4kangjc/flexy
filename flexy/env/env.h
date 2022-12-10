@@ -1,8 +1,8 @@
 #pragma once
 
+#include <unordered_map>
 #include "flexy/thread/mutex.h"
 #include "flexy/util/singleton.h"
-#include <unordered_map>
 
 namespace flexy {
 
@@ -23,10 +23,13 @@ public:
 
     bool setEnv(const std::string& key, const std::string& val);
     bool setEnv(const char* key, const char* val);
-    std::string getEnv(const std::string& key, const std::string& default_value = "") const;
-    std::string getEnv(const char* key, const std::string& default_value = "") const;
+    std::string getEnv(const std::string& key,
+                       const std::string& default_value = "") const;
+    std::string getEnv(const char* key,
+                       const std::string& default_value = "") const;
 
     std::string getAbsolutePath(std::string_view path) const;
+
 private:
     mutable rw_mutex mutex_;
     std::unordered_map<std::string, std::string> args_;
@@ -34,10 +37,11 @@ private:
     std::string program_;
     std::string exe_;
     std::string cwd_;
+
 public:
     bool init_ = false;
 };
 
 using EnvMgr = Singleton<Env>;
 
-} // namespace flexy
+}  // namespace flexy

@@ -1,12 +1,10 @@
 #include "mutex.h"
-#include "scheduler.h"
 #include "flexy/util/macro.h"
+#include "scheduler.h"
 
 namespace flexy::fiber {
 
-mutex::~mutex() {
-    FLEXY_ASSERT(locked_ == false);
-}
+mutex::~mutex() { FLEXY_ASSERT(locked_ == false); }
 
 void mutex::lock() {
     FLEXY_ASSERT(Scheduler::GetThis());
@@ -24,7 +22,7 @@ void mutex::lock() {
 }
 
 void mutex::unlock() {
-    std::pair<Scheduler*, Fiber::ptr> waiter; 
+    std::pair<Scheduler*, Fiber::ptr> waiter;
     {
         LOCK_GUARD(mutex_);
         FLEXY_ASSERT(locked_);
@@ -33,11 +31,10 @@ void mutex::unlock() {
             return;
         } else {
             waiter = std::move(waiters_.front());
-            waiters_.pop_front();       
+            waiters_.pop_front();
         }
     }
     waiter.first->async(std::move(waiter.second));
 }
 
-
-} // namespace flexy fiber
+}  // namespace flexy::fiber

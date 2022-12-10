@@ -14,4 +14,4 @@ int EncodeLen(const char* in, int in_len);
 bool ShouldEncode(std::string_view in);
 bool ShouldEncode(const char* in, int in_len);
 
-} // namespace flexy::http2::huffman
+}  // namespace flexy::http2::huffman

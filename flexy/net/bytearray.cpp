@@ -1,22 +1,32 @@
 #include "bytearray.h"
 #include "flexy/util/log.h"
 
-#include <iomanip>
-#include <cstring>
 #include <cassert>
 #include <cmath>
+#include <cstring>
+#include <iomanip>
 
 namespace flexy {
 
 static auto g_logger = FLEXY_LOG_NAME("system");
 
-ByteArray::ByteArray(size_t base_size) : m_baseSize(base_size), m_position(0), 
-    m_capacity(base_size), m_size(0), m_endian(FLEXY_BIG_ENDIAN),
-    m_root(new Node(base_size)), m_cur(m_root), m_owner(true) {
-}
+ByteArray::ByteArray(size_t base_size)
+    : m_baseSize(base_size),
+      m_position(0),
+      m_capacity(base_size),
+      m_size(0),
+      m_endian(FLEXY_BIG_ENDIAN),
+      m_root(new Node(base_size)),
+      m_cur(m_root),
+      m_owner(true) {}
 
-ByteArray::ByteArray(void* data, size_t size, bool owner) : m_baseSize(size), m_position(0),
-    m_capacity(size), m_size(size), m_endian(FLEXY_BIG_ENDIAN), m_owner(owner) {
+ByteArray::ByteArray(void* data, size_t size, bool owner)
+    : m_baseSize(size),
+      m_position(0),
+      m_capacity(size),
+      m_size(size),
+      m_endian(FLEXY_BIG_ENDIAN),
+      m_owner(owner) {
     m_root = new Node();
     m_root->ptr = (char*)data;
     m_cur = m_root;
@@ -35,13 +45,9 @@ ByteArray::~ByteArray() {
     m_root = m_cur = nullptr;
 }
 
-void ByteArray::writeFint8(int8_t value) {
-    write(&value, sizeof(value));
-}
+void ByteArray::writeFint8(int8_t value) { write(&value, sizeof(value)); }
 
-void ByteArray::writeFuint8(uint8_t value) {
-    write(&value, sizeof(value));
-}
+void ByteArray::writeFuint8(uint8_t value) { write(&value, sizeof(value)); }
 
 void ByteArray::writeFint16(int16_t value) {
     if (m_endian != FLEXY_BYTE_ORDER) {
@@ -111,7 +117,7 @@ void ByteArray::writeUint32(uint32_t value) {
     while (value >= 0x80) {
         tmp[i++] = (value & 0x7f) | 0x80;
         value >>= 7;
-    } 
+    }
     tmp[i++] = value;
     write(tmp, i);
 }
@@ -126,7 +132,7 @@ void ByteArray::writeUint64(uint64_t value) {
     while (value >= 0x80) {
         tmp[i++] = (value & 0x7f) | 0x80;
         value >>= 7;
-    } 
+    }
     tmp[i++] = value;
     write(tmp, i);
 }
@@ -179,50 +185,34 @@ uint8_t ByteArray::readFuint8() {
     return v;
 }
 
-#define XX(type)                                \
-    type v;                                     \
-    read(&v, sizeof(v));                        \
-    if (m_endian != FLEXY_BYTE_ORDER) {         \
-        return byteswap(v);                     \
-    }                                           \
+#define XX(type)                        \
+    type v;                             \
+    read(&v, sizeof(v));                \
+    if (m_endian != FLEXY_BYTE_ORDER) { \
+        return byteswap(v);             \
+    }                                   \
     return v;
 
-int16_t ByteArray::readFint16() {
-    XX(int16_t);
-}
+int16_t ByteArray::readFint16() { XX(int16_t); }
 
-uint16_t ByteArray::readFuint16() {
-    XX(uint16_t);
-}
+uint16_t ByteArray::readFuint16() { XX(uint16_t); }
 
-int32_t ByteArray::readFint32() {
-    XX(int32_t);
-}
+int32_t ByteArray::readFint32() { XX(int32_t); }
 
-uint32_t ByteArray::readFuint32() {
-    XX(uint32_t);
-}
+uint32_t ByteArray::readFuint32() { XX(uint32_t); }
 
-int64_t ByteArray::readFint64() {
-    XX(int64_t);
-}
+int64_t ByteArray::readFint64() { XX(int64_t); }
 
-uint64_t ByteArray::readFuint64() {
-    XX(uint64_t);
-}
+uint64_t ByteArray::readFuint64() { XX(uint64_t); }
 #undef XX
 
 static int32_t DecodeZigzag32(const uint32_t& v) {
-    return (v >> 1) ^ -(v & 1);                             // ^ 0 or -1    x ^ (-1) == ~x
+    return (v >> 1) ^ -(v & 1);  // ^ 0 or -1    x ^ (-1) == ~x
 }
 
-static int64_t DecodeZigzag64(const uint64_t& v) {
-    return (v >> 1) ^ -(v & 1);
-}
+static int64_t DecodeZigzag64(const uint64_t& v) { return (v >> 1) ^ -(v & 1); }
 
-int32_t ByteArray::readInt32() {
-    return DecodeZigzag32(readUint32());
-}
+int32_t ByteArray::readInt32() { return DecodeZigzag32(readUint32()); }
 
 uint32_t ByteArray::readUint32() {
     uint32_t result = 0;
@@ -238,9 +228,7 @@ uint32_t ByteArray::readUint32() {
     return result;
 }
 
-int64_t ByteArray::readInt64() {
-    return DecodeZigzag64(readUint64());
-}
+int64_t ByteArray::readInt64() { return DecodeZigzag64(readUint64()); }
 
 uint64_t ByteArray::readUint64() {
     uint64_t result = 0;
@@ -260,14 +248,14 @@ float ByteArray::readFloat() {
     uint32_t v = readFuint32();
     float value;
     memcpy(&value, &v, sizeof(v));
-    return value; 
+    return value;
 }
 
 double ByteArray::readDouble() {
     uint32_t v = readFuint32();
     double value;
     memcpy(&value, &v, sizeof(v));
-    return value; 
+    return value;
 }
 
 std::string ByteArray::readStringF16() {
@@ -302,7 +290,6 @@ std::string ByteArray::readStringVint() {
     return buff;
 }
 
-
 void ByteArray::clear() {
     m_position = m_size = 0;
     m_capacity = m_baseSize;
@@ -324,9 +311,9 @@ void ByteArray::write(const void* buf, size_t size) {
         return;
     }
     addCapacity(size);
-    size_t npos = m_position % m_baseSize;                   // 当前节点偏移量
-    size_t ncap = m_baseSize - npos;                        // 当前节点容量 
-    size_t bpos = 0;                                       // 当前写入buf的字节数
+    size_t npos = m_position % m_baseSize;  // 当前节点偏移量
+    size_t ncap = m_baseSize - npos;        // 当前节点容量
+    size_t bpos = 0;                        // 当前写入buf的字节数
 
     while (size > 0) {
         if (ncap >= size) {
@@ -367,9 +354,9 @@ void ByteArray::read(void* buf, size_t size) {
             if (ncap == size) {
                 m_cur = m_cur->next;
             }
-            //if (m_baseSize == (npos + size)) {
-            //    m_cur = m_cur->next;
-            //}
+            // if (m_baseSize == (npos + size)) {
+            //     m_cur = m_cur->next;
+            // }
             bpos += size;
             m_position += size;
             size = 0;
@@ -385,7 +372,7 @@ void ByteArray::read(void* buf, size_t size) {
     }
 }
 
-void ByteArray::read(void* buf, size_t size, size_t position) const  {
+void ByteArray::read(void* buf, size_t size, size_t position) const {
     if (size > (m_size - position)) {
         throw std::out_of_range("not enough len");
     }
@@ -415,7 +402,6 @@ void ByteArray::read(void* buf, size_t size, size_t position) const  {
     }
 }
 
-
 void ByteArray::setPosition(size_t v) {
     if (v > m_capacity) {
         throw std::out_of_range("set_position out of range");
@@ -435,11 +421,14 @@ void ByteArray::setPosition(size_t v) {
 }
 
 bool ByteArray::writeToFile(std::string_view name) {
-    std::ofstream ofs; 
-    ofs.open(name.data(), std::ios::trunc | std::ios::binary);              // 如果文件已存在则先删除该文件
+    std::ofstream ofs;
+    ofs.open(
+        name.data(),
+        std::ios::trunc | std::ios::binary);  // 如果文件已存在则先删除该文件
     if (!ofs) {
-        FLEXY_LOG_ERROR(g_logger) << "writeToFile name = " << name << " error , errno = " 
-            << errno << " errstr = " << strerror(errno);
+        FLEXY_LOG_ERROR(g_logger)
+            << "writeToFile name = " << name << " error , errno = " << errno
+            << " errstr = " << strerror(errno);
         return false;
     }
 
@@ -447,9 +436,10 @@ bool ByteArray::writeToFile(std::string_view name) {
     int64_t pos = m_position;
     Node* cur = m_cur;
 
-    while(read_size > 0) {
+    while (read_size > 0) {
         int diff = pos % m_baseSize;
-        int64_t len = (read_size > (int64_t)m_baseSize ? m_baseSize : read_size) - diff;
+        int64_t len =
+            (read_size > (int64_t)m_baseSize ? m_baseSize : read_size) - diff;
         ofs.write(cur->ptr + diff, len);
         cur = cur->next;
         pos += len;
@@ -462,11 +452,13 @@ bool ByteArray::readFromFile(std::string_view name) {
     std::ifstream ifs;
     ifs.open(name.data(), std::ios::binary);
     if (!ifs) {
-        FLEXY_LOG_ERROR(g_logger) << "readFromFile name = " << name << " error, errno = " 
-            << errno << " errstr = " << strerror(errno);
+        FLEXY_LOG_ERROR(g_logger)
+            << "readFromFile name = " << name << " error, errno = " << errno
+            << " errstr = " << strerror(errno);
         return false;
     }
-    std::shared_ptr<char> buff(new char[m_baseSize], [](char* ptr) { delete[] ptr; });
+    std::shared_ptr<char> buff(new char[m_baseSize],
+                               [](char* ptr) { delete[] ptr; });
     while (!ifs.eof()) {
         ifs.read(buff.get(), m_baseSize);
         write(buff.get(), ifs.gcount());
@@ -491,7 +483,8 @@ std::string ByteArray::toHexString() const {
         if (i > 0 && i % 32 == 0) {
             ss << std::endl;
         }
-        ss << std::setw(2) << std::setfill('0') << std::hex << (int)(uint8_t)str[i] << " ";
+        ss << std::setw(2) << std::setfill('0') << std::hex
+           << (int)(uint8_t)str[i] << " ";
     }
     return ss.str();
 }
@@ -526,8 +519,8 @@ void ByteArray::addCapacity(size_t size) {
     }
 }
 
-
-uint64_t ByteArray::getReadBuffers(std::vector<iovec>& buffers, uint64_t len) const {
+uint64_t ByteArray::getReadBuffers(std::vector<iovec>& buffers,
+                                   uint64_t len) const {
     len = std::min(len, getReadSize());
     if (len == 0) {
         return 0;
@@ -535,9 +528,9 @@ uint64_t ByteArray::getReadBuffers(std::vector<iovec>& buffers, uint64_t len) co
 
     uint64_t size = len;
 
-    size_t npos = m_position % m_baseSize;     
+    size_t npos = m_position % m_baseSize;
     size_t ncap = m_baseSize - npos;
-    struct iovec iov;   
+    struct iovec iov;
     Node* cur = m_cur;
     while (len > 0) {
         if (ncap >= len) {
@@ -552,12 +545,13 @@ uint64_t ByteArray::getReadBuffers(std::vector<iovec>& buffers, uint64_t len) co
             ncap = m_baseSize;
             npos = 0;
         }
-        buffers.push_back(iov); 
+        buffers.push_back(iov);
     }
     return size;
 }
 
-uint64_t ByteArray::getReadBuffers(std::vector<iovec>& buffers, uint64_t len, uint64_t position) const {
+uint64_t ByteArray::getReadBuffers(std::vector<iovec>& buffers, uint64_t len,
+                                   uint64_t position) const {
     len = std::min(len, getReadSize());
     if (len == 0) {
         return 0;
@@ -565,16 +559,16 @@ uint64_t ByteArray::getReadBuffers(std::vector<iovec>& buffers, uint64_t len, ui
 
     uint64_t size = len;
 
-    size_t npos = position % m_baseSize;    
+    size_t npos = position % m_baseSize;
     size_t count = position / m_baseSize;
-    Node* cur =  m_root;
+    Node* cur = m_root;
     while (count) {
         cur = cur->next;
         --count;
     }
 
     size_t ncap = m_baseSize - npos;
-    struct iovec iov;   
+    struct iovec iov;
     while (len > 0) {
         if (ncap >= len) {
             iov.iov_base = cur->ptr + npos;
@@ -588,7 +582,7 @@ uint64_t ByteArray::getReadBuffers(std::vector<iovec>& buffers, uint64_t len, ui
             ncap = m_baseSize;
             npos = 0;
         }
-        buffers.push_back(iov); 
+        buffers.push_back(iov);
     }
     return size;
 }
@@ -622,4 +616,4 @@ uint64_t ByteArray::getWriteBuffers(std::vector<iovec>& buffers, uint64_t len) {
     return size;
 }
 
-} // namespace flexy
+}  // namespace flexy

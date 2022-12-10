@@ -1,66 +1,46 @@
+#include <gtest/gtest.h>
 #include "flexy/util/function.h"
 #include "flexy/util/log.h"
-#include <gtest/gtest.h>
 
 static auto g_logger = FLEXY_LOG_ROOT();
 
-int minus(int a, int b) {
-    return a - b;
-}
+int minus(int a, int b) { return a - b; }
 
-int product(int a, int b) {
-    return a * b;
-}
+int product(int a, int b) { return a * b; }
 
 struct divides {
-    int operator()(int a, int b) const {
-        return a / b;
-    }
+    int operator()(int a, int b) const { return a / b; }
 };
 
 // noncopyable plus
 struct plus {
-    int operator()(int a, int b) const {
-        return a + b;
-    }
+    int operator()(int a, int b) const { return a + b; }
     plus(const plus&) = delete;
     plus() = default;
     plus(plus&&) = default;
 };
 
-TEST(Function, Empty) {
-    flexy::Function<void()> f;
-}
+TEST(Function, Empty) { flexy::Function<void()> f; }
 
 TEST(Function, Lambda) {
-    flexy::Function f1 = [](int a, int b) {
-        return a + b;
-    };
+    flexy::Function f1 = [](int a, int b) { return a + b; };
     ASSERT_EQ(3, f1(1, 2));
-    
+
     int a = 0;
-    flexy::Function f2 = [&a]() {
-        ++a;
-    };
+    flexy::Function f2 = [&a]() { ++a; };
     f2();
     ASSERT_EQ(a, 1);
-    
+
     plus p;
-    flexy::Function f3([](plus&& p) {
-        return p(2, 5);
-    });
+    flexy::Function f3([](plus&& p) { return p(2, 5); });
     ASSERT_EQ(f3(std::move(p)), 7);
 
     divides d;
-    flexy::Function f4([d](int a, int b){
-        return d(a, b);
-    });
+    flexy::Function f4([d](int a, int b) { return d(a, b); });
     ASSERT_EQ(f4(20, 5), 4);
 
     std::unique_ptr uq = std::make_unique<int>(3);
-    flexy::Function f5 = [uni_ptr = std::move(uq)]() {
-        return *uni_ptr;
-    };
+    flexy::Function f5 = [uni_ptr = std::move(uq)]() { return *uni_ptr; };
     ASSERT_EQ(f5(), 3);
 
     std::array<char, 1000000> payload;
@@ -74,15 +54,10 @@ TEST(Function, Lambda) {
     // flexy::Function<decltype(lamda)> f7;
 }
 
-
 struct Pii {
     int a, b;
-    int hash_func() {
-        return std::hash<int>()(a) ^ std::hash<int>()(b);
-    }
-    int sum(int c = 0) const {
-        return a + b + c;
-    }
+    int hash_func() { return std::hash<int>()(a) ^ std::hash<int>()(b); }
+    int sum(int c = 0) const { return a + b + c; }
 };
 
 TEST(Function, MemberMethod) {
@@ -100,7 +75,7 @@ TEST(Function, MemberMethod) {
 
     flexy::Function<int(Pii*, int)> f4(&Pii::sum);
     ASSERT_EQ(f4(&pii, 1), 10);
-}   
+}
 
 template <class T>
 void multiplication(T& a, const T& b) {
@@ -110,7 +85,7 @@ void multiplication(T& a, const T& b) {
 TEST(Function, Function) {
     flexy::Function f1(minus);
     ASSERT_EQ(f1(10, 5), 5);
-    
+
     flexy::Function f2 = &product;
     ASSERT_EQ(f2(2, 3), 6);
 
@@ -125,26 +100,24 @@ TEST(Function, Bind) {
     ASSERT_EQ(f1(5), 5);
 
     Pii pii{2, 3};
-    // flexy::Function<int(int)> f2(std::bind(&Pii::sum, &pii, std::placeholders::_1));
-    
-    std::function<int(int)> f2(std::bind(&Pii::sum, &pii, std::placeholders::_1));
+    // flexy::Function<int(int)> f2(std::bind(&Pii::sum, &pii,
+    // std::placeholders::_1));
+
+    std::function<int(int)> f2(
+        std::bind(&Pii::sum, &pii, std::placeholders::_1));
     ASSERT_EQ(f2(0), 5);
 }
 
 TEST(Function, Swap) {
     flexy::Function f1(product);
     ASSERT_EQ(f1(2, 5), 10);
-    flexy::Function([](int a, int b) {
-        return a + b;
-    }).swap(f1);
+    flexy::Function([](int a, int b) { return a + b; }).swap(f1);
     ASSERT_EQ(f1(2, 5), 7);
 
     flexy::Function f2(&minus);
     ASSERT_EQ(f2(3, 2), 1);
     Pii pii{4, 5};
-    flexy::Function f3([pii](int a, int b){
-        return pii.sum(a) + b;
-    });
+    flexy::Function f3([pii](int a, int b) { return pii.sum(a) + b; });
     ASSERT_EQ(f3(1, 0), 10);
     f3.swap(f2);
     ASSERT_EQ(f3(3, 2), 1);
@@ -183,4 +156,4 @@ TEST(Function, LargeFunctorMoveTest) {
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
-} 
+}

@@ -12,7 +12,7 @@ void run() {
     }
 
     auto fun = [](const flexy::http::HttpRequest::ptr& header,
-                  const flexy::http::WSFrameMessage::ptr& msg, 
+                  const flexy::http::WSFrameMessage::ptr& msg,
                   const flexy::http::WSSession::ptr& session) {
         session->sendMessage(msg);
         return 0;

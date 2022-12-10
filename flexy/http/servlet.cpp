@@ -11,18 +11,19 @@ FuncionServlet::FuncionServlet(const callback& cb)
 : Servlet("FunctionServlet"), cb_(cb) {
 }
 
-int32_t FuncionServlet::handle(const HttpRequest::ptr& request, 
-                               const HttpResponse::ptr& response, const SockStream::ptr& session) {
+int32_t FuncionServlet::handle(const HttpRequest::ptr& request,
+                               const HttpResponse::ptr& response,
+                               const SockStream::ptr& session) {
     return cb_(request, response, session);
 }
 
 ServletDispatch::ServletDispatch()
-: Servlet("ServletDispatch"), default_(std::make_shared<NotFoundServlet>()) {
+    : Servlet("ServletDispatch"),
+      default_(std::make_shared<NotFoundServlet>()) {}
 
-}
-
-int32_t ServletDispatch::handle(const HttpRequest::ptr& request, 
-                                const HttpResponse::ptr& response, const SockStream::ptr& session) {
+int32_t ServletDispatch::handle(const HttpRequest::ptr& request,
+                                const HttpResponse::ptr& response,
+                                const SockStream::ptr& session) {
     auto&& slt = getMatchedServlet(request->getPath());
     if (slt) {
         slt->handle(request, response, session);
@@ -113,8 +114,9 @@ NotFoundServlet::NotFoundServlet() : Servlet("NotFoundServlet") {
 
 }
 
-int32_t NotFoundServlet::handle(const HttpRequest::ptr& request, 
-                                const HttpResponse::ptr& response, const SockStream::ptr& session) {
+int32_t NotFoundServlet::handle(const HttpRequest::ptr& request,
+                                const HttpResponse::ptr& response,
+                                const SockStream::ptr& session) {
     static const std::string BODY1 = "<html><head>\n"
                                      "<title>404 Not Found</title>\n"
                                      "</head><body>\n"
@@ -130,5 +132,4 @@ int32_t NotFoundServlet::handle(const HttpRequest::ptr& request,
     response->setBody(std::move(RSP_BODY));
     return 0;
 }
-
 }

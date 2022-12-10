@@ -1,9 +1,9 @@
 #pragma once
 
 #include <stdint.h>
+#include <boost/lexical_cast.hpp>
 #include <string>
 #include <vector>
-#include <boost/lexical_cast.hpp>
 
 namespace flexy {
 
@@ -24,14 +24,15 @@ uint64_t GetSteadyUs();
 // 获得当前Steady时钟毫秒数
 uint64_t GetSteadyMs();
 // 时间秒数 装换为 时间字符串
-std::string TimeToStr(time_t ts = time(0), const std::string& fmt = "%Y-%m-%d %H:%M:%S");
+std::string TimeToStr(time_t ts = time(0),
+                      const std::string& fmt = "%Y-%m-%d %H:%M:%S");
 // 时间字符串 转换为 时间秒数
 time_t StrToTime(const char* str, const char* fmt = "%Y-%m-%d %H:%M:%S");
-// 从 map m 中获得 key 为 k 的 value(type to V) 
-template<class V, class Map, class K>
+// 从 map m 中获得 key 为 k 的 value(type to V)
+template <class V, class Map, class K>
 V GetParamValue(const Map& m, const K& k, const V& def = V()) {
     auto it = m.find(k);
-    if(it == m.end()) {
+    if (it == m.end()) {
         return def;
     }
     try {
@@ -41,10 +42,10 @@ V GetParamValue(const Map& m, const K& k, const V& def = V()) {
     return def;
 }
 
-template<class V, class Map, class K>
+template <class V, class Map, class K>
 bool CheckGetParamValue(const Map& m, const K& k, V& v) {
     auto it = m.find(k);
-    if(it == m.end()) {
+    if (it == m.end()) {
         return false;
     }
     try {
@@ -89,7 +90,8 @@ char ToLower(char c);
 char ToUpper(char c);
 
 template <bool copy = true>
-std::conditional_t<copy, std::string, void> ToLower(std::conditional_t<copy, const std::string*, std::string*> s) {
+std::conditional_t<copy, std::string, void> ToLower(
+    std::conditional_t<copy, const std::string*, std::string*> s) {
     if constexpr (copy) {
         std::string ret(*s);
         std::transform(ret.begin(), ret.end(), ret.begin(), ::tolower);
@@ -100,7 +102,8 @@ std::conditional_t<copy, std::string, void> ToLower(std::conditional_t<copy, con
 }
 
 template <bool copy = true>
-std::conditional_t<copy, std::string, void> ToUpper(std::conditional_t<copy, const std::string*, std::string*> s) {
+std::conditional_t<copy, std::string, void> ToUpper(
+    std::conditional_t<copy, const std::string*, std::string*> s) {
     if constexpr (copy) {
         std::string ret(*s);
         std::transform(ret.begin(), ret.end(), ret.begin(), ::toupper);
@@ -114,13 +117,17 @@ std::string ToLower(std::string_view s);
 
 std::string ToUpper(std::string_view s);
 
-std::string_view Trim(std::string_view str, std::string_view delimit = "\t\r\n");
-std::string_view TrimLeft(std::string_view str, std::string_view delimit = "\t\r\n");
-std::string_view TrimRight(std::string_view str, std::string_view delimit = "\t\r\n");
-std::vector<std::string_view> Split(std::string_view s, std::string_view delim, bool keep_empty = false);
+std::string_view Trim(std::string_view str,
+                      std::string_view delimit = "\t\r\n");
+std::string_view TrimLeft(std::string_view str,
+                          std::string_view delimit = "\t\r\n");
+std::string_view TrimRight(std::string_view str,
+                           std::string_view delimit = "\t\r\n");
+std::vector<std::string_view> Split(std::string_view s, std::string_view delim,
+                                    bool keep_empty = false);
 
-inline std::vector<std::string_view> Split(std::string_view s, char delim, bool keep_empty = false) {
+inline std::vector<std::string_view> Split(std::string_view s, char delim,
+                                           bool keep_empty = false) {
     return Split(s, std::string_view(&delim, 1), keep_empty);
 }
-
 }

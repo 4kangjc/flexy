@@ -1,19 +1,19 @@
 #include "ws_session.h"
+#include "flexy/net/edian.h"
 #include "flexy/util/config.h"
 #include "flexy/util/hash_util.h"
-#include "flexy/net/edian.h"
 
 namespace flexy::http {
 
 static auto g_logger = FLEXY_LOG_NAME("system");
 
-auto g_websocket_message_max_size = Config::Lookup("websocket.message.max_size", 
-                    (uint32_t) 1024 * 1024 * 32, "websocket message max size");
+auto g_websocket_message_max_size =
+    Config::Lookup("websocket.message.max_size", (uint32_t)1024 * 1024 * 32,
+                   "websocket message max size");
 
+WSSession::WSSession(const Socket::ptr& sock, bool owner)
+    : HttpSession(sock, owner) {}
 
-WSSession::WSSession(const Socket::ptr& sock, bool owner) 
-                    : HttpSession(sock, owner) {}
-        
 HttpRequest::ptr WSSession::handleShake() {
     HttpRequest::ptr req;
     do {
@@ -31,7 +31,8 @@ HttpRequest::ptr WSSession::handleShake() {
             break;
         }
         if (req->getHeaderAs<int>("Sec-WebSocket-Version") != 13) {
-            FLEXY_LOG_INFO(g_logger) << "http header Sec-websocket-Version != 13";
+            FLEXY_LOG_INFO(g_logger)
+                << "http header Sec-websocket-Version != 13";
         }
         std::string key = req->getHeader("Sec-WebSocket-Key");
         if (key.empty()) {
@@ -65,10 +66,9 @@ HttpRequest::ptr WSSession::handleShake() {
 
 std::string WSFrameHead::toString() const {
     std::stringstream ss;
-    ss << "[WSFrameHead fin = " << fin << " rsv1 = "
-    << rsv1 << " rsv2 = " << rsv2 << " rsv3 = " << rsv3
-    << " opcode = " << opcode << " mask = " << mask
-    << " payload = " << payload << "]";
+    ss << "[WSFrameHead fin = " << fin << " rsv1 = " << rsv1
+       << " rsv2 = " << rsv2 << " rsv3 = " << rsv3 << " opcode = " << opcode
+       << " mask = " << mask << " payload = " << payload << "]";
     return ss.str();
 }
 
@@ -81,17 +81,13 @@ int32_t WSSession::sendMessage(const WSFrameMessage::ptr& msg, bool fin) {
 }
 
 int32_t WSSession::sendMessage(std::string_view msg, int32_t opcode, bool fin) {
-    return WSSendMessage(this, std::make_unique<WSFrameMessage>(opcode, msg), false, fin);
+    return WSSendMessage(this, std::make_unique<WSFrameMessage>(opcode, msg),
+                         false, fin);
 }
 
-int32_t WSSession::ping() {
-    return WSPing(this);
-}
+int32_t WSSession::ping() { return WSPing(this); }
 
-int32_t WSSession::pong() {
-    return WSPong(this);
-}
-
+int32_t WSSession::pong() { return WSPong(this); }
 
 WSFrameMessage::ptr WSRecvMessage(Stream* stream, bool client) {
     int opcode = 0;
@@ -112,14 +108,17 @@ WSFrameMessage::ptr WSRecvMessage(Stream* stream, bool client) {
                 }
                 break;
             }
-            case WSFrameHead::PONG :
+            case WSFrameHead::PONG:
                 break;
-            case WSFrameHead::CONTINUE :
-            case WSFrameHead::TEXT_FRAME : 
-            case WSFrameHead::BIN_FRAME : {
-                if (client == ws_head.mask) {       // client ^ ws_head.mask == 1 must be true 
-                    FLEXY_LOG_INFO(g_logger) << "client == ws_head.mash, "
-                    "client = " << client << ", ws_head.mask = " << ws_head.mask;
+            case WSFrameHead::CONTINUE:
+            case WSFrameHead::TEXT_FRAME:
+            case WSFrameHead::BIN_FRAME: {
+                if (client ==
+                    ws_head.mask) {  // client ^ ws_head.mask == 1 must be true
+                    FLEXY_LOG_INFO(g_logger)
+                        << "client == ws_head.mash, "
+                           "client = "
+                        << client << ", ws_head.mask = " << ws_head.mask;
                     goto close;
                 }
                 uint64_t length = 0;
@@ -133,22 +132,25 @@ WSFrameMessage::ptr WSRecvMessage(Stream* stream, bool client) {
                     uint64_t len = 0;
                     if (stream->readFixSize(&len, sizeof(len)) <= 0) {
                         goto close;
-                    } 
+                    }
                     length = byteswap(len);
                 } else {
                     length = ws_head.payload;
                 }
-                
-                if (cur_len + length >= g_websocket_message_max_size->getValue()) {
-                    FLEXY_LOG_WARN(g_logger) << "WSFrameMessage length > "
-                    << g_websocket_message_max_size->getValue() << " (" 
-                    << (cur_len + length) << ")";
+
+                if (cur_len + length >=
+                    g_websocket_message_max_size->getValue()) {
+                    FLEXY_LOG_WARN(g_logger)
+                        << "WSFrameMessage length > "
+                        << g_websocket_message_max_size->getValue() << " ("
+                        << (cur_len + length) << ")";
                     goto close;
                 }
 
                 char masking_key[4] = {0};
                 if (ws_head.mask) {
-                    if (stream->readFixSize(masking_key, sizeof(masking_key)) <= 0) {
+                    if (stream->readFixSize(masking_key, sizeof(masking_key)) <=
+                        0) {
                         goto close;
                     }
                 }
@@ -171,14 +173,17 @@ WSFrameMessage::ptr WSRecvMessage(Stream* stream, bool client) {
 
                 if (ws_head.fin) {
                     FLEXY_LOG_DEBUG(g_logger) << data;
-                    // return WSFrameMessage::ptr(new WSFrameMessage(opcode, std::move(data))); 
-                    return std::make_unique<WSFrameMessage>(opcode, std::move(data));
+                    // return WSFrameMessage::ptr(new WSFrameMessage(opcode,
+                    // std::move(data)));
+                    return std::make_unique<WSFrameMessage>(opcode,
+                                                            std::move(data));
                 }
 
                 break;
             }
-            default: 
-                FLEXY_LOG_DEBUG(g_logger) << "invalid opcode = " << ws_head.opcode;
+            default:
+                FLEXY_LOG_DEBUG(g_logger)
+                    << "invalid opcode = " << ws_head.opcode;
                 break;
         }
     } while (true);
@@ -187,7 +192,8 @@ close:
     return nullptr;
 }
 
-int32_t WSSendMessage(Stream* stream, const WSFrameMessage::ptr& msg, bool client, bool fin) {
+int32_t WSSendMessage(Stream* stream, const WSFrameMessage::ptr& msg,
+                      bool client, bool fin) {
     do {
         WSFrameHead ws_head;
         memset(&ws_head, 0, sizeof(ws_head));
@@ -230,7 +236,7 @@ int32_t WSSendMessage(Stream* stream, const WSFrameMessage::ptr& msg, bool clien
 
             if (stream->writeFixSize(masking_key, sizeof(masking_key)) <= 0) {
                 break;
-            }            
+            }
         }
 
         if (stream->writeFixSize(msg->getData().c_str(), length) <= 0) {
@@ -266,4 +272,4 @@ int32_t WSPong(Stream* stream) {
     return v;
 }
 
-}
+}  // namespace flexy::http

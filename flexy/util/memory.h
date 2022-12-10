@@ -9,10 +9,10 @@ namespace flexy {
 // 2. _Tp 的构造函数不能是 private
 // 优点
 // _Tp的构造函数可以是protected
-// template <typename _Tp, typename ..._Args> 
+// template <typename _Tp, typename ..._Args>
 // std::shared_ptr<_Tp> make_shared(_Args &&...__args) {
 //     struct EnableMakeShared : public _Tp {
-//         EnableMakeShared(_Args&&... args) 
+//         EnableMakeShared(_Args&&... args)
 //             : _Tp(std::forward<_Args>(args)...)
 //         {}
 //     };

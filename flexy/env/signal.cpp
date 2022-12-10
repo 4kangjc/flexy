@@ -31,5 +31,4 @@ void Signal::signal(int sig, detail::__task&& handler) {
     // sigfillset(&sa.sa_mask);
     // sigaction(sig, &sa, nullptr);
 }
-
 }

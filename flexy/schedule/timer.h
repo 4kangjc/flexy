@@ -17,7 +17,8 @@ public:
     // 重置定时器时间 from_now 是否从当前时间开始计算
     bool reset(uint64_t ms, bool from_now);
 private:
-    Timer(uint64_t ms, detail::__task&& cb, bool recurring, TimerManager* manager);
+    Timer(uint64_t ms, detail::__task&& cb, bool recurring,
+          TimerManager* manager);
     Timer(uint64_t next);
 private:
     bool recurring_;                                // 是否为循环定时器
@@ -39,7 +40,8 @@ public:
     // 添加定时器
     template <typename... Args>
     Timer::ptr addTimer(uint64_t ms, Args&&... args) {
-        Timer::ptr timer(new Timer(ms, detail::__task(std::forward<Args>(args)...), false, this));
+        Timer::ptr timer(new Timer(
+            ms, detail::__task(std::forward<Args>(args)...), false, this));
         WRITELOCK2(mutex_);
         addTimer(timer, lk);
         return timer;
@@ -47,7 +49,8 @@ public:
     // 添加循环定时器
     template <typename... Args>
     Timer::ptr addRecTimer(uint64_t ms, Args&&... args) {
-        Timer::ptr timer(new Timer(ms, detail::__task(std::forward<Args>(args)...), true, this));
+        Timer::ptr timer(new Timer(
+            ms, detail::__task(std::forward<Args>(args)...), true, this));
         WRITELOCK2(mutex_);
         addTimer(timer, lk);
         return timer;
@@ -55,12 +58,14 @@ public:
     // 添加条件定时器
     template <typename... Args>
     Timer::ptr addCondtionTimer(uint64_t ms, std::weak_ptr<void()> weak_cond, Args&&... args) {
-        return addTimer(ms, OnTimer, weak_cond, detail::__task(std::forward<Args>(args)...));
+        return addTimer(ms, OnTimer, weak_cond,
+                        detail::__task(std::forward<Args>(args)...));
     }
     // 添加循环条件定时器
     template <typename... Args>
     Timer::ptr addRecCondtionTimer(uint64_t ms, std::weak_ptr<void()> weak_cond, Args&&... args) {
-        return addRecTimer(ms, OnTimer, weak_cond, detail::__task(std::forward<Args>(args)...));
+        return addRecTimer(ms, OnTimer, weak_cond,
+                           detail::__task(std::forward<Args>(args)...));
     }
     // 获取下一个要执行的定时器任务的时间
     uint64_t getNextTimer();
@@ -73,7 +78,9 @@ protected:
     [[deprecated]] virtual void onTimerInsertedAtFront() = 0;
     // 注册函数
     template <typename... Args>
-    void onRefreshNearest(Args&&... args) { refreshNearest_ = detail::__task(std::forward<Args>(args)...); }
+    void onRefreshNearest(Args&&... args) {
+        refreshNearest_ = detail::__task(std::forward<Args>(args)...);
+    }
     // 将定时器添加到timers_中
     void addTimer(Timer::ptr& val, unique_lock<mutex>& lock);
     // 将定时器添加到timers_中
@@ -86,7 +93,8 @@ private:
     bool tickled_ = false;                                      // 是否触发onTimerInsertedAtFront
     uint64_t previouseTime_;                                    // 上次执行时间
 protected:
-    detail::__task refreshNearest_;                             // 当有新的定时器插入到定时器的首部,执行该函数
+    detail::__task
+        refreshNearest_;  // 当有新的定时器插入到定时器的首部,执行该函数
 private:
     static void OnTimer(std::weak_ptr<void()> weak_cond, detail::__task&& cb);
 };

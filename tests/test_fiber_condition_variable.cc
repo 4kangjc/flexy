@@ -12,7 +12,7 @@ void worker_thread() {
     FLEXY_LOG_DEBUG(g_logger) << "Worker thread begin...";
     // 等待直至 main() 发送数据
     flexy::unique_lock<decltype(m)> lk(m);
-    cv.wait(lk, [](){ return ready; });
+    cv.wait(lk, []() { return ready; });
 
     // 等待后，我们占有锁。
     FLEXY_LOG_DEBUG(g_logger) << "Worker thread is processing data";
@@ -20,7 +20,8 @@ void worker_thread() {
 
     // 发送数据回 main()
     processed = true;
-    FLEXY_LOG_DEBUG(g_logger) << "Worker thread signals data processing completed";
+    FLEXY_LOG_DEBUG(g_logger)
+        << "Worker thread signals data processing completed";
 
     // 通知前完成手动解锁，以避免等待线程才被唤醒就阻塞
     lk.unlock();
@@ -44,7 +45,7 @@ int main1() {
     // 等候 worker
     {
         std::unique_lock<decltype(m)> lk(m);
-        cv.wait(lk, []{return processed;});
+        cv.wait(lk, [] { return processed; });
     }
     FLEXY_LOG_DEBUG(g_logger) << "Back in main(), data = " << data;
 

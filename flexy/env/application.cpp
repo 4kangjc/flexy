@@ -1,17 +1,19 @@
 #include "application.h"
-#include "env.h"
 #include "daemon.h"
+#include "env.h"
+#include "flexy/schedule/worker.h"
 #include "flexy/util/config.h"
 #include "flexy/util/file.h"
-#include "flexy/schedule/worker.h"
 
 namespace flexy {
 
 static auto g_logger = FLEXY_LOG_NAME("system");
 
-static auto g_server_work_path = Config::Lookup<std::string>("server.work_path", "/apps/work/flexy", "server work path");
+static auto g_server_work_path = Config::Lookup<std::string>(
+    "server.work_path", "/apps/work/flexy", "server work path");
 
-static auto g_server_pid_file = Config::Lookup<std::string>("server.pid_file", "flexy.pid", "server pid file");
+static auto g_server_pid_file = Config::Lookup<std::string>(
+    "server.pid_file", "flexy.pid", "server pid file");
 
 struct TcpServerConf {
     std::vector<std::string> address;
@@ -23,21 +25,20 @@ struct TcpServerConf {
     std::string io_worker;
     std::string process_worker;
 
-    bool isValid() const {
-        return !address.empty();
-    }
+    bool isValid() const { return !address.empty(); }
 
     bool operator==(const TcpServerConf& other) const {
-        return name == other.name && keepalive == other.keepalive
-         && timeout == other.timeout && address == other.address
-         && type == other.type && accept_worker == other.accept_worker
-         && io_worker == other.io_worker && process_worker == other.process_worker;
+        return name == other.name && keepalive == other.keepalive &&
+               timeout == other.timeout && address == other.address &&
+               type == other.type && accept_worker == other.accept_worker &&
+               io_worker == other.io_worker &&
+               process_worker == other.process_worker;
     }
 };
 
-template<>
+template <>
 struct LexicalCastYaml<std::string, TcpServerConf> {
-    decltype(auto) operator() (const std::string& v) {
+    decltype(auto) operator()(const std::string& v) {
         YAML::Node node = YAML::Load(v);
         TcpServerConf conf;
         conf.name = node["name"].as<std::string>();
@@ -53,14 +54,13 @@ struct LexicalCastYaml<std::string, TcpServerConf> {
                 conf.address.emplace_back(node["address"][i].as<std::string>());
             }
         }
-        return conf; 
+        return conf;
     }
-    
 };
 
-template<>
+template <>
 struct LexicalCastYaml<TcpServerConf, std::string> {
-    decltype(auto) operator() (const TcpServerConf& v) {
+    decltype(auto) operator()(const TcpServerConf& v) {
         YAML::Node node;
         node["name"] = v.name;
         node["keepalive"] = v.keepalive;
@@ -78,9 +78,9 @@ struct LexicalCastYaml<TcpServerConf, std::string> {
     }
 };
 
-template<>
+template <>
 struct LexicalCastJson<std::string, TcpServerConf> {
-    decltype(auto) operator() (const std::string& v) {
+    decltype(auto) operator()(const std::string& v) {
         Json::Reader r;
         Json::Value node;
         r.parse(v, node);
@@ -103,9 +103,9 @@ struct LexicalCastJson<std::string, TcpServerConf> {
     }
 };
 
-template<>
+template <>
 struct LexicalCastJson<TcpServerConf, std::string> {
-    decltype(auto) operator() (const TcpServerConf& v) {
+    decltype(auto) operator()(const TcpServerConf& v) {
         Json::Value node;
         node["name"] = v.name;
         node["keepalive"] = v.keepalive;
@@ -123,12 +123,10 @@ struct LexicalCastJson<TcpServerConf, std::string> {
     }
 };
 
+static auto g_tcp_server_conf = Config::Lookup(
+    "servers", std::vector<TcpServerConf>(), "tcp server config");
 
-static auto g_tcp_server_conf = Config::Lookup("servers", std::vector<TcpServerConf>(), "tcp server config");   
-
-Application::Application() {
-    s_instance = this;
-}
+Application::Application() { s_instance = this; }
 
 bool Application::init(int argc, char** argv) {
     argc_ = argc;
@@ -162,52 +160,55 @@ bool Application::init(int argc, char** argv) {
         return false;
     }
 
-    auto pidfile = g_server_work_path->getValue() + "/" + g_server_pid_file->getValue();
+    auto pidfile =
+        g_server_work_path->getValue() + "/" + g_server_pid_file->getValue();
     if (FS::IsRunningPidfile(pidfile)) {
         FLEXY_LOG_ERROR(g_logger) << "server is running: " << pidfile;
         return false;
     }
-    auto conf_path = EnvMgr::GetInstance().getAbsolutePath(EnvMgr::GetInstance().get("c", "conf"));
+    auto conf_path = EnvMgr::GetInstance().getAbsolutePath(
+        EnvMgr::GetInstance().get("c", "conf"));
     FLEXY_LOG_INFO(g_logger) << "load conf path: " << conf_path;
 
     int load_type = 0;
 
     if (EnvMgr::GetInstance().has("y")) {
-        load_type |= 1; 
+        load_type |= 1;
     }
     if (EnvMgr::GetInstance().has("j")) {
         load_type |= 2;
     }
 
     switch (load_type) {
-    case 0:
-        Config::LoadFromConDir<false>(conf_path);
-        break;
-    case 1:
-        Config::LoadFromConDir<false>(conf_path);
-        break;
-    case 2:
-        Config::LoadFromConDir<true>(conf_path);
-        break;
-    case 3:
-        Config::LoadFromConDir(conf_path); 
-    default:
-        break;
+        case 0:
+            Config::LoadFromConDir<false>(conf_path);
+            break;
+        case 1:
+            Config::LoadFromConDir<false>(conf_path);
+            break;
+        case 2:
+            Config::LoadFromConDir<true>(conf_path);
+            break;
+        case 3:
+            Config::LoadFromConDir(conf_path);
+        default:
+            break;
     }
 
     if (!FS::Mkdir(g_server_work_path->getValue())) {
-        FLEXY_LOG_FATAL(g_logger) << "create work path [" << g_server_work_path->getValue()
-        << "] errno = " << errno << " errstr = " << strerror(errno);
+        FLEXY_LOG_FATAL(g_logger)
+            << "create work path [" << g_server_work_path->getValue()
+            << "] errno = " << errno << " errstr = " << strerror(errno);
     }
-    
+
     return true;
 }
 
 bool Application::run() {
     bool is_daemon = EnvMgr::GetInstance().has("d");
-    return start_daemon(argc_, argv_, [this](int argc, char** argv) {
-        return main(argc, argv);
-    }, is_daemon);
+    return start_daemon(
+        argc_, argv_,
+        [this](int argc, char** argv) { return main(argc, argv); }, is_daemon);
 }
 
 void Application::run_fiber() {
@@ -231,7 +232,8 @@ void Application::run_fiber() {
                 continue;
             }
 
-            auto result = Address::GetInterfaceAddress(std::string(a.c_str(), pos));
+            auto result =
+                Address::GetInterfaceAddress(std::string(a.c_str(), pos));
             if (result) {
                 for (auto& [x, y] : *result) {
                     auto ipaddr = std::dynamic_pointer_cast<IPAddress>(x);
@@ -251,60 +253,78 @@ void Application::run_fiber() {
         IOManager* process_worker = IOManager::GetThis();
 
         if (!i.accept_worker.empty()) {
-            accept_worker = WorkerMgr::GetInstance().getAsIOManager(i.accept_worker).get();
+            accept_worker =
+                WorkerMgr::GetInstance().getAsIOManager(i.accept_worker).get();
             if (!accept_worker) {
-                FLEXY_LOG_ERROR(g_logger) << "accept_worker: " << i.accept_worker
-                << " not exists";
+                FLEXY_LOG_ERROR(g_logger)
+                    << "accept_worker: " << i.accept_worker << " not exists";
                 exit(0);
             }
         }
 
-        if(!i.io_worker.empty()) {
-            io_worker = WorkerMgr::GetInstance().getAsIOManager(i.io_worker).get();
-            if(!io_worker) {
-                FLEXY_LOG_ERROR(g_logger) << "io_worker: " << i.io_worker
-                    << " not exists";
+        if (!i.io_worker.empty()) {
+            io_worker =
+                WorkerMgr::GetInstance().getAsIOManager(i.io_worker).get();
+            if (!io_worker) {
+                FLEXY_LOG_ERROR(g_logger)
+                    << "io_worker: " << i.io_worker << " not exists";
                 exit(0);
             }
         }
 
-        if(!i.process_worker.empty()) {
-            process_worker = WorkerMgr::GetInstance().getAsIOManager(i.process_worker).get();
-            if(!process_worker) {
-                FLEXY_LOG_ERROR(g_logger) << "process_worker: " << i.process_worker
-                    << " not exists";
+        if (!i.process_worker.empty()) {
+            process_worker =
+                WorkerMgr::GetInstance().getAsIOManager(i.process_worker).get();
+            if (!process_worker) {
+                FLEXY_LOG_ERROR(g_logger)
+                    << "process_worker: " << i.process_worker << " not exists";
                 exit(0);
             }
         }
 
         TcpServer::ptr server;
 
-        static std::unordered_map<std::string, std::function<TcpServer::ptr(int, IOManager*, IOManager*, IOManager*)>> tcp_creater = {
-            {"http", [](int keep_alive, IOManager* worker, IOManager* io_worker, IOManager* accept_worker) {
-                return std::make_shared<http::HttpServer>(keep_alive, worker, io_worker, accept_worker);
-            }},
-            {"ws", [](int keep_alive, IOManager* worker, IOManager* io_worker, IOManager* accept_worker) {
-                return std::make_shared<http::WSServer>(worker, io_worker, accept_worker);
-            }},
-            {"tcp", [](int keep_alive, IOManager* worker, IOManager* io_worker, IOManager* accept_worker) {
-                return std::make_shared<TcpServer>(worker, io_worker, accept_worker);
-            }},
-        };
-
-
+        static std::unordered_map<std::string,
+                                  std::function<TcpServer::ptr(
+                                      int, IOManager*, IOManager*, IOManager*)>>
+            tcp_creater = {
+                {"http",
+                 [](int keep_alive, IOManager* worker, IOManager* io_worker,
+                    IOManager* accept_worker) {
+                     return std::make_shared<http::HttpServer>(
+                         keep_alive, worker, io_worker, accept_worker);
+                 }},
+                {"ws",
+                 [](int keep_alive, IOManager* worker, IOManager* io_worker,
+                    IOManager* accept_worker) {
+                     return std::make_shared<http::WSServer>(worker, io_worker,
+                                                             accept_worker);
+                 }},
+                {"tcp",
+                 [](int keep_alive, IOManager* worker, IOManager* io_worker,
+                    IOManager* accept_worker) {
+                     return std::make_shared<TcpServer>(worker, io_worker,
+                                                        accept_worker);
+                 }},
+            };
 
         // if (i.type == "http") {
-        //     server = std::make_shared<http::HttpServer>(i.keepalive, process_worker, io_worker, accept_worker);
+        //     server = std::make_shared<http::HttpServer>(i.keepalive,
+        //     process_worker, io_worker, accept_worker);
         // } else if (i.type == "ws") {
-        //     server = std::make_shared<http::WSServer>(process_worker, io_worker, accept_worker);
+        //     server = std::make_shared<http::WSServer>(process_worker,
+        //     io_worker, accept_worker);
         // } else {
 
         // }
         if (auto it = tcp_creater.find(i.type); it != tcp_creater.end()) {
-            server = it->second(i.keepalive, process_worker, io_worker, accept_worker);     // 若不是httpserver, 则忽略keep-alive参数
+            server = it->second(
+                i.keepalive, process_worker, io_worker,
+                accept_worker);  // 若不是httpserver, 则忽略keep-alive参数
         } else {
-            FLEXY_LOG_ERROR(g_logger) << "invalid server type = " << i.type 
-            << LexicalCastYaml<TcpServerConf, std::string>()(i);
+            FLEXY_LOG_ERROR(g_logger)
+                << "invalid server type = " << i.type
+                << LexicalCastYaml<TcpServerConf, std::string>()(i);
             exit(0);
         }
 
@@ -316,7 +336,7 @@ void Application::run_fiber() {
                 exit(0);
             }
         }
-        
+
         if (!i.name.empty()) {
             server->setName(i.name);
         }
@@ -343,7 +363,8 @@ void Application::run_fiber() {
 
 int Application::main(int argc, char** argv) {
     FLEXY_LOG_INFO(g_logger) << "main";
-    auto pidfile = g_server_work_path->getValue() + "/" + g_server_pid_file->getValue();
+    auto pidfile =
+        g_server_work_path->getValue() + "/" + g_server_pid_file->getValue();
     std::ofstream ofs(pidfile);
     if (!ofs) {
         FLEXY_LOG_ERROR(g_logger) << "open pidfile " << pidfile << " failed";
@@ -352,11 +373,11 @@ int Application::main(int argc, char** argv) {
     ofs << getpid();
 
     IOManager iom(1, true, "main");
-    
+
     go_args(&Application::run_fiber, this);
-    iom.addRecTimer(2000, [](){});
+    iom.addRecTimer(2000, []() {});
 
     return 0;
 }
 
-}
+}  // namespace flexy

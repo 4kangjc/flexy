@@ -1,14 +1,14 @@
 #pragma once
 
+#include <mysql/mysql.h>
+#include <deque>
+#include <functional>
+#include <map>
+#include <optional>
+#include <unordered_map>
 #include "db.h"
 #include "flexy/thread/mutex.h"
 #include "flexy/util/singleton.h"
-#include <mysql/mysql.h>
-#include <functional>
-#include <optional>
-#include <map>
-#include <unordered_map>
-#include <deque>
 
 namespace flexy {
 
@@ -29,14 +29,15 @@ std::optional<MYSQL_TIME> time_t_to_mysql_time(const time_t& ts);
 class MySQLRes : public ISQLData {
 public:
     using ptr = std::shared_ptr<MySQLRes>;
-    using data_cb = std::function<bool(MYSQL_ROW row, int field_count, int row_no)>;
+    using data_cb =
+        std::function<bool(MYSQL_ROW row, int field_count, int row_no)>;
     MySQLRes(MYSQL_RES* res, int eno, const char* estr);
     MYSQL_RES* get() const { return data_.get(); }
 
     int getErrno() const override { return errno_; }
     const std::string& getErrStr() const override { return errstr_; }
 
-    bool foreach(const data_cb& cb);
+    bool foreach (const data_cb& cb);
 
     int getDataCount() override;
     int getColumnCount() override;
@@ -60,6 +61,7 @@ public:
     time_t getTime(int idx) override;
     std::string getTimeStr(int idx) override;
     bool next() override;
+
 private:
     int errno_;
     std::string errstr_;
@@ -69,14 +71,15 @@ private:
 };
 
 class MySQLStmtRes : public ISQLData {
-friend class MySQLStmt;
+    friend class MySQLStmt;
+
 public:
     typedef std::shared_ptr<MySQLStmtRes> ptr;
     static MySQLStmtRes::ptr Create(const std::shared_ptr<MySQLStmt>& stmt);
     ~MySQLStmtRes();
 
-    int getErrno() const override { return errno_;}
-    const std::string& getErrStr() const override { return errstr_;}
+    int getErrno() const override { return errno_; }
+    const std::string& getErrStr() const override { return errstr_; }
 
     int getDataCount() override;
     int getColumnCount() override;
@@ -101,9 +104,12 @@ public:
     time_t getTime(int idx) override;
     std::string getTimeStr(int idx) override;
     bool next() override;
+
 private:
-    MySQLStmtRes(const std::shared_ptr<MySQLStmt>& stmt, int eno, const std::string& errstr);
-    MySQLStmtRes(std::shared_ptr<MySQLStmt>&& stmt, int eno, const std::string& errstr);
+    MySQLStmtRes(const std::shared_ptr<MySQLStmt>& stmt, int eno,
+                 const std::string& errstr);
+    MySQLStmtRes(std::shared_ptr<MySQLStmt>&& stmt, int eno,
+                 const std::string& errstr);
     struct Data {
         Data();
         ~Data();
@@ -120,6 +126,7 @@ private:
         char* data;
         std::string name;
     };
+
 private:
     int errno_;
     std::string errstr_;
@@ -130,7 +137,8 @@ private:
 
 class MySQLManager;
 class MySQL : public IDB, public std::enable_shared_from_this<MySQL> {
-friend class MySQLManager;
+    friend class MySQLManager;
+
 public:
     using ptr = std::shared_ptr<MySQL>;
 
@@ -168,8 +176,10 @@ public:
     int getErrno() override;
     std::string getErrStr() override;
     uint64_t getInsertId();
+
 private:
     bool isNeedCheck();
+
 private:
     std::map<std::string, std::string> params_;
     std::shared_ptr<MYSQL> mysql_;
@@ -186,7 +196,8 @@ class MySQLTransaction : public ITransaction {
 public:
     using ptr = std::shared_ptr<MySQLTransaction>;
 
-    static MySQLTransaction::ptr Create(const MySQL::ptr& mysql, bool auto_commit);
+    static MySQLTransaction::ptr Create(const MySQL::ptr& mysql,
+                                        bool auto_commit);
     static MySQLTransaction::ptr Create(MySQL::ptr&& mysql, bool auto_commit);
     ~MySQLTransaction();
 
@@ -256,7 +267,10 @@ public:
     int bindNull(int idx) override;
 
     int getErrno() override { return mysql_stmt_errno(stmt_); }
-    std::string getErrStr() override { auto e = mysql_stmt_error(stmt_); return e ? e : ""; }
+    std::string getErrStr() override {
+        auto e = mysql_stmt_error(stmt_);
+        return e ? e : "";
+    }
 
     int execute() override;
     int64_t getLastInsertId() override;
@@ -265,8 +279,10 @@ public:
     MYSQL_STMT* getRaw() const { return stmt_; }
 
 private:
-    MySQLStmt(const MySQL::ptr& db, MYSQL_STMT* stmt) : mysql_(db), stmt_(stmt) {}
-    MySQLStmt(MySQL::ptr&& db, MYSQL_STMT* stmt) : mysql_(std::move(db)), stmt_(stmt) {}
+    MySQLStmt(const MySQL::ptr& db, MYSQL_STMT* stmt)
+        : mysql_(db), stmt_(stmt) {}
+    MySQLStmt(MySQL::ptr&& db, MYSQL_STMT* stmt)
+        : mysql_(std::move(db)), stmt_(stmt) {}
 
 private:
     MySQL::ptr mysql_;
@@ -274,14 +290,16 @@ private:
     std::vector<MYSQL_BIND> binds_;
 };
 
-class MySQLManager{
+class MySQLManager {
 public:
     MySQLManager();
     ~MySQLManager();
 
     MySQL::ptr get(const std::string& name);
-    void registerMySQL(const std::string& name, const std::map<std::string, std::string>& params);
-    void registerMySQL(const std::string& name, std::map<std::string, std::string>&& params);
+    void registerMySQL(const std::string& name,
+                       const std::map<std::string, std::string>& params);
+    void registerMySQL(const std::string& name,
+                       std::map<std::string, std::string>&& params);
 
     void checkConnection(uint64_t sec = 30);
 
@@ -296,13 +314,15 @@ public:
     ISQLData::ptr query(const std::string& name, const char* fmt, va_list ap);
     ISQLData::ptr query(const std::string& name, const std::string& sql);
 
-    MySQLTransaction::ptr openTransaction(const std::string& name, bool auto_commit);
+    MySQLTransaction::ptr openTransaction(const std::string& name,
+                                          bool auto_commit);
 
     template <class... Args>
     int execStmt(const std::string& name, const char* stmt, Args&&... args);
 
     template <class... Args>
-    ISQLData::ptr queryStmt(const std::string& name, const char* stmt, Args&&... args);
+    ISQLData::ptr queryStmt(const std::string& name, const char* stmt,
+                            Args&&... args);
 
 private:
     void freeMySQL(const std::string& name, MySQL* m);
@@ -346,7 +366,8 @@ ISQLData::ptr MySQL::queryStmt(const char* stmt, Args&&... args) {
 }
 
 template <class... Args>
-int MySQLManager::execStmt(const std::string& name, const char* stmt, Args&&... args) {
+int MySQLManager::execStmt(const std::string& name, const char* stmt,
+                           Args&&... args) {
     auto conn = get(name);
     if (!conn) {
         return -1;
@@ -355,7 +376,8 @@ int MySQLManager::execStmt(const std::string& name, const char* stmt, Args&&... 
 }
 
 template <class... Args>
-ISQLData::ptr MySQLManager::queryStmt(const std::string& name, const char* stmt, Args&&... args) {
+ISQLData::ptr MySQLManager::queryStmt(const std::string& name, const char* stmt,
+                                      Args&&... args) {
     auto conn = get(name);
     if (!conn) {
         return nullptr;
@@ -363,4 +385,4 @@ ISQLData::ptr MySQLManager::queryStmt(const std::string& name, const char* stmt,
     return conn->queryStmt(stmt, std::forward<Args>(args)...);
 }
 
-} // namespace flexy
+}  // namespace flexy

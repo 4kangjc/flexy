@@ -1,12 +1,11 @@
-#include "iomanager.h"
-#include "flexy/util/log.h"
-#include "flexy/net/hook.h"
 #include <iostream>
+#include "flexy/net/hook.h"
+#include "flexy/util/log.h"
+#include "iomanager.h"
 
 namespace flexy {
 
 struct __async__cin {
-
     template <typename... Args>
     static void Scan(Args&... args) {
         if (!is_hook_enable()) {
@@ -71,9 +70,7 @@ struct __async__cin {
     }
 };
 
-
 struct __async__cout {
-
     template <class... Args>
     static void Print(Args&&... args) {
         if (!is_hook_enable()) {
@@ -93,7 +90,7 @@ struct __async__cout {
             Fiber::Yield();
             ((std::cout << std::forward<Args>(args)), ...);
         }
-    } 
+    }
 
     template <class T>
     __async__cout& operator<<(T&& val) {
@@ -117,17 +114,17 @@ struct __async__cout {
         }
     }
 
-    __async__cout& operator<<(std::ostream&(*pf)(std::ostream&)) {
+    __async__cout& operator<<(std::ostream& (*pf)(std::ostream&)) {
         pf(std::cout);
         return *this;
     }
 };
 
-extern __async__cin  async_cin;
+extern __async__cin async_cin;
 extern __async__cout async_cout;
 
 static void getline(__async__cin& cin, std::string& s) {
     return cin.getline(s);
 }
 
-}
+}  // namespace flexy

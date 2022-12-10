@@ -12,28 +12,27 @@ static auto g_logger = FLEXY_LOG_NAME("system");
 static std::atomic<uint64_t> s_fiber_id {0};            // 分配协程id
 static std::atomic<uint64_t> s_fiber_count {0};         // 记录正在运行的协程数量
 
-static thread_local Fiber* t_current_fiber = nullptr;       // run fiber
-static thread_local Fiber::ptr t_main_fiber = nullptr;     // main fiber
+static thread_local Fiber* t_current_fiber = nullptr;   // run fiber
+static thread_local Fiber::ptr t_main_fiber = nullptr;  // main fiber
 
-static auto g_fiber_stack_size = Config::Lookup("fiber.stack_size", 128u * 1024u, "fiber stack size");
+static auto g_fiber_stack_size =
+    Config::Lookup("fiber.stack_size", 128u * 1024u, "fiber stack size");
 
 using StackAllocator = MallocStackAllocator;
 
-
 Fiber* MallocFiber(size_t& __first) {
     __first = __first ? __first : g_fiber_stack_size->getValue();
-    
+
     Fiber* fiber = (Fiber*)StackAllocator::Alloc(sizeof(Fiber) + __first);
     // new (fiber) Fiber(__first, std::forward<_Args>(__args)...);
     return fiber;
 }
 
-
 std::shared_ptr<Fiber> FreeFiber(Fiber* fiber) {
     return std::shared_ptr<Fiber>(fiber, [](Fiber* fiber) {
         fiber->~Fiber();
         StackAllocator::Dealloc(fiber, 0);
-    }); 
+    });
 }
 
 Fiber::Fiber() {
@@ -44,9 +43,8 @@ Fiber::Fiber() {
     FLEXY_LOG_DEBUG(g_logger) << "Fiber::Fiber main";
 }
 
-Fiber::Fiber(size_t stacksize, detail::__task&& task) 
-    : id_(++s_fiber_id), cb_(std::move(task))
-{
+Fiber::Fiber(size_t stacksize, detail::__task&& task)
+    : id_(++s_fiber_id), cb_(std::move(task)) {
     ++s_fiber_count;
     // stacksize_ = stacksize ? stacksize : g_fiber_stack_size->getValue();
     stacksize_ = stacksize;
@@ -60,7 +58,7 @@ Fiber::Fiber(size_t stacksize, detail::__task&& task)
 
 Fiber::~Fiber() {
     --s_fiber_count;
-    if (stacksize_) {                                          // 子协程
+    if (stacksize_) {  // 子协程
         FLEXY_ASSERT(state_ != EXEC);
         // StackAllocator::Dealloc(stack_, stacksize_);
     } else {
@@ -72,7 +70,6 @@ Fiber::~Fiber() {
     }
     FLEXY_LOG_DEBUG(g_logger) << "Fiber::~Fiber id = " << id_ << " total = " << s_fiber_count;
 }
-
 
 void Fiber::reset(detail::__task&& cb) {
     FLEXY_ASSERT(stack_);                            // 子协程才能重置
@@ -86,7 +83,7 @@ void Fiber::reset(detail::__task&& cb) {
 void Fiber::resume() {
     FLEXY_ASSERT(state_ == READY);
     auto caller = t_current_fiber;
-    t_current_fiber = this;             
+    t_current_fiber = this;
     state_ = EXEC;
 
     auto [ctx, self] = jump_fcontext(ctx_, caller);
@@ -96,9 +93,7 @@ void Fiber::resume() {
     t_current_fiber = caller;
 }
 
-void Fiber::yield() {
-    t_main_fiber->resume();
-}
+void Fiber::yield() { t_main_fiber->resume(); }
 
 // void Fiber::yield_callback(detail::__task&& cb) {
 //     FLEXY_ASSERT(state_ == EXEC);
@@ -108,12 +103,9 @@ void Fiber::yield() {
 
 //     // auto [ctx, self] = ontop_fcontext(t_main_fiber->ctx_, , );
 
-
 // }
 
-void Fiber::SetThis(Fiber* f) {
-    t_current_fiber = f;
-}
+void Fiber::SetThis(Fiber* f) { t_current_fiber = f; }
 
 Fiber::ptr Fiber::GetThis() {
     if (t_current_fiber) {

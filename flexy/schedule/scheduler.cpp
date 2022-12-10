@@ -5,7 +5,7 @@
 namespace flexy {
 
 static auto g_logger = FLEXY_LOG_NAME("system");
-static thread_local Scheduler* t_scheduler = nullptr;           // 线程所属的协程调度器
+static thread_local Scheduler* t_scheduler = nullptr;  // 线程所属的协程调度器
 
 Scheduler::Scheduler(size_t threads, bool use_caller, std::string_view name) : name_(name) {
     FLEXY_ASSERT(threads > 0);
@@ -33,9 +33,7 @@ Scheduler::Scheduler(size_t threads, bool use_caller, std::string_view name) : n
         }
     };
 
-    tickle_ = []() {
-        FLEXY_LOG_DEBUG(g_logger) << "tickle";
-    };
+    tickle_ = []() { FLEXY_LOG_DEBUG(g_logger) << "tickle"; };
 }
 
 Scheduler* Scheduler::GetThis() {
@@ -81,7 +79,7 @@ void Scheduler::stop() {
         tickle_();
     }
 
-    if (rootThreadId_ != -1) {                  // usercaller 调度协程执行 run()
+    if (rootThreadId_ != -1) {  // usercaller 调度协程执行 run()
         if (!stopping()) {
             run();
         }
@@ -105,7 +103,7 @@ void Scheduler::run() {
     if (GetThreadId() != rootThreadId_) {                   // 非主线程
         Fiber::GetThis();
     }
-    auto idle_fiber(fiber_make_shared([this]() { idle_(); } ));
+    auto idle_fiber(fiber_make_shared([this]() { idle_(); }));
     // auto idle_fiber(std::make_shared<Fiber>(std::bind(&Scheduler::idle, this)));
     Fiber::ptr cb_fiber;
     
@@ -120,7 +118,8 @@ void Scheduler::run() {
                 tk = std::move(tasks_.front());
                 tasks_.pop_front();
                 if (!tk)   continue;            // nullptr task continue
-                if (tk.fiber && FLEXY_UNLIKELY(tk.fiber->getState() == Fiber::EXEC)) {
+                if (tk.fiber &&
+                    FLEXY_UNLIKELY(tk.fiber->getState() == Fiber::EXEC)) {
                     tasks_.push_back(std::move(tk));
                     continue;
                 }
@@ -188,9 +187,10 @@ void Scheduler::idle() {
 
 std::ostream& Scheduler::dump(std::ostream& os) {
     os << "[Scheduler name = " << name_ << " size = " << threadCount_
-    << " active_count = " << activeThreadCount_ << " idle_count = "
-    << idleThreadCount_ << " stopping = " << stopping_ << " ]" << std::endl
-    << "    ";
+       << " active_count = " << activeThreadCount_
+       << " idle_count = " << idleThreadCount_ << " stopping = " << stopping_
+       << " ]" << std::endl
+       << "    ";
     for (size_t i = 0; i < threadIds_.size(); ++i) {
         if (i) {
             os << ", ";

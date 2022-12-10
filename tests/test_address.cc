@@ -6,9 +6,12 @@ static auto g_logger = FLEXY_LOG_ROOT();
 void testIPv6() {
     auto addr = flexy::IPv6Address::Create("2001:0db8:85a3::8a2e:0370:7334", 12345);
     FLEXY_LOG_INFO(g_logger) << "IPAddress        = " << addr->toString();
-    FLEXY_LOG_INFO(g_logger) << "broadcastAddress = " << addr->broadcastAddress(44)->toString();
-    FLEXY_LOG_INFO(g_logger) << "networkAddress   = " << addr->networkAddress(44)->toString();
-    FLEXY_LOG_INFO(g_logger) << "subnetMask       = " << addr->subnetMask(44)->toString();
+    FLEXY_LOG_INFO(g_logger)
+        << "broadcastAddress = " << addr->broadcastAddress(44)->toString();
+    FLEXY_LOG_INFO(g_logger)
+        << "networkAddress   = " << addr->networkAddress(44)->toString();
+    FLEXY_LOG_INFO(g_logger)
+        << "subnetMask       = " << addr->subnetMask(44)->toString();
 }
 
 void testUnixAddress() {
@@ -20,9 +23,12 @@ void testIpv4() {
     auto addr = flexy::IPv4Address::Create("172.17.237.213", 23);
     if (addr) {
         FLEXY_LOG_INFO(g_logger) << "IPAddress        = " << addr->toString();
-        FLEXY_LOG_INFO(g_logger) << "broadcastAddress = " << addr->broadcastAddress(20)->toString();
-        FLEXY_LOG_INFO(g_logger) << "networkAddress   = " << addr->networkAddress(20)->toString();
-        FLEXY_LOG_INFO(g_logger) << "subnetMask       = " << addr->subnetMask(20)->toString();
+        FLEXY_LOG_INFO(g_logger)
+            << "broadcastAddress = " << addr->broadcastAddress(20)->toString();
+        FLEXY_LOG_INFO(g_logger)
+            << "networkAddress   = " << addr->networkAddress(20)->toString();
+        FLEXY_LOG_INFO(g_logger)
+            << "subnetMask       = " << addr->subnetMask(20)->toString();
     }
     // auto baidu = flexy::IPAddress::Create("www.baidu.com");
     auto baidu = flexy::IPAddress::Create("103.235.46.39", 80);

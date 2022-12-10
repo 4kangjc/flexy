@@ -4,9 +4,7 @@
 
 namespace flexy::fiber {
 
-Semaphore::~Semaphore() {
-    FLEXY_ASSERT(waiters_.empty());
-}
+Semaphore::~Semaphore() { FLEXY_ASSERT(waiters_.empty()); }
 
 bool Semaphore::tryWait() {
     FLEXY_ASSERT(Scheduler::GetThis());
@@ -15,7 +13,7 @@ bool Semaphore::tryWait() {
         if (concurrency_ > 0u) {
             --concurrency_;
             return true;
-        } 
+        }
         return false;
     }
 }
@@ -37,8 +35,9 @@ void Semaphore::wait() {
 void Semaphore::post() {
     LOCK_GUARD(mutex_);
     if (!waiters_.empty()) {
-        auto&& [scheduler, fiber] = std::move(waiters_.front());    // reference
-        // auto [scheduler, fiber] = std::move(waiters_.front());   // move construct
+        auto&& [scheduler, fiber] = std::move(waiters_.front());  // reference
+        // auto [scheduler, fiber] = std::move(waiters_.front());   // move
+        // construct
         scheduler->async(std::move(fiber));
         waiters_.pop();
     } else {
@@ -46,4 +45,4 @@ void Semaphore::post() {
     }
 }
 
-} // namespace flexy
+}  // namespace flexy::fiber

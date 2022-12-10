@@ -15,8 +15,9 @@ void test_base64() {
         auto rst = flexy::base64encode(src);
         // FLEXY_LOG_INFO(g_logger) << rst;
         auto ret = flexy::base64decode(rst);
-        FLEXY_ASSERT2(ret == src, ret << " " << src 
-        << " , rst.size() == " << ret.size() << ", src.size()" << src.size());
+        FLEXY_ASSERT2(ret == src, ret << " " << src
+                                      << " , rst.size() == " << ret.size()
+                                      << ", src.size()" << src.size());
     }
 }
 

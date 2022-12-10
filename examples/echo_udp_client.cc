@@ -13,19 +13,20 @@ void run() {
         return;
     }
     auto sock = Socket::CreateUDP(addr->getFamily());
-    go [sock]() {
+    go[sock]() {
         Address::ptr addr = std::make_shared<IPv4Address>();
         FLEXY_LOG_INFO(g_logger) << "begin recv";
         while (true) {
             char buff[1024];
             int len = sock->recvFrom(buff, 1024, addr);
             if (len > 0) {
-                std::cout << std::endl << " recv: " << std::string_view(buff, len)
-                << " from: " << *addr << std::endl;
+                std::cout << std::endl
+                          << " recv: " << std::string_view(buff, len)
+                          << " from: " << *addr << std::endl;
             }
         }
     };
-    
+
     // sleep(1);
     while (true) {
         std::string line;
@@ -36,9 +37,10 @@ void run() {
             int len = sock->sendTo(line.c_str(), line.size(), addr);
             if (len < 0) {
                 int err = sock->getError();
-                FLEXY_LOG_ERROR(g_logger) << "send error err = " << err
-                << " errstr = " << strerror(err) << " len = " << len
-                << " addr = " << *addr << " sock = " << sock;
+                FLEXY_LOG_ERROR(g_logger)
+                    << "send error err = " << err
+                    << " errstr = " << strerror(err) << " len = " << len
+                    << " addr = " << *addr << " sock = " << sock;
             } else {
                 FLEXY_LOG_INFO(g_logger) << "send " << line << " len = " << len;
             }

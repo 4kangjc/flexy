@@ -28,7 +28,8 @@ public:
     // 停止协程调度器
     void stop();
     // 将任务加入到协程调度器中运行
-    template <typename... _Args, typename = std::enable_if_t<std::is_invocable_v<_Args&&...>>>
+    template <typename... _Args,
+              typename = std::enable_if_t<std::is_invocable_v<_Args&&...>>>
     void async(_Args&&... __args) {
         static_assert(sizeof...(__args) > 0);
         bool need_tickle = false;
@@ -42,7 +43,8 @@ public:
         }
     }
 
-    template <typename _Fiber, typename = std::enable_if_t<is_fiber_ptr_v<_Fiber>>>
+    template <typename _Fiber,
+              typename = std::enable_if_t<is_fiber_ptr_v<_Fiber>>>
     void async(_Fiber&& fiber) {
         bool need_tickle = false;
         {
@@ -98,20 +100,23 @@ public:
     void onTickle(Args&&... args) { tickle_ = __task(std::forward<Args>(args)...); }
 
     std::ostream& dump(std::ostream& os);
+
 private:
     // 可执行对象
     struct Task {
-        Fiber::ptr fiber  = nullptr;
+        Fiber::ptr fiber = nullptr;
         detail::__task cb = nullptr;
 
-        template <typename... _Args, typename = std::enable_if_t<std::is_invocable_v<_Args&&...>>>
-        Task(_Args&&... args) : cb(std::forward<_Args>(args)...) { }
+        template <typename... _Args,
+                  typename = std::enable_if_t<std::is_invocable_v<_Args&&...>>>
+        Task(_Args&&... args) : cb(std::forward<_Args>(args)...) {}
 
-        template <typename _Fiber, typename = std::enable_if_t<is_fiber_ptr_v<_Fiber>>>
-        Task(_Fiber&& fb) : fiber(std::forward<_Fiber>(fb)) { }
+        template <typename _Fiber,
+                  typename = std::enable_if_t<is_fiber_ptr_v<_Fiber>>>
+        Task(_Fiber&& fb) : fiber(std::forward<_Fiber>(fb)) {}
 
         Task(std::nullptr_t = nullptr) {}
-        
+
         void reset() {
             fiber = nullptr;
             cb = nullptr;
@@ -134,8 +139,8 @@ protected:
     bool hasIdleThreads() const { return idleThreadCount_ > 0; }
 private:    
     mutable mutex mutex_;                                                      // Mutex       
-    std::vector<Thread::ptr> threads_;                                         // 线程池                                    
-    std::deque<Task> tasks_;                                                   // 待执行的任务队列                                      
+    std::vector<Thread::ptr> threads_;                                         // 线程池
+    std::deque<Task> tasks_;  // 待执行的任务队列
     std::string name_;                                                         // 调度器名称        
 protected:
     std::vector<int> threadIds_;                                               // 线程id数组
@@ -144,17 +149,20 @@ protected:
     std::atomic<size_t> idleThreadCount_   = {0};                              // 空闲线程数量
     bool stopping_ = true;                                                     // 是否正在停止
     int rootThreadId_ = 0;                                                     // 主线程id(use_caller)
-    detail::__task idle_;                                                      // 协程无任务调度时执行idle协程
-    detail::__task tickle_;                                                    // 通知调度器有任务了
+    detail::__task idle_;    // 协程无任务调度时执行idle协程
+    detail::__task tickle_;  // 通知调度器有任务了
 };
 
-// 生命周期开始： 将当前协程切换到 target 协程调度器中执行 生命周期结束： 切换回最初的协程调度器中执行
+// 生命周期开始： 将当前协程切换到 target 协程调度器中执行 生命周期结束：
+// 切换回最初的协程调度器中执行
 class SchedulerSwitcher : public noncopyable {
 public:
     SchedulerSwitcher(Scheduler* target);
     ~SchedulerSwitcher();
+
 private:
     static void SwitchTo(Scheduler* target);
+
 private:
     Scheduler* caller_;
 };

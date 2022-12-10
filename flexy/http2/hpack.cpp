@@ -7,15 +7,14 @@ namespace flexy::http2 {
 static auto g_logger = FLEXY_LOG_NAME("system");
 
 static constexpr std::array<std::string_view, 8> s_index_type_strings = {
-        "INDEXED",
-        "WITH_INDEXING_INDEXED_NAME",
-        "WITH_INDEXING_NEW_NAME",
-        "WITHOUT_INDEXING_INDEXED_NAME",
-        "WITHOUT_INDEXING_NEW_NAME",
-        "NEVER_INDEXED_INDEXED_NAME",
-        "NEVER_INDEXED_NEW_NAME",
-        "ERROR"
-};
+    "INDEXED",
+    "WITH_INDEXING_INDEXED_NAME",
+    "WITH_INDEXING_NEW_NAME",
+    "WITHOUT_INDEXING_INDEXED_NAME",
+    "WITHOUT_INDEXING_NEW_NAME",
+    "NEVER_INDEXED_INDEXED_NAME",
+    "NEVER_INDEXED_NEW_NAME",
+    "ERROR"};
 
 std::string_view IndexTypeToSring(IndexType type) {
     auto v = static_cast<uint8_t>(type);
@@ -27,13 +26,13 @@ std::string_view IndexTypeToSring(IndexType type) {
 }
 
 std::string HeaderField::toString() const {
-    return fmt::format("[header type = {} h_name = {} h_value = {} index = {} name = {} value = {}]",
-                       IndexTypeToSring(type), h_name, h_value, index, name, value);
+    return fmt::format(
+        "[header type = {} h_name = {} h_value = {} index = {} name = {} value "
+        "= {}]",
+        IndexTypeToSring(type), h_name, h_value, index, name, value);
 }
 
-HPack::HPack(DynamicTable &table)
-    : table_(table)
-{}
+HPack::HPack(DynamicTable &table) : table_(table) {}
 
 std::string HPack::ReadString(const ByteArray::ptr &ba) {
     uint8_t type = ba->readFuint8();
@@ -42,7 +41,7 @@ std::string HPack::ReadString(const ByteArray::ptr &ba) {
     if (len) {
         data.resize(len);
         ba->read(data.data(), len);
-        if (type & 0x80) {              // 标志位 'H' 指示字符串的八位字节是否经过霍夫曼编码
+        if (type & 0x80) {  // 标志位 'H' 指示字符串的八位字节是否经过霍夫曼编码
             std::string out;
             huffman::DecodeString(data, out);
             return out;
@@ -51,7 +50,8 @@ std::string HPack::ReadString(const ByteArray::ptr &ba) {
     return data;
 }
 
-int HPack::WriteString(const ByteArray::ptr &ba, const std::string &str, bool h) {
+int HPack::WriteString(const ByteArray::ptr &ba, const std::string &str,
+                       bool h) {
     int pos = ba->getPosition();
     if (h) {
         std::string new_str;
@@ -76,22 +76,28 @@ int HPack::parse(const ByteArray::ptr &ba, int length) {
     while (parsed < length) {
         HeaderField header;
         uint8_t type = ba->readFuint8();
-        if (type & 0x80) {                  // 索引 header 字段以 1 位模式 “1” 开头
+        if (type & 0x80) {  // 索引 header 字段以 1 位模式 “1” 开头
             uint32_t idx = ReadVarInt<7>(ba, type);
             header.type = IndexType::INDEXED;
             header.index = idx;
         } else {
-            if (type & 0x40) {           // 带增量索引的字面 header 字段 以 “01” 2 位模式开头
+            if (type &
+                0x40) {  // 带增量索引的字面 header 字段 以 “01” 2 位模式开头
                 uint32_t idx = ReadVarInt<6>(ba, type);
-                header.type = idx > 0 ? IndexType::WITH_INDEXING_INDEXED_NAME : IndexType::WITH_INDEXING_NEW_NAME;
+                header.type = idx > 0 ? IndexType::WITH_INDEXING_INDEXED_NAME
+                                      : IndexType::WITH_INDEXING_NEW_NAME;
                 header.index = idx;
-            } else if ((type & 0xf0) == 0) {    // 不带索引的字面 header 字段  以 “0000” 4 位模式开头
+            } else if ((type & 0xf0) == 0) {  // 不带索引的字面 header 字段  以
+                                              // “0000” 4 位模式开头
                 uint32_t idx = ReadVarInt<4>(ba, type);
-                header.type = idx > 0 ? IndexType::WITHOUT_INDEXING_INDEXED_NAME : IndexType::WITHOUT_INDEXING_NEW_NAME;
+                header.type = idx > 0 ? IndexType::WITHOUT_INDEXING_INDEXED_NAME
+                                      : IndexType::WITHOUT_INDEXING_NEW_NAME;
                 header.index = idx;
-            } else if (type & 0x10) {           // 从不索引的字面 header 字段 以 “0001” 4 位模式开
+            } else if (type & 0x10) {  // 从不索引的字面 header 字段 以 “0001” 4
+                                       // 位模式开
                 uint32_t idx = ReadVarInt<4>(ba, type);
-                header.type = idx > 0 ? IndexType::NEVER_INDEXED_INDEXED_NAME : IndexType::NEVER_INDEXED_NEW_NAME;
+                header.type = idx > 0 ? IndexType::NEVER_INDEXED_INDEXED_NAME
+                                      : IndexType::NEVER_INDEXED_NEW_NAME;
                 header.index = idx;
             } else {
                 return -1;
@@ -140,7 +146,7 @@ int HPack::Pack(HeaderField *header, const ByteArray::ptr &ba) {
             break;
         }
         case IndexType::WITH_INDEXING_NEW_NAME: {
-            WriteVarInt<6, true>(ba, header->index);        // header->index == 0
+            WriteVarInt<6, true>(ba, header->index);  // header->index == 0
             WriteString(ba, header->name, header->h_name);
             WriteString(ba, header->value, header->h_value);
             break;
@@ -180,7 +186,8 @@ int HPack::pack(HeaderField *header, const ByteArray::ptr &ba) {
     return ret;
 }
 
-int HPack::pack(const std::vector<std::pair<std::string, std::string>> &headers, std::string &out) {
+int HPack::pack(const std::vector<std::pair<std::string, std::string>> &headers,
+                std::string &out) {
     auto ba = std::make_shared<ByteArray>();
     int rt = pack(headers, ba);
     ba->setPosition(0);
@@ -188,9 +195,10 @@ int HPack::pack(const std::vector<std::pair<std::string, std::string>> &headers,
     return rt;
 }
 
-int HPack::pack(const std::vector<std::pair<std::string, std::string>> &headers, const ByteArray::ptr &ba) {
+int HPack::pack(const std::vector<std::pair<std::string, std::string>> &headers,
+                const ByteArray::ptr &ba) {
     int rt = 0;
-    for (auto& [x, y] : headers) {
+    for (auto &[x, y] : headers) {
         HeaderField h;
         auto [idx, ok] = table_.findPair(x, y);
         if (ok) {
@@ -200,7 +208,7 @@ int HPack::pack(const std::vector<std::pair<std::string, std::string>> &headers,
             h.type = IndexType::WITH_INDEXING_INDEXED_NAME;
             h.index = idx;
             h.h_value = huffman::ShouldEncode(y);
-            h.name = x;     // headers.push_back 需要
+            h.name = x;  // headers.push_back 需要
             h.value = y;
             table_.update(x, y);
         } else {
@@ -221,10 +229,10 @@ int HPack::pack(const std::vector<std::pair<std::string, std::string>> &headers,
 std::string HPack::toString() const {
     auto ret = fmt::format("[HPack size = {}]", headers_.size());
     int i = 0;
-    for (auto& header : headers_) {
+    for (auto &header : headers_) {
         ret += fmt::format("\t{}\t:\t{}", i++, header.toString());
     }
     return ret;
 }
 
-} // namespace flexy http2
+}  // namespace flexy::http2

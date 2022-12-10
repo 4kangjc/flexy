@@ -457,24 +457,28 @@ void LogFormatter::init() {
     if (!nstr.empty()) {
         vec.emplace_back(nstr, "", 0);
     }
-    static std::unordered_map<std::string, std::function<FormatItem::ptr(std::string_view)>> s_format_items = {
-    #define XX(str, C) \
-        {#str, [](std::string_view fmt) { return std::make_shared<C>(fmt); } }
-        XX(m, MessageFormatItem),           // %m 消息体
-        XX(p, LevelFormatItem),             // %p level
-        XX(r, ElapseFormatItem),            // %r 启动后的时间
-        XX(c, NameFormatItem),              // %c:日志名称
-        XX(t, ThreadIdFormatItem),          // %t 线程id
-        XX(n, NewLineFormatItem),           // %n 回车换行
-        XX(d, DateTimeFormatItem),          // %d 时间
-        XX(f, FilenameFormatItem),          // %f 文件名
-        XX(l, LineFormatItem),              // %l 行号
-        XX(u, FuncnameFormatItem),          // %u 函数名
-        XX(T, TabFormatItem),               // %T tab
-        XX(F, FiberIdFormatItem),           // %F 协程id
-        XX(N, ThreadNameFormatItem),        // %N 线程名称
-    #undef XX
-    };
+    static std::unordered_map<std::string,
+                              std::function<FormatItem::ptr(std::string_view)>>
+        s_format_items = {
+#define XX(str, C)                                                          \
+    {                                                                       \
+#str, [](std::string_view fmt) { return std::make_shared<C>(fmt); } \
+    }
+            XX(m, MessageFormatItem),     // %m 消息体
+            XX(p, LevelFormatItem),       // %p level
+            XX(r, ElapseFormatItem),      // %r 启动后的时间
+            XX(c, NameFormatItem),        // %c:日志名称
+            XX(t, ThreadIdFormatItem),    // %t 线程id
+            XX(n, NewLineFormatItem),     // %n 回车换行
+            XX(d, DateTimeFormatItem),    // %d 时间
+            XX(f, FilenameFormatItem),    // %f 文件名
+            XX(l, LineFormatItem),        // %l 行号
+            XX(u, FuncnameFormatItem),    // %u 函数名
+            XX(T, TabFormatItem),         // %T tab
+            XX(F, FiberIdFormatItem),     // %F 协程id
+            XX(N, ThreadNameFormatItem),  // %N 线程名称
+#undef XX
+        };
 
 
     for (auto& [str, format, type] : vec) {
@@ -483,7 +487,8 @@ void LogFormatter::init() {
         } else {
             auto it = s_format_items.find(str);
             if (it == s_format_items.end()) {
-                items_.push_back(std::make_shared<StringFormatItem>("<<error_format % " + str + ">>"));
+                items_.push_back(std::make_shared<StringFormatItem>(
+                    "<<error_format % " + str + ">>"));
                 error_ = true;
             } else {
                 items_.push_back(it->second(format));
@@ -830,7 +835,7 @@ struct LogIniter {
             for (auto& a : i.appenders) {
                 LogAppender::ptr ap;
                 switch (a.type) {
-                    case 1 : 
+                    case 1 :
                         ap = std::make_shared<FileLogAppender>(a.fist);
                         break;
                     case 2 :

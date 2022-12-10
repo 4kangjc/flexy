@@ -1,8 +1,8 @@
 #pragma once
 
-#include "semaphore.h"
-#include "flexy/util/task.h"
 #include <memory>
+#include "flexy/util/task.h"
+#include "semaphore.h"
 
 namespace flexy {
 
@@ -36,6 +36,7 @@ public:
     static uint64_t GetStartTime();
     // 返回当前线程真实id
     static pid_t GetThreadId();
+
 private:
     static void* run(void* arg);                 // 线程真正执行函数
 private:

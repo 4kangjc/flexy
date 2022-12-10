@@ -1,9 +1,9 @@
 #pragma once
-#include <map>
-#include <sstream>
-#include <cstring>
-#include <memory>
 #include <boost/lexical_cast.hpp>
+#include <cstring>
+#include <map>
+#include <memory>
+#include <sstream>
 
 namespace flexy::http {
 
@@ -190,7 +190,8 @@ public:
     bool isClose() const { return close_; }
     void setClose(bool v) { close_ = v; }
 
-    std::string getHeader(const std::string& key, const std::string& def = "") const;
+    std::string getHeader(const std::string& key,
+                          const std::string& def = "") const;
     void setHeader(const std::string& key, const std::string& val);
     void delHeader(const std::string& key);
 
@@ -210,14 +211,15 @@ public:
         dump(ss);
         return ss.str();
     }
-private:
-    HttpStatus status_;                     // 响应状态码
-    uint8_t version_;                       // 版本
-    bool close_;                            // 是否自动关闭
 
-    std::string body_;                      // 响应消息体
-    std::string reason_;                    // 响应原因
-    mutable MapType headers_;               // 响应头部报文
+private:
+    HttpStatus status_;  // 响应状态码
+    uint8_t version_;    // 版本
+    bool close_;         // 是否自动关闭
+
+    std::string body_;         // 响应消息体
+    std::string reason_;       // 响应原因
+    mutable MapType headers_;  // 响应头部报文
 };
 
 // Htpp请求报文
@@ -228,8 +230,8 @@ public:
 
     HttpRequest(uint8_t version = 0x11, bool close = true);
 
-    std::unique_ptr<HttpResponse> createResponse() { 
-        return std::make_unique<HttpResponse>(version_, close_); 
+    std::unique_ptr<HttpResponse> createResponse() {
+        return std::make_unique<HttpResponse>(version_, close_);
     }
 
     HttpMethod getMehod() const { return method_; }
@@ -278,8 +280,8 @@ public:
     bool hasCookie(const std::string& key, std::string* val = nullptr);
 
     template <typename T>
-    std::pair<typename MapType::iterator, bool> 
-    try_emplaceHeader(const std::string& key, T&& val) {
+    std::pair<typename MapType::iterator, bool> try_emplaceHeader(
+        const std::string& key, T&& val) {
         return headers_.try_emplace(key, std::forward<T>(val));
     }
 
@@ -326,9 +328,9 @@ private:
     uint8_t version_;                       // Http 版本
     bool close_;                            // 是否自动关闭
 
-    uint8_t parseParmFlag_;                 // 
+    uint8_t parseParmFlag_;                 //
 
-    uint32_t streamId_ = 0;                 // http2 流id
+    uint32_t streamId_ = 0;  // http2 流id
 
     std::string path_;                      // 请求路径
     std::string query_;                     // 请求参数
@@ -348,4 +350,4 @@ inline std::ostream& operator<<(std::ostream& os, const HttpResponse& rsp) {
     return rsp.dump(os);
 }
 
-} // namespace flexy http
+}  // namespace flexy::http

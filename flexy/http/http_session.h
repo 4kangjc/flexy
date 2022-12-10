@@ -13,4 +13,4 @@ public:
     int sendResponse(const HttpResponse::ptr& rsp); 
 };
 
-} // namespace flexy http
+}  // namespace flexy::http

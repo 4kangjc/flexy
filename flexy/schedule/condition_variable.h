@@ -2,9 +2,9 @@
 
 #include "flexy/util/noncopyable.h"
 // #include "flexy/thread/mutex.h"
-#include "mutex.h"
-#include <deque>
 #include <condition_variable>
+#include <deque>
+#include "mutex.h"
 
 namespace flexy {
 
@@ -21,7 +21,7 @@ public:
 
     void notify_one() noexcept;
     void notify_all() noexcept;
-    // wait std::mutex 
+    // wait std::mutex
     void wait(unique_lock<flexy::mutex>& __lock) noexcept;
     // wait fiber::mutex
     void wait(unique_lock<mutex>& __lock) noexcept;
@@ -32,9 +32,10 @@ public:
             wait(__lock);
         }
     }
+
 private:
     mutable Spinlock mutex_;
-    std::deque<std::pair<Scheduler*, Fiber::ptr>> waiters_;    
+    std::deque<std::pair<Scheduler*, Fiber::ptr>> waiters_;
 };
 
-} // namespace flexy::fiber
+}  // namespace flexy::fiber
