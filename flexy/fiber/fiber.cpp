@@ -37,7 +37,7 @@ std::shared_ptr<Fiber> FreeFiber(Fiber* fiber) {
 
 Fiber::Fiber() {
     state_ = EXEC;
-    SetThis(this);
+    t_current_fiber = this;
 
     ++s_fiber_count;
     FLEXY_LOG_DEBUG(g_logger) << "Fiber::Fiber main";
@@ -67,9 +67,9 @@ Fiber::~Fiber() {
                       "m_state = " << state_);  // 主协程一定在运行
 
         Fiber* cur = t_current_fiber;
-        FLEXY_ASSERT(cur ==
-                     this);  // 主协程最后析构，此时运行的协程一定是主协程
-        SetThis(nullptr);
+        // 主协程最后析构，此时运行的协程一定是主协程
+        FLEXY_ASSERT(cur == this);
+        t_current_fiber = nullptr;
     }
     FLEXY_LOG_DEBUG(g_logger)
         << "Fiber::~Fiber id = " << id_ << " total = " << s_fiber_count;
@@ -131,8 +131,6 @@ void Fiber::yield_callback(detail::__task&& cb) {
         static_cast<Fiber*>(self)->state_ = READY;
     t_current_fiber = data.caller;
 }
-
-void Fiber::SetThis(Fiber* f) { t_current_fiber = f; }
 
 Fiber::ptr Fiber::GetThis() {
     if (t_current_fiber) {

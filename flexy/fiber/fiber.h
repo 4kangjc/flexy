@@ -63,7 +63,6 @@ public:
     uint64_t getId() const { return id_; }     // 返回协程id
     State getState() const { return state_; }  // 返回协程状态
 
-    static void SetThis(Fiber*);                        // 设置当前协程
     static Fiber::ptr GetThis();                        // 返回当前协程
     static void Yield() { return GetThis()->yield(); }  // 让出当前协程的执行权
     static uint64_t TotalFibers();     // 返回当前协程的总数量
