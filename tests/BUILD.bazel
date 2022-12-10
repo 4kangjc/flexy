@@ -20,9 +20,19 @@ cc_test(
     copts = FLEXY_COPTS,
 )
 
+# cc_test(
+#     name = "test_file",
+#     srcs = ["test_file.cc"],
+#     deps = [
+#         "//:flexy",
+#         "@com_google_googletest//:gtest",
+#     ],
+#     copts = FLEXY_COPTS,
+# )
+
 cc_test(
-    name = "test_file",
-    srcs = ["test_file.cc"],
+    name = "test_fiber",
+    srcs = ["test_fiber.cc"],
     deps = [
         "//:flexy",
         "@com_google_googletest//:gtest",

@@ -94,19 +94,42 @@ void Fiber::resume() {
     auto [ctx, self] = _fl_jump_fcontext(ctx_, caller);
 
     ctx_ = ctx;
-    static_cast<Fiber*>(self)->state_ = READY;
+    if (self)
+        static_cast<Fiber*>(self)->state_ = READY;
     t_current_fiber = caller;
 }
 
 void Fiber::yield() { t_main_fiber->resume(); }
 
-void Fiber::yield_callback(detail::__task&& cb) {
-    //     FLEXY_ASSERT(state_ == EXEC);
-    //     // FLEXY_ASSERT()
-    //     t_current_fiber = t_main_fiber.get();
-    //     t_main_fiber->state_ = EXEC;
+struct yield_callback_data {
+    detail::__task callback;
+    Fiber* caller;
+};
 
-    //     // auto [ctx, self] = ontop_fcontext(t_main_fiber->ctx_, , );
+transfer_t ontop_callback(transfer_t from) {
+    auto data = static_cast<yield_callback_data*>(from.data);
+    data->callback();
+
+    return {.fctx = from.fctx, .data = data->caller};
+}
+
+void Fiber::yield_callback(detail::__task&& cb) {
+    FLEXY_ASSERT(state_ == EXEC);
+
+    yield_callback_data data{.callback = std::move(cb),
+                             .caller = t_current_fiber};
+
+    FLEXY_ASSERT(t_current_fiber != t_main_fiber.get());
+    t_current_fiber = t_main_fiber.get();
+    t_main_fiber->state_ = EXEC;
+
+    auto [ctx, self] =
+        _fl_ontop_fcontext(t_main_fiber->ctx_, &data, ontop_callback);
+
+    t_main_fiber->ctx_ = ctx;
+    if (self)
+        static_cast<Fiber*>(self)->state_ = READY;
+    t_current_fiber = data.caller;
 }
 
 void Fiber::SetThis(Fiber* f) { t_current_fiber = f; }
@@ -122,6 +145,16 @@ Fiber::ptr Fiber::GetThis() {
 }
 
 uint64_t Fiber::TotalFibers() { return s_fiber_count; }
+
+void Fiber::_M_return() const {
+    FLEXY_ASSERT2((state_ == Fiber::TERM) || (state_ == EXCEPT),
+                  "state = " << state_);
+
+    t_current_fiber = t_main_fiber.get();
+    t_main_fiber->state_ = EXEC;
+
+    _fl_jump_fcontext(t_main_fiber->ctx_, nullptr);
+}
 
 void Fiber::MainFunc(transfer_t t) {
     auto&& cur = GetThis();
@@ -148,7 +181,9 @@ void Fiber::MainFunc(transfer_t t) {
 
     auto raw_ptr = cur.get();
     cur = nullptr;
-    raw_ptr->yield();
+
+    // raw_ptr->yield();   // failed, state will be ready, use _M_return
+    raw_ptr->_M_return();
 
     FLEXY_ASSERT2(false,
                   "never reach fiber id = " + std::to_string(raw_ptr->getId()));

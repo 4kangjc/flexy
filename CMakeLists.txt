@@ -80,7 +80,7 @@ set(LIB_SRC
     # flexy/http2/stream.cpp 
     # flexy/http2/http2_stream.cpp 
     # flexy/http2/http2_server.cpp
-    # flexy/fiber/condition_variable.cpp
+    flexy/fiber/condition_variable.cpp
 )
 
 list(APPEND LIB_SRC ${fcontext})

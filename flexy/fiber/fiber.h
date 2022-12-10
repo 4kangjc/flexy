@@ -49,7 +49,7 @@ public:
     template <class... _Args,
               typename = std::enable_if_t<std::is_invocable_v<_Args&&...>>>
     void reset(_Args&&... __args) {
-        return reset(__task(std::forward<_Args>(__args)...));
+        return reset(detail::__task(std::forward<_Args>(__args)...));
     }
 
     template <class... _Args,

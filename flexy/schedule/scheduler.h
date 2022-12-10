@@ -126,13 +126,13 @@ private:
 
 protected:
     // 通知调度器有任务了
-    [[deprecated]] virtual void tickle();
+    virtual void tickle();
     // 协程调度实体函数
     void run();
     // 返回是否可以停止
     virtual bool stopping();
-    // 协程无任务调度时执行idle协程 
-    [[deprecated]]  virtual void idle();
+    // 协程无任务调度时执行idle协程
+    virtual void idle();
     // 设置当前协程调度器
     void setThis();
     // 是否有空闲线程

@@ -217,7 +217,8 @@ public:
 };
 
 // using __task = __task_function;          // 缺点是 std::function must be
-// CopyConstructible using __task = __task_virtual;              // 缺点是
+// CopyConstructible
+// using __task = __task_virtual;              // 缺点是
 // 使用了虚函数,可能会性能会稍微下降
 using __task = __task_template;
 // using __task = __task_Function;          // 没有提供拷贝构造和拷贝赋值
