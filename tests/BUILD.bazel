@@ -1,0 +1,21 @@
+load("//bazel/config:copt.bzl", "FLEXY_COPTS")
+
+cc_test(
+    name = "test_function",
+    srcs = ["test_function.cc"],
+    deps = [
+        "//:flexy",
+        "@com_google_googletest//:gtest",
+    ],
+    copts = FLEXY_COPTS,
+)
+
+cc_test(
+    name = "test_task",
+    srcs = ["test_task.cc"],
+    deps = [
+        "//:flexy",
+        "@com_google_googletest//:gtest",
+    ],
+    copts = FLEXY_COPTS,
+)

@@ -25,7 +25,7 @@ jobs:
 
     - name: Test
       working-directory: ${{github.workspace}}
-      run: bazel build --action_env=CXX=g++-${{matrix.gcc_version}} --action_env=CC=gcc-${{matrix.gcc_version}} --test_output=errors ...
+      run: bazel test --action_env=CXX=g++-${{matrix.gcc_version}} --action_env=CC=gcc-${{matrix.gcc_version}} --test_output=errors ...
 
   build_on_22_04:
     strategy:
@@ -47,4 +47,4 @@ jobs:
 
     - name: Test
       working-directory: ${{github.workspace}}
-      run: bazel build --action_env=CXX=g++-${{matrix.gcc_version}} --action_env=CC=gcc-${{matrix.gcc_version}} --test_output=errors ...
+      run: bazel test --action_env=CXX=g++-${{matrix.gcc_version}} --action_env=CC=gcc-${{matrix.gcc_version}} --test_output=errors ...

@@ -1,6 +1,6 @@
-#include <flexy/util/log.h>
-#include <flexy/util/task.h>
 #include <gtest/gtest.h>
+#include "flexy/util/log.h"
+#include "flexy/util/task.h"
 
 static auto&& g_logger = FLEXY_LOG_ROOT();
 

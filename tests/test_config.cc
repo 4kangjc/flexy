@@ -176,7 +176,7 @@ void test_loadfile() {
 
 
 int main() {
-    // test_config();
+    test_config();
     // test_person();
-    test_loadfile();
+    // test_loadfile();
 }

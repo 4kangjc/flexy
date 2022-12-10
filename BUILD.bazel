@@ -1,20 +1,10 @@
+load("//bazel/config:copt.bzl", "FLEXY_COPTS")
+
 config_setting(
     name = "flexy_config_with_json",
     define_values = {"FLEXY_JSON": "true"},
     visibility = ["//visibility:public"],
 )
-
-FLEXY_COPTS = [
-    "-rdynamic",
-    "-ggdb",
-    "-std=c++17",
-    "-Wall",
-    "-Werror",
-    "-Wno-deprecated",
-    "-Wno-unused-function",
-    "-Wno-builtin-macro-redefined",
-    "-Wno-deprecated-declarations",
-]
 
 cc_library(
     name = "flexy",
@@ -29,7 +19,10 @@ cc_library(
         "@boringssl//:crypto",
     ],
     linkopts = [
-        "-lpthread", 
+        "-ldl",
+        "-lpthread",
+        "-lsqlite3",
+        "-lmysqlclient",
     ],
     copts = FLEXY_COPTS,
     defines = select({
