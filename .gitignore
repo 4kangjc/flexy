@@ -11,9 +11,7 @@
 #忽略ragel编译出来的文件
 # *.rl.cpp
 #忽略二进制文件
-/bin/*
-
-!/bin/conf/
+/**/bin/*
 
 #忽略txt目录下文件 存放log日志和yaml配置文件
 /txt/*

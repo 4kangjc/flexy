@@ -139,5 +139,5 @@ flexy_add_executable(http_server "examples/http_server.cc" "${LIBS}")
 # flexy_add_executable(http2_server "examples/http2_server.cc" "${LIBS}")
 flexy_add_executable(fiber "examples/fiber.cc" "${LIBS}")
 
-SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
+SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/output/bin)
+SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/output/lib)
