@@ -1,11 +1,38 @@
 cmake_minimum_required(VERSION 3.2)
-project(flexy)
+project(flexy CXX C ASM)
 
 include (cmake/utils.cmake)
 
-set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O0 -ggdb -std=c++17 -Wall -Wno-deprecated -Werror -Wno-unused-function -Wno-builtin-macro-redefined -Wno-deprecated-declarations")
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O0 -ggdb -Wall -Wno-deprecated -Werror -Wno-unused-function -Wno-builtin-macro-redefined -Wno-deprecated-declarations")
 
 include_directories(./)
+
+file(GLOB fcontext "flexy/fiber/internal/x86_64/*.S")
+file(GLOB fiber "flexy/fiber/*.cpp")
+file(GLOB thread "flexy/thread/*.cpp")
+file(GLOB schedule "flexy/schedule/*.cpp")
+file(GLOB net "flexy/net/*.cpp")
+file(GLOB http "flexy/http/*.cpp")
+file(GLOB db "flexy/db/*.cpp")
+file(GLOB stream "flexy/stream/*.cpp")
+file(GLOB http2 "flexy/http2/*.cpp")
+file(GLOB util "flexy/util/*.cpp")
+file(GLOB env "flexy/env/*.cpp")
+
+# set(LIB_SRC
+#     ${fcontext}
+#     ${fiber}
+#     ${thread}
+#     ${schedule}
+#     ${net}
+#     ${http}
+#     ${db}
+#     ${stream}
+#     ${http2}
+#     ${util}
+#     ${env}
+# )
 
 set(LIB_SRC
     flexy/thread/thread.cpp
@@ -56,6 +83,8 @@ set(LIB_SRC
     # flexy/fiber/condition_variable.cpp
 )
 
+list(APPEND LIB_SRC ${fcontext})
+
 ragelmaker(flexy/http/http11_parser.rl LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/flexy/http)
 ragelmaker(flexy/http/httpclient_parser.rl LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/flexy/http)
 
@@ -63,7 +92,6 @@ set(LIBS
     flexy
     pthread
     fmt
-    boost_context
     yaml-cpp
     jsoncpp
     dl

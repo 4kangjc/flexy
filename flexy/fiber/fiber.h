@@ -12,10 +12,11 @@ struct transfer_t {
 
 extern "C" {
 
-transfer_t jump_fcontext(fcontext_t const to, void* vp);
-fcontext_t make_fcontext(void* sp, std::size_t size, void (*fn)(transfer_t));
-transfer_t ontop_fcontext(fcontext_t const to, void* vp,
-                          transfer_t (*fn)(transfer_t));
+transfer_t _fl_jump_fcontext(fcontext_t const to, void* vp);
+fcontext_t _fl_make_fcontext(void* sp, std::size_t size,
+                             void (*fn)(transfer_t));
+transfer_t _fl_ontop_fcontext(fcontext_t const to, void* vp,
+                              transfer_t (*fn)(transfer_t));
 }
 
 namespace flexy {

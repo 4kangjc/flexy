@@ -18,7 +18,7 @@ FLEXY_COPTS = [
 
 cc_library(
     name = "flexy",
-    srcs = glob(["flexy/**/*.cpp"]),
+    srcs = glob(["flexy/**/*.cpp", "flexy/**/*.S"]),
     hdrs = glob(["flexy/**/*.h"]),
     visibility = ["//visibility:public"],
     deps = [
@@ -30,7 +30,6 @@ cc_library(
     ],
     linkopts = [
         "-lpthread", 
-        "-lboost_context"
     ],
     copts = FLEXY_COPTS,
     defines = select({

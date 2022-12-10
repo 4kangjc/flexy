@@ -51,8 +51,8 @@ Fiber::Fiber(size_t stacksize, detail::__task&& task)
 
     // stack_ = StackAllocator::Alloc(stacksize_);
 
-    ctx_ =
-        make_fcontext((char*)stack_ + stacksize_, stacksize_, &Fiber::MainFunc);
+    ctx_ = _fl_make_fcontext((char*)stack_ + stacksize_, stacksize_,
+                             &Fiber::MainFunc);
 
     FLEXY_LOG_DEBUG(g_logger) << "Fiber::Fiber id = " << id_;
 }
@@ -80,8 +80,8 @@ void Fiber::reset(detail::__task&& cb) {
     FLEXY_ASSERT(state_ != EXEC);  // 没有在运行
     cb_ = std::move(cb);
 
-    ctx_ =
-        make_fcontext((char*)stack_ + stacksize_, stacksize_, &Fiber::MainFunc);
+    ctx_ = _fl_make_fcontext((char*)stack_ + stacksize_, stacksize_,
+                             &Fiber::MainFunc);
     state_ = READY;
 }
 
@@ -91,7 +91,7 @@ void Fiber::resume() {
     t_current_fiber = this;
     state_ = EXEC;
 
-    auto [ctx, self] = jump_fcontext(ctx_, caller);
+    auto [ctx, self] = _fl_jump_fcontext(ctx_, caller);
 
     ctx_ = ctx;
     static_cast<Fiber*>(self)->state_ = READY;
@@ -100,15 +100,14 @@ void Fiber::resume() {
 
 void Fiber::yield() { t_main_fiber->resume(); }
 
-// void Fiber::yield_callback(detail::__task&& cb) {
-//     FLEXY_ASSERT(state_ == EXEC);
-//     // FLEXY_ASSERT()
-//     t_current_fiber = t_main_fiber.get();
-//     t_main_fiber->state_ = EXEC;
+void Fiber::yield_callback(detail::__task&& cb) {
+    //     FLEXY_ASSERT(state_ == EXEC);
+    //     // FLEXY_ASSERT()
+    //     t_current_fiber = t_main_fiber.get();
+    //     t_main_fiber->state_ = EXEC;
 
-//     // auto [ctx, self] = ontop_fcontext(t_main_fiber->ctx_, , );
-
-// }
+    //     // auto [ctx, self] = ontop_fcontext(t_main_fiber->ctx_, , );
+}
 
 void Fiber::SetThis(Fiber* f) { t_current_fiber = f; }
 

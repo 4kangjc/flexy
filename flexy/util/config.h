@@ -5,13 +5,10 @@
 #include "lexical.h"
 
 #include <functional>
+#include <memory>
 #include <stdexcept>
 #include <string_view>
 #include <unordered_map>
-#include <boost/type_index.hpp>
-#include <memory>
-
-using boost::typeindex::type_id;
 
 namespace flexy {
 
@@ -26,7 +23,8 @@ public:
     
     virtual std::string toString() = 0;
     virtual bool fromString(const std::string& val) = 0;
-    virtual decltype(type_id<int>()) getTypeName() const = 0;
+    virtual std::string getTypeName() const = 0;
+
 protected:
     std::string name_;
     std::string description_;
@@ -45,8 +43,10 @@ public:
             READLOCK(mutex_);
             return ToStr()(val_);
         } catch (std::exception& e) {
-            FLEXY_LOG_ERROR(FLEXY_LOG_ROOT()) << "ConfigVar::toString exception " << e.what() 
-             << ", convert: " << type_id<T>() << " to String, name =  " << name_;
+            FLEXY_LOG_ERROR(FLEXY_LOG_ROOT())
+                << "ConfigVar::toString exception " << e.what()
+                << ", convert: " << typeid(T).name()
+                << " to String, name =  " << name_;
         }
         return "";
     }
@@ -55,15 +55,15 @@ public:
         try {
             setValue(FromStr()(val));
         } catch (std::exception& e) {
-            FLEXY_LOG_ERROR(FLEXY_LOG_ROOT()) << "ConfigVar::fromString exception " << e.what()
-             << ", convert: string to " << type_id<T>() << ", name = " << name_ << ", val = " << val;
+            FLEXY_LOG_ERROR(FLEXY_LOG_ROOT())
+                << "ConfigVar::fromString exception " << e.what()
+                << ", convert: string to " << typeid(T).name()
+                << ", name = " << name_ << ", val = " << val;
         }
         return false;
     }
 
-    decltype(type_id<int>()) getTypeName() const override {
-        return type_id<T>();
-    }
+    std::string getTypeName() const override { return typeid(T).name(); }
 
     const T& getValue() const {
         READLOCK(mutex_);
@@ -132,9 +132,11 @@ public:
             if (tmp) {
                 FLEXY_LOG_INFO(FLEXY_LOG_ROOT()) << "Lookup name = " << name << " exits";
             } else {
-                FLEXY_LOG_ERROR(FLEXY_LOG_ROOT()) << "Lookup name = " << name << " exits but type not "
-                 << type_id<T>() << ", real_type = " << it->second->getTypeName() << " value = "
-                 << it->second->toString();
+                FLEXY_LOG_ERROR(FLEXY_LOG_ROOT())
+                    << "Lookup name = " << name << " exits but type not "
+                    << typeid(T).name()
+                    << ", real_type = " << it->second->getTypeName()
+                    << " value = " << it->second->toString();
                 return nullptr;
             }
         }
