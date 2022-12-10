@@ -26,11 +26,10 @@ public:
     using ptr = std::shared_ptr<Fiber>;
     friend class Scheduler;
     friend transfer_t ontop_callback(transfer_t);
-    friend transfer_t ontop_callback2(transfer_t);
 
-    template <typename _First, typename... _Args>
-    friend std::shared_ptr<Fiber> fiber_make_shared(_First&& __first,
-                                                    _Args&&... __args);
+    template <typename First, typename... Args>
+    friend std::shared_ptr<Fiber> fiber_make_shared(First&& first,
+                                                    Args&&... args);
 
     enum State {
         READY,   // 就绪状态
@@ -46,16 +45,16 @@ private:
 public:
     ~Fiber();
 
-    template <class... _Args,
-              typename = std::enable_if_t<std::is_invocable_v<_Args&&...>>>
-    void reset(_Args&&... __args) {
-        return reset(detail::__task(std::forward<_Args>(__args)...));
+    template <class... Args,
+              typename = std::enable_if_t<std::is_invocable_v<Args...>>>
+    void reset(Args&&... args) {
+        return reset(detail::__task(std::forward<Args>(args)...));
     }
 
-    template <class... _Args,
-              typename = std::enable_if_t<std::is_invocable_v<_Args&&...>>>
-    void yield_callback(_Args&&... __args) {
-        return yield_callback(detail::__task(std::forward<_Args>(__args)...));
+    template <class... Args,
+              typename = std::enable_if_t<std::is_invocable_v<Args...>>>
+    void yield_callback(Args&&... args) {
+        return yield_callback(detail::__task(std::forward<Args>(args)...));
     }
 
     void yield();   // 让出执行权
@@ -83,24 +82,24 @@ private:
     char stack_[];            // 协程栈首指针
 };
 
-template <typename _First, typename... _Args>
-std::shared_ptr<Fiber> fiber_make_shared(_First&& __first, _Args&&... __args) {
+template <typename First, typename... Args>
+std::shared_ptr<Fiber> fiber_make_shared(First&& first, Args&&... args) {
     extern Fiber* MallocFiber(size_t & stacksize);
     extern std::shared_ptr<Fiber> FreeFiber(Fiber * fiber);
 
-    if constexpr (std::is_integral_v<_First>) {
-        size_t stacksize = __first > 0 ? __first : 0;
+    if constexpr (std::is_integral_v<First>) {
+        size_t stacksize = first > 0 ? first : 0;
         Fiber* fiber = MallocFiber(stacksize);
         new (fiber)
-            Fiber(stacksize, detail::__task(std::forward<_Args>(__args)...));
+            Fiber(stacksize, detail::__task(std::forward<Args>(args)...));
 
         return FreeFiber(fiber);
     } else {
         size_t stacksize = 0;
         Fiber* fiber = MallocFiber(stacksize);
         new (fiber)
-            Fiber(stacksize, detail::__task(std::forward<_First>(__first),
-                                            std::forward<_Args>(__args)...));
+            Fiber(stacksize, detail::__task(std::forward<First>(first),
+                                            std::forward<Args>(args)...));
 
         return FreeFiber(fiber);
     }
