@@ -106,12 +106,6 @@ std::shared_ptr<Fiber> fiber_make_shared(_First&& __first, _Args&&... __args) {
     }
 }
 
-template <typename _Fiber, typename... _Args>
-std::enable_if_t<std::is_same_v<_Fiber, Fiber>, Fiber::ptr> make_shared(
-    _Args&&... __args) {
-    return fiber_make_shared(std::forward<_Args>(__args)...);
-}
-
 namespace detail {
 
 template <class _Tp, class = void>

@@ -33,7 +33,7 @@ TEST(Fiber, Main) {
 
         indexs.push_back(1);
 
-        auto fiber1 = flexy::make_shared<flexy::Fiber>(run_in_fiber1);
+        auto fiber1 = flexy::fiber_make_shared(run_in_fiber1);
         auto fiber2 = flexy::fiber_make_shared(run_in_fiber2);
         ASSERT_EQ(fiber1->getState(), flexy::Fiber::READY);
         ASSERT_EQ(fiber2->getState(), flexy::Fiber::READY);
