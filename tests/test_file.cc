@@ -1,26 +1,39 @@
-#include <flexy/util/file.h>
-#include <flexy/util/log.h>
+#include <gtest/gtest.h>
+#include <string>
+#include "flexy/util/file.h"
+#include "flexy/util/log.h"
 
 static auto&& g_logger = FLEXY_LOG_ROOT();
 
-int main(int argc, char** argv) {
-    FLEXY_LOG_INFO(g_logger) << flexy::FS::AbsolutePath("../bin/log.txt");
-    FLEXY_LOG_FMT_INFO(g_logger, "{}", argv[0]);
-    FLEXY_LOG_INFO(g_logger) << flexy::FS::AbsolutePath(argv[0], false);
-    FLEXY_LOG_INFO(g_logger) << flexy::FS::AbsolutePath(".");
-    FLEXY_LOG_INFO(g_logger) << flexy::FS::AbsolutePath("/bin");
-    flexy::FS::Mv("../bin/conf/log.txt", "../bin/log.txt", true);
+// TEST(File, AbsolutePath) {
+//     ASSERT_EQ(flexy::filesystem::AbsolutePath("~"), getenv("HOME"));
+//     FLEXY_LOG_INFO(g_logger) << flexy::FS::AbsolutePath(".");
+//     ASSERT_EQ(flexy::filesystem::AbsolutePath("/bin"), "/bin");
+// }
+
+TEST(File, Mkdir) {
+    ASSERT_TRUE(flexy::filesystem::Mkdir("temp"));
+    ASSERT_TRUE(flexy::filesystem::Mkdir("temp/kkk/mm"));
+}
+
+TEST(File, Mv) {
+    ASSERT_TRUE(flexy::filesystem::Mv("temp/kkk/mm", "temp/kkk/fff"));
+}
+
+TEST(File, Rm) {
+    ASSERT_TRUE(flexy::filesystem::Rm("temp"));
+    ASSERT_TRUE(flexy::filesystem::Rm("temp/kkk/fff"));
+}
+
+TEST(File, ListAllFile) {
     std::vector<std::string> vec;
     flexy::FS::ListAllFile(vec, "../flexy", ".cpp");
     for (auto& file : vec) {
         FLEXY_LOG_INFO(g_logger) << file;
-    } 
-    bool v = flexy::FS::Mkdir("../bin/temp", true);
-    if (!v) {
-        FLEXY_LOG_INFO(g_logger) << "mkdir failed";
     }
-    v = flexy::FS::Rm("../bin/temp/", true);
-    if (!v) {
-        FLEXY_LOG_INFO(g_logger) << "rm -rf failed";
-    }
+}
+
+int main(int argc, char** argv) {
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }
