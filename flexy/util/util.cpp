@@ -1,6 +1,6 @@
 #include "util.h"
+#include "flexy/fiber/fiber.h"
 #include "flexy/thread/thread.h"
-#include "flexy/schedule/fiber.h"
 #include "log.h"
 
 #include <sys/syscall.h>

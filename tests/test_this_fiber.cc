@@ -1,4 +1,4 @@
-#include <flexy/schedule/this_fiber.h>
+#include <flexy/fiber/this_fiber.h>
 
 using namespace flexy;
 using namespace std::chrono_literals;

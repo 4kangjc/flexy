@@ -2,7 +2,7 @@
 
 #include <atomic>
 #include <deque>
-#include "flexy/schedule/fiber.h"
+#include "flexy/fiber/fiber.h"
 #include "flexy/thread/mutex.h"
 #include "flexy/util/noncopyable.h"
 

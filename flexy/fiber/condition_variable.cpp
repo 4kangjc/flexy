@@ -1,6 +1,6 @@
 #include "condition_variable.h"
+#include "flexy/schedule/scheduler.h"
 #include "flexy/util/macro.h"
-#include "scheduler.h"
 
 namespace flexy::fiber {
 

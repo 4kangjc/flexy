@@ -4,7 +4,7 @@
 // #include "flexy/thread/mutex.h"
 #include <condition_variable>
 #include <deque>
-#include "mutex.h"
+#include "flexy/fiber/mutex.h"
 
 namespace flexy {
 

@@ -12,7 +12,7 @@ set(LIB_SRC
     flexy/util/util.cpp
     flexy/util/log.cpp
     flexy/util/file.cpp
-    flexy/schedule/fiber.cpp
+    flexy/fiber/fiber.cpp
     flexy/schedule/scheduler.cpp
     flexy/util/config.cpp
     flexy/schedule/timer.cpp
@@ -45,7 +45,7 @@ set(LIB_SRC
     flexy/http/ws_servlet.cpp
     flexy/http/ws_server.cpp
     flexy/http2/dynamic_table.cpp
-    flexy/schedule/mutex.cpp 
+    flexy/fiber/mutex.cpp 
     flexy/net/bytearray.cpp
     flexy/http2/huffman.cpp
     flexy/http2/frame.cpp
@@ -53,7 +53,7 @@ set(LIB_SRC
     # flexy/http2/stream.cpp 
     # flexy/http2/http2_stream.cpp 
     # flexy/http2/http2_server.cpp
-    # flexy/schedule/condition_variable.cpp
+    # flexy/fiber/condition_variable.cpp
 )
 
 ragelmaker(flexy/http/http11_parser.rl LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/flexy/http)

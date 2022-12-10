@@ -1,4 +1,4 @@
-#include <flexy/schedule/fiber.h>
+#include <flexy/fiber/fiber.h>
 #include <flexy/util/log.h>
 #include <flexy/util/memory.h>
 

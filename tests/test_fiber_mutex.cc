@@ -1,5 +1,5 @@
+#include <flexy/fiber/mutex.h>
 #include <flexy/schedule/iomanager.h>
-#include <flexy/schedule/mutex.h>
 #include <flexy/util/log.h>
 
 static auto& g_logger = FLEXY_LOG_ROOT();

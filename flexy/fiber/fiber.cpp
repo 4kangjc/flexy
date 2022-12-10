@@ -1,16 +1,16 @@
-#include "fiber.h"
-#include "allocator.h"
-#include "flexy/util/macro.h"
-#include "flexy/util/config.h"
-#include "scheduler.h"
+#include "flexy/fiber/fiber.h"
 #include <atomic>
+#include "flexy/fiber/allocator.h"
+#include "flexy/schedule/scheduler.h"
+#include "flexy/util/config.h"
+#include "flexy/util/macro.h"
 
 namespace flexy {
 
 static auto g_logger = FLEXY_LOG_NAME("system");
 
-static std::atomic<uint64_t> s_fiber_id {0};            // 分配协程id
-static std::atomic<uint64_t> s_fiber_count {0};         // 记录正在运行的协程数量
+static std::atomic<uint64_t> s_fiber_id{0};  // 分配协程id
+static std::atomic<uint64_t> s_fiber_count{0};  // 记录正在运行的协程数量
 
 static thread_local Fiber* t_current_fiber = nullptr;   // run fiber
 static thread_local Fiber::ptr t_main_fiber = nullptr;  // main fiber
@@ -51,7 +51,8 @@ Fiber::Fiber(size_t stacksize, detail::__task&& task)
 
     // stack_ = StackAllocator::Alloc(stacksize_);
 
-    ctx_ = make_fcontext((char*)stack_ + stacksize_, stacksize_, &Fiber::MainFunc);
+    ctx_ =
+        make_fcontext((char*)stack_ + stacksize_, stacksize_, &Fiber::MainFunc);
 
     FLEXY_LOG_DEBUG(g_logger) << "Fiber::Fiber id = " << id_;
 }
@@ -62,21 +63,25 @@ Fiber::~Fiber() {
         FLEXY_ASSERT(state_ != EXEC);
         // StackAllocator::Dealloc(stack_, stacksize_);
     } else {
-        FLEXY_ASSERT2(state_ == EXEC, "m_state = " << state_);   // 主协程一定在运行
+        FLEXY_ASSERT2(state_ == EXEC,
+                      "m_state = " << state_);  // 主协程一定在运行
 
         Fiber* cur = t_current_fiber;
-        FLEXY_ASSERT(cur == this);                                // 主协程最后析构，此时运行的协程一定是主协程
+        FLEXY_ASSERT(cur ==
+                     this);  // 主协程最后析构，此时运行的协程一定是主协程
         SetThis(nullptr);
     }
-    FLEXY_LOG_DEBUG(g_logger) << "Fiber::~Fiber id = " << id_ << " total = " << s_fiber_count;
+    FLEXY_LOG_DEBUG(g_logger)
+        << "Fiber::~Fiber id = " << id_ << " total = " << s_fiber_count;
 }
 
 void Fiber::reset(detail::__task&& cb) {
-    FLEXY_ASSERT(stack_);                            // 子协程才能重置
-    FLEXY_ASSERT(state_ != EXEC);                    // 没有在运行
+    FLEXY_ASSERT(stack_);          // 子协程才能重置
+    FLEXY_ASSERT(state_ != EXEC);  // 没有在运行
     cb_ = std::move(cb);
 
-    ctx_ = make_fcontext((char*)stack_ + stacksize_, stacksize_, &Fiber::MainFunc);
+    ctx_ =
+        make_fcontext((char*)stack_ + stacksize_, stacksize_, &Fiber::MainFunc);
     state_ = READY;
 }
 
@@ -115,12 +120,9 @@ Fiber::ptr Fiber::GetThis() {
     FLEXY_ASSERT(t_current_fiber == main_fiber.get());
     t_main_fiber = std::move(main_fiber);
     return t_current_fiber->shared_from_this();
-} 
+}
 
-
-uint64_t Fiber::TotalFibers() {
-    return s_fiber_count;
-}   
+uint64_t Fiber::TotalFibers() { return s_fiber_count; }
 
 void Fiber::MainFunc(transfer_t t) {
     auto&& cur = GetThis();
@@ -135,19 +137,22 @@ void Fiber::MainFunc(transfer_t t) {
         cur->state_ = TERM;
     } catch (std::exception& ex) {
         cur->state_ = EXCEPT;
-        FLEXY_LOG_ERROR(g_logger) << "Fiber Except: " << ex.what() << " fiber id = " << cur->getId() 
-            << std::endl << BacktraceToString();
+        FLEXY_LOG_ERROR(g_logger) << "Fiber Except: " << ex.what()
+                                  << " fiber id = " << cur->getId() << std::endl
+                                  << BacktraceToString();
     } catch (...) {
-        cur->state_ = EXCEPT;  
-        FLEXY_LOG_ERROR(g_logger) << "Fiber Except: "<< " fiber id = " << cur->getId() 
-            << std::endl << BacktraceToString();
+        cur->state_ = EXCEPT;
+        FLEXY_LOG_ERROR(g_logger) << "Fiber Except: "
+                                  << " fiber id = " << cur->getId() << std::endl
+                                  << BacktraceToString();
     }
 
     auto raw_ptr = cur.get();
     cur = nullptr;
     raw_ptr->yield();
 
-    FLEXY_ASSERT2(false, "never reach fiber id = " + std::to_string(raw_ptr->getId()));
+    FLEXY_ASSERT2(false,
+                  "never reach fiber id = " + std::to_string(raw_ptr->getId()));
 }
 
 uint64_t Fiber::GetFiberId() {
@@ -157,4 +162,4 @@ uint64_t Fiber::GetFiberId() {
     return 0;
 }
 
-}
+}  // namespace flexy
