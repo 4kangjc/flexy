@@ -96,7 +96,7 @@ void Fiber::resume() {
     ctx_ = ctx;
     if (self)
         static_cast<Fiber*>(self)->state_ = READY;
-    t_current_fiber = caller;
+    FLEXY_ASSERT(t_current_fiber == caller);
 }
 
 void Fiber::yield() { t_main_fiber->resume(); }
@@ -129,7 +129,7 @@ void Fiber::yield_callback(detail::__task&& cb) {
     t_main_fiber->ctx_ = ctx;
     if (self)
         static_cast<Fiber*>(self)->state_ = READY;
-    t_current_fiber = data.caller;
+    FLEXY_ASSERT(t_current_fiber == data.caller);
 }
 
 Fiber::ptr Fiber::GetThis() {
@@ -155,7 +155,7 @@ void Fiber::_M_return() const {
 }
 
 void Fiber::MainFunc(transfer_t t) {
-    auto&& cur = GetThis();
+    auto cur = GetThis();
     FLEXY_ASSERT(cur);
 
     t_main_fiber->ctx_ = t.fctx;
